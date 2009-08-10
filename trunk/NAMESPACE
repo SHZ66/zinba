@@ -1,0 +1,11 @@
+useDynLib(zimba)
+# ------------------------------------------
+# Export directives.  
+# ------------------------------------------
+export(peakbound)
+export(basecountimport)
+export(getsigwindows)
+export(buildwindowdata)
+# ------------------------------------------
+# S3method declarations.  
+# ------------------------------------------
