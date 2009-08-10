@@ -1,0 +1,10 @@
+Package: zimba
+Type: Package
+Title: allele specific sequencing study
+Version: 1.0
+Date: 2009-08-05
+Author: Naim Rashid
+Maintainer: Naim Rashid <nrashid@bios.unc.edu>
+Description: seq
+License: GPL version 2 or later
+LazyLoad: yes
