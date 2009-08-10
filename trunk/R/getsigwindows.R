@@ -1,7 +1,9 @@
 #for covnames, enter desired covariates as c('gcPerc', 'align','cnv') for example
 getsigwindows=function(file,covnames,threshold=.01,output){
-	library(zicounts)
+	time.start <- Sys.time()
+        library(zicounts)
 	library(qvalue)
+        options(scipen=999)
 	###### USER INPUT ############################
 	data=read.table(file, header=TRUE,sep="\t")
 	covariates=eval(parse(text=paste("cbind(", paste(rep('data$', length(covnames)), covnames, sep='', collapse=',') , ")") ))
@@ -20,16 +22,18 @@ getsigwindows=function(file,covnames,threshold=.01,output){
 	#TO DO:  unlink design matrices for count and zero models (Z neq X)
 	a=eval(parse(text=modelcommand))
 	print(summary(a))
-		link=make.link('logit')
-		linkinv=link$linkinv
-		X=cbind(rep(1, length(leverage)), covariates)
-		coefc=a$coefficients[1:(length(covnames)+1)]
-		coefz=a$coefficients[(length(covnames)+2):(2*length(covnames)+2)]
-        	mu <- exp(as.matrix(X) %*% coefc)[,1]
-        	phi <- linkinv(as.matrix(X) %*% coefz)[,1]
-  		Yhat <- (1-phi) * mu
-  		res <- a$data - Yhat
-	theta1 <- 1/exp(a$coefficients[2*(length(covnames)+1)+1])
+        
+	link=make.link('logit')
+	linkinv=link$linkinv
+	X=cbind(rep(1, length(leverage)), covariates)
+	coefc=a$coefficients[1:(length(covnames)+1)]
+	coefz=a$coefficients[(length(covnames)+2):(2*length(covnames)+2)]
+        mu <- exp(as.matrix(X) %*% coefc)[,1]
+        phi <- linkinv(as.matrix(X) %*% coefz)[,1]
+        Yhat <- (1-phi) * mu
+        res <- a$data - Yhat
+	
+        theta1 <- 1/exp(a$coefficients[2*(length(covnames)+1)+1])
 	vv <- Yhat * (1 + (phi + theta1) * mu)
 	standardized=res/sqrt(vv*(1-leverage))
 	########output is 'standardized'#################
@@ -53,11 +57,12 @@ getsigwindows=function(file,covnames,threshold=.01,output){
 	write.table(coordinates,out,quote=F,sep="\t",row.names=F,col.names=F)
 ###############################
 
-	
 #	sigpeaksSORTED=sigpeaks[order(sigpeaks[,dim(data)[2]+2], decreasing=TRUE),]
 #	colnames(sigpeaksSORTED)[c(dim(sigpeaksSORTED)[2]-1, dim(sigpeaksSORTED)[2])]=c('q-value', 'residual')
 	#######output is 'sigpeaks' and 'sigpeaksSORTED'#
 	#################################################
 	print(c(line1, line2,line3))
 	write.table(sigpeaks,output,quote=F,sep="\t",row.names=F)
+      	time.end <- Sys.time()
+	print(difftime(time.end,time.start))
 }

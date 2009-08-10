@@ -6,6 +6,7 @@ export(peakbound)
 export(basecountimport)
 export(getsigwindows)
 export(buildwindowdata)
+export(run.zinba)
 # ------------------------------------------
 # S3method declarations.  
 # ------------------------------------------

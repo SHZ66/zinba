@@ -3,7 +3,7 @@ use strict;
 use Getopt::Long;
 use Parallel::ForkManager;
 
-my $TWOBIT_DIR = $ENV{TWO_BIT};
+#my $TWOBIT_DIR = $ENV{TWO_BIT};
 
 my $usage = <<'USAGE';
 
@@ -34,7 +34,7 @@ USAGE
 my ($seq_hits,$rand_hits,$gdna_hits,$cOut,%files);
 my $window_size = 500;
 my $offset = 0;
-my $database = "hg18";
+#my $database = "hg18";
 my $bckgrndRegion = 0;
 my $alignThresh = 4;
 my $cnv_array = "none";
@@ -46,7 +46,7 @@ my $result = GetOptions(
 	"seq=s" => \$seq_hits,
 	'window-size=i' => \$window_size,
 	'align-threshold=i' => \$alignThresh,
-	"db=s" => \$database,
+#	"db=s" => \$database,
 	"offset-size=i" => \$offset,
 	"bckgrnd-region=i" => \$bckgrndRegion,
 	"log2-trans"  => sub{$log2Trans='TRUE'},
@@ -60,7 +60,7 @@ my $result = GetOptions(
 die $usage unless($seq_hits);
 
 my $pm = new Parallel::ForkManager(16);
-my $twoBitFile = $TWOBIT_DIR . "/" . $database . ".2bit";
+#my $twoBitFile = $TWOBIT_DIR . "/" . $database . ".2bit";
 my $nThresh = 0.5;
 
 my @offsets = 0;
