@@ -1,11 +1,11 @@
 #for covnames, enter desired covariates as c('gcPerc', 'align','cnv') for example
-getsigwindows=function(file,covnames,threshold=.01,output){
+getsigwindows=function(file,covnames,threshold=.01,output, offset=0){
 	time.start <- Sys.time()
         library(zicounts)
 	library(qvalue)
         options(scipen=999)
 	###### USER INPUT ############################
-	data=read.table(file, header=TRUE,sep="\t")
+	data=read.table(file,header=TRUE,sep="\t")
 	covariates=eval(parse(text=paste("cbind(", paste(rep('data$', length(covnames)), covnames, sep='', collapse=',') , ")") ))
 	colnames(covariates)=covnames
 	cov_text=paste( covnames, collapse='+')
