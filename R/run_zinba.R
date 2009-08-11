@@ -1,6 +1,7 @@
 run.zinba=function(seq, align, gdna, cnvarray){
 
-#buildwindowdata=function(seq, align, gdna, cnvarray)
+#buildwindowdata=function(seq, align=NULL, input=NULL, cnvarray=NULL,twoBit=NULL,winSize=500,offset=0,aThresh=1,gb=NULL)
+
 #getsigwindows=function(file,covnames,threshold=.01,output)
 #basecountimport=function(inputfile, coordfile, outputfile, chromosome='all')
 

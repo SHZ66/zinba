@@ -7,7 +7,6 @@ export(basecountimport)
 export(getsigwindows)
 export(buildwindowdata)
 export(run.zinba)
-export(buildgcdata)
 # ------------------------------------------
 # S3method declarations.  
 # ------------------------------------------
