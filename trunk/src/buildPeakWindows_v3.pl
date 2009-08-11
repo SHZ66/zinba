@@ -3,8 +3,6 @@ use strict;
 use Getopt::Long;
 #use Parallel::ForkManager;
 
-#my $TWOBIT_DIR = $ENV{TWO_BIT};
-
 my $usage = <<'USAGE';
 
 ################ CNV-seq ################
@@ -12,51 +10,52 @@ my $usage = <<'USAGE';
 	usage: buildPeakWindows.pl [options]
 
 		--seq data_seq_hits.txt
-		--align alignability_hits.txt
-		--gdna gdna_seq_hits.txt
+		--align alignability_score.wig
+		--input input_seq_hits.txt
 		--cnvarray cnvArray.tsv
+		--gc-file gc_binary.wig
 		
 		--window-size (default = 500 bp)
 		--offset-size (default = 0)
+		--align-thresh (default = 1)
 		
-		--log2-trans (default FALSE)
-		--crt-trans (default FALSE)
-		--db (default = hg18)
+		--trans-input trasnform input counts, cube root (default FALSE)
+		--gb genome build (example hg18)
 
 		--help
-
 #########################################
 
 USAGE
 
-my ($seq_hits,$rand_hits,$gdna_hits,$cOut,%files);
+my ($seq_hits,$cOut,%files,$gb);
 my $window_size = 500;
 my $offset = 0;
+my $align_thresh = 1;
+my $input_hits = "none";
+my $gc_file = "none";
+my $align_score = "none";
 my $cnv_array = "none";
-my $gDnaAlignTrans = "none";
-my $log2Trans = "FALSE";
-my $crtTrans = "FALSE";
+my $transInput = "FALSE";
 
 my $result = GetOptions(
 	"seq=s" => \$seq_hits,
+	"align=s" => \$align_score,
+	"input=s" => \$input_hits,
+	"cnvarray=s" => \$cnv_array,
+	"gc-file=s" => \$gc_file,
 	'window-size=i' => \$window_size,
 	"offset-size=i" => \$offset,
-	"log2-trans"  => sub{$log2Trans='TRUE'},
-	"crt-trans"  => sub{$crtTrans='TRUE'},
-	"align=s" => \$rand_hits,
-	"gdna=s" => \$gdna_hits,
-	"cnvarray=s" => \$cnv_array,
+	"align-thresh=i" => \$align_thresh,
+	"gb=s"	=> \$gb,
+	"trans-input"  => sub{$transInput='TRUE'},
 	"help|?" => sub{print $usage; exit}
 );
 
-die $usage unless($seq_hits);
-
-my $nThresh = 0.5;
+die $usage unless($seq_hits && $gb);
 
 my @offsets = 0;
 my $numOffsets = 1;
 $numOffsets = int($window_size/$offset) if $offset > 0;
-print STDERR "Windows will be stepped at:\n\t0bp\n";
 for (my $o = 1; $o < $numOffsets; $o++){
 	print STDERR "\t" . ($offset*$o) . "bp\n";
 	push(@offsets,($offset*$o));
@@ -64,7 +63,6 @@ for (my $o = 1; $o < $numOffsets; $o++){
 
 my (%cnvProbe,$sortCnvStarts);
 if($cnv_array ne "none"){
-	print STDERR "\n\nLoading cnv array data $cnv_array .....";
 	open(CNV,$cnv_array) or die;
 	while(<CNV>){
 	    chomp;
@@ -98,18 +96,14 @@ if($cnv_array ne "none"){
 			delete($cnvProbe{$chrm}{$pID}{count});
 		}
 	}
-	print STDERR "FINISHED\n";
 }
 
-print STDERR "\nBuilding windows......\nUsing $seq_hits as experimental sample\n";
 open(SEQ,$seq_hits) or die;
-print STDERR "Counting seq hits, completed: ";
 my (%count,%chrom,%maxPos);
 my $pat = qr/^(\w+)\t(\d+)$/;
 my $n = 0;
 while(<SEQ> =~ m/$pat/){
 	$n++;
-	print STDERR "$n " if $n%1000000 == 0;
 	unless($1 =~ '_'){
 		$chrom{$1}=1;
 		for (my $o = 0; $o <= $#offsets; $o++){
@@ -123,31 +117,19 @@ while(<SEQ> =~ m/$pat/){
 	}
 }close SEQ;
 
-open(RAND,$rand_hits) or die;
-print STDERR "FINISHED\n\nUsing $rand_hits as alignability data\nCounting align hits, completed: ";
-$n = 0;
-while(<RAND> =~ m/$pat/){
-	$n++;
-	print STDERR "$n " if $n%1000000 == 0;
-	for (my $o = 0; $o <= $#offsets; $o++){
-		my $window_pos = int(($2-$offsets[$o])/$window_size);
-		$count{$1}->[1][$o][$window_pos]++;
-	}
-}close RAND;
-	
-open(CNV,$gdna_hits) or die;
-print STDERR "FINISHED\n\nUsing $gdna_hits as input control\nCounting input hits, completed: ";
-$n = 0;
-while(<CNV> =~ m/$pat/){
-	$n++;
-	print STDERR "$n " if $n%1000000 == 0;
-	for (my $o = 0; $o <= $#offsets; $o++){
-		my $window_pos = int(($2-$offsets[$o])/$window_size);
-		$count{$1}->[2][$o][$window_pos]++;
-	}
-}close CNV;
+if($input_hits ne "none"){
+	open(INPUT,$input_hits) or die;
+	$n = 0;
+	while(<INPUT> =~ m/$pat/){
+		$n++;
+		print STDERR "$n " if $n%1000000 == 0;
+		for (my $o = 0; $o <= $#offsets; $o++){
+			my $window_pos = int(($2-$offsets[$o])/$window_size);
+			$count{$1}->[1][$o][$window_pos]++;
+		}
+	}close INPUT;
+}
 
-print STDERR "FINISHED\n";
 my $out = $seq_hits;
 $out =~ s/\..*/\_win$window_size\_/g;
 
@@ -156,10 +138,7 @@ foreach my $chr(sort{$a<=>$b} keys %chrom){
 	my $chrm = "chr" . $chr;
 	for (my $o = 0; $o <= $#offsets; $o++){
 		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".temp";
-		my $gcSeq = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".gcseq";
-		print STDERR "\nCreating temp windows for $chrm .....";
 		$files{$chr}{$offsets[$o]}{temp} = $cOut;
-		$files{$chr}{$offsets[$o]}{gcSeq} = $gcSeq;
 #		my $pid = $pm->start and next;
 		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},\%{$cnvProbe{$chrm}},$sortCnvStarts->{$chrm},$o) if $cnv_array ne "none";
 		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},"none",$sortCnvStarts->{$chrm},$o) if $cnv_array eq "none";
@@ -167,41 +146,43 @@ foreach my $chr(sort{$a<=>$b} keys %chrom){
 	}
 }
 #$pm->wait_all_children;
-print STDERR "\n...........................FINISHED\n";
 
-print STDERR "\nGetting seq for windows";
-my %gcSeqFiles;
-foreach my $chr(sort{$a<=>$b} keys %chrom){
-	my $chrm = "chr" . $chr;
-	for (my $o = 0; $o <= $#offsets; $o++){
-		my $gcSeq = $files{$chr}{$offsets[$o]}{gcSeq};
-		print STDERR "\n\tGetting gc percent for " . $files{$chr}{$offsets[$o]}{temp} ."....";
-		my $start = $offsets[$o];
-		$start-- if $start > 0;
-		#my $end = ($window_size*$maxPos{$chr}{$offsets[$o]})+$offsets[$o]+$window_size;
-		my $winOut = $files{$chr}{$offsets[$o]}{temp};
-		$winOut =~ s/\..*/\.txt/g;
-		my $cFileLen = $chrm . "_" . $offset . ".txt";
-		`twoBitInfo /gbdb/hg18/hg18.2bit:$chrm $cFileLen`;
-		open(CLEN,$cFileLen);
-		my $line = <CLEN>;
-		chomp($line);
-		my ($cInfo,$cLength) = split(/\t/, $line);
-		close CLEN; unlink($cFileLen);
-		`twoBitToFa -noMask -seq=$chrm -start=$start -end=$cLength $twoBitFile $gcSeq 2> /dev/null`;
-#		my $pid = $pm->start and next;
-		&get_gcPerc($files{$chr}{$offsets[$o]}{gcSeq},$files{$chr}{$offsets[$o]}{temp},$winOut,$window_size);
-#		$pm->finish;
+if($gc_file ne "none"){
+	foreach my $chr(sort{$a<=>$b} keys %chrom){
+		my $chrm = "chr" . $chr;
+		my $gcSeq = "GC_" . $gb . "_" . $chrm . ".wig";
+		for (my $o = 0; $o <= $#offsets; $o++){
+			my $tempFile = $files{$chr}{$offsets[$o]}{temp};
+			my $winOut = $tempFile;
+			$winOut .= "_GC.temp" if ($align_score ne "none");
+			$winOut =~ s/\..*/\.txt/g if ($align_score eq "none");			
+			$files{$chr}{$offsets[$o]}{temp} = $winOut;
+	#		my $pid = $pm->start and next;
+			&get_gcPerc($gcSeq,$tempFile,$winOut,$window_size,$offsets[$o]);
+	#		$pm->finish;
+		}
 	}
+	#$pm->wait_all_children;
 }
-#$pm->wait_all_children;
-print STDERR "\n...........................FINISHED\n";
+
+if($align_score ne "none"){
+	foreach my $chr(sort{$a<=>$b} keys %chrom){
+		my $chrm = "chr" . $chr;
+		my $aScore = "ALIGN_" . $gb . "_" . $chrm . ".wig";
+		for (my $o = 0; $o <= $#offsets; $o++){
+			my $winOut = $files{$chr}{$offsets[$o]}{temp};
+			$winOut =~ s/\..*/\.txt/g;
+	#		my $pid = $pm->start and next;
+			&get_align($aScore,$files{$chr}{$offsets[$o]}{temp},$winOut,$window_size,$offsets[$o]);
+	#		$pm->finish;
+		}
+	}
+	#$pm->wait_all_children;
+}
 
 foreach my $chr(sort{$a<=>$b} keys %chrom){
 	unlink($files{$chr}{temp});
 }
-
-print STDERR "\nFINISHED\n\n";
 
 sub process_chrm{
 	my ($chrm, $offset,$cOut,$count_ref,$cnv_href,$cnvStarts,$o) = @_;
@@ -211,10 +192,8 @@ sub process_chrm{
 	open(OUT, ">$cOut");
 
 	print OUT "chromosome\tstart\tend\texp_count";
-	print OUT "\talign" if (defined($rand_hits) && length($rand_hits));
-	print OUT "\tinput_count" if (defined($gdna_hits) && length($gdna_hits));
-	print OUT "\tgdna_align_log2" if $log2Trans eq "TRUE";
-	print OUT "\tgdna_align_crt" if $crtTrans eq "TRUE";
+	print OUT "\tinput_count" if ($input_hits ne "none");
+	print OUT "\tcrt_input" if $transInput eq "TRUE";
 	print OUT "\tcube_cnvArray" if $cnv_array ne "none";
 	print OUT "\n";
 
@@ -226,23 +205,15 @@ sub process_chrm{
 		my $hits_raw = $hits[$id]+0;
 		print OUT "$chrm\t$start\t$end\t$hits_raw";
 		
-		my ($align_raw,$input_raw);
-		if (defined($rand_hits) && length($rand_hits)){
-			$align_raw = ${$count_ref->[1][$o]}[$id]+0;
-			print OUT "\t$align_raw";
-		}
-		
-		if (defined($gdna_hits) && length($gdna_hits)){
-			$input_raw = ${$count_ref->[2][$o]}[$id]+0;
+		my $input_raw;
+		if ($input_hits ne "none"){
+			my $input_raw = ${$count_ref->[1][$o]}[$id]+0;
 			print OUT "\t$input_raw";
 		}
 		
-		if ($log2Trans eq "TRUE" || $crtTrans eq "TRUE"){
-			my ($log2,$crt);
-			$log2 = log(($input_raw+1)/($align_raw+1))/log(2) if $log2Trans eq "TRUE";
-			$crt = (($input_raw+1)/($align_raw+1))**0.3 if $crtTrans eq "TRUE";
-			print OUT "\t$log2" if $log2Trans eq "TRUE";
-			print OUT "\t$crt" if $crtTrans eq "TRUE";
+		if ($transInput eq "TRUE"){
+			my $crt = ($input_raw+1)**0.3;
+			print OUT "\t$crt";
 		}
 
 		if ($cnv_array ne "none"){
@@ -281,13 +252,50 @@ sub process_chrm{
 	}close OUT;
 }
 
+sub get_align {
+	my ($alignFile,$tempWin,$winOut,$winSize,$offset) = @_;
+
+	open(ALIGN,$alignFile);
+	my $alignHeader = <ALIGN>;
+	for (0..$offset){
+		my $temp = <ALIGN>;
+	}
+
+	open(TEMP, $tempWin);
+	open(OUT,">$winOut");
+	while(<TEMP>){
+		chomp;
+		if($_ =~ 'chromosome'){
+			print OUT "$_\talign\n";
+		}else{
+			my $alignCount = 0;
+			for (1..$winSize){
+				my $aScore = <ALIGN>;
+				chomp($aScore);
+				if($aScore <= $align_thresh && $aScore > 0){
+					$alignCount++;
+				}
+			}
+			if(!eof(ALIGN)){
+				print OUT "$_";
+				my $aPerc = sprintf "%.4f", $alignCount/$winSize;
+				print OUT "\t$aPerc\n";
+			}
+		}
+		
+	}close TEMP;close OUT;
+	close ALIGN;
+	unlink($tempWin);
+}
+
 sub get_gcPerc {
-	my ($gcFile,$tempWin,$winOut,$winSize) = @_;
-	open(GC, $gcFile);
-	my $header = <GC>;
-	
-#need to deal different size windows
-	my $numLines = int($winSize/50);
+	my ($gcFile,$tempWin,$winOut,$winSize,$offset) = @_;
+
+	open(GC,$gcFile);
+	my $gcHeader = <GC>;
+	for (0..$offset){
+		my $temp = <GC>;
+	}
 
 	open(TEMP, $tempWin);
 	open(OUT,">$winOut");
@@ -296,15 +304,11 @@ sub get_gcPerc {
 		if($_ =~ 'chromosome'){
 			print OUT "$_\tgcPerc\n";
 		}else{
-			my ($gcCount,$nCount) = (0,0);
-#while($collectSeq == 1)$seqLen < $winSize
-			for(my $g =1; $g <= $numLines; $g++){
-				my $seq = <GC>;
-				$gcCount += ($seq =~ tr/[G|C]//);
-				$nCount += ($seq =~ tr/N//);
+			my $gcCount = 0;
+			for (1..$winSize){
+				chomp($gcCount += <GC>) if (!eof(GC));
 			}
-
-			if(($nCount/$winSize) < 0.25){
+			if(!eof(GC)){
 				print OUT "$_";
 				my $gcP = sprintf "%.4f", $gcCount/$winSize;
 				print OUT "\t$gcP\n";
@@ -312,6 +316,6 @@ sub get_gcPerc {
 		}
 		
 	}close TEMP;close OUT;
+	close GC;
 	unlink($tempWin);
-	unlink($gcFile);
 }
