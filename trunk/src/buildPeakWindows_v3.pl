@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 use strict;
 use Getopt::Long;
-use Parallel::ForkManager;
+#use Parallel::ForkManager;
 
 #my $TWOBIT_DIR = $ENV{TWO_BIT};
 
@@ -18,11 +18,9 @@ my $usage = <<'USAGE';
 		
 		--window-size (default = 500 bp)
 		--offset-size (default = 0)
-		--bckgrnd-region (default 0 bp)
 		
 		--log2-trans (default FALSE)
 		--crt-trans (default FALSE)
-		--align-threshold (default = 4)
 		--db (default = hg18)
 
 		--help
@@ -34,9 +32,6 @@ USAGE
 my ($seq_hits,$rand_hits,$gdna_hits,$cOut,%files);
 my $window_size = 500;
 my $offset = 0;
-#my $database = "hg18";
-my $bckgrndRegion = 0;
-my $alignThresh = 4;
 my $cnv_array = "none";
 my $gDnaAlignTrans = "none";
 my $log2Trans = "FALSE";
@@ -45,10 +40,7 @@ my $crtTrans = "FALSE";
 my $result = GetOptions(
 	"seq=s" => \$seq_hits,
 	'window-size=i' => \$window_size,
-	'align-threshold=i' => \$alignThresh,
-#	"db=s" => \$database,
 	"offset-size=i" => \$offset,
-	"bckgrnd-region=i" => \$bckgrndRegion,
 	"log2-trans"  => sub{$log2Trans='TRUE'},
 	"crt-trans"  => sub{$crtTrans='TRUE'},
 	"align=s" => \$rand_hits,
@@ -59,8 +51,6 @@ my $result = GetOptions(
 
 die $usage unless($seq_hits);
 
-my $pm = new Parallel::ForkManager(16);
-#my $twoBitFile = $TWOBIT_DIR . "/" . $database . ".2bit";
 my $nThresh = 0.5;
 
 my @offsets = 0;
@@ -71,8 +61,6 @@ for (my $o = 1; $o < $numOffsets; $o++){
 	print STDERR "\t" . ($offset*$o) . "bp\n";
 	push(@offsets,($offset*$o));
 }
-
-my $nBckWins = int(($bckgrndRegion/2)/$window_size) if $bckgrndRegion > 0;
 
 my (%cnvProbe,$sortCnvStarts);
 if($cnv_array ne "none"){
@@ -172,13 +160,13 @@ foreach my $chr(sort{$a<=>$b} keys %chrom){
 		print STDERR "\nCreating temp windows for $chrm .....";
 		$files{$chr}{$offsets[$o]}{temp} = $cOut;
 		$files{$chr}{$offsets[$o]}{gcSeq} = $gcSeq;
-		my $pid = $pm->start and next;
+#		my $pid = $pm->start and next;
 		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},\%{$cnvProbe{$chrm}},$sortCnvStarts->{$chrm},$o) if $cnv_array ne "none";
 		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},"none",$sortCnvStarts->{$chrm},$o) if $cnv_array eq "none";
-		$pm->finish;
+#		$pm->finish;
 	}
 }
-$pm->wait_all_children;
+#$pm->wait_all_children;
 print STDERR "\n...........................FINISHED\n";
 
 print STDERR "\nGetting seq for windows";
@@ -201,12 +189,12 @@ foreach my $chr(sort{$a<=>$b} keys %chrom){
 		my ($cInfo,$cLength) = split(/\t/, $line);
 		close CLEN; unlink($cFileLen);
 		`twoBitToFa -noMask -seq=$chrm -start=$start -end=$cLength $twoBitFile $gcSeq 2> /dev/null`;
-		my $pid = $pm->start and next;
+#		my $pid = $pm->start and next;
 		&get_gcPerc($files{$chr}{$offsets[$o]}{gcSeq},$files{$chr}{$offsets[$o]}{temp},$winOut,$window_size);
-		$pm->finish;
+#		$pm->finish;
 	}
 }
-$pm->wait_all_children;
+#$pm->wait_all_children;
 print STDERR "\n...........................FINISHED\n";
 
 foreach my $chr(sort{$a<=>$b} keys %chrom){
@@ -228,7 +216,6 @@ sub process_chrm{
 	print OUT "\tgdna_align_log2" if $log2Trans eq "TRUE";
 	print OUT "\tgdna_align_crt" if $crtTrans eq "TRUE";
 	print OUT "\tcube_cnvArray" if $cnv_array ne "none";
-	print OUT "\tbck_" . $bckgrndRegion . "bp"  if ($bckgrndRegion > 0);
 	print OUT "\n";
 
 	for my $id (0..$#hits){
@@ -289,16 +276,6 @@ sub process_chrm{
 	
 			my $rawData = sprintf "%.5f", (2**$cnvData)**3;
 			print OUT "\t$rawData";
-		}
-		
-		if($bckgrndRegion > 0){
-			my $nBckWins = int(($bckgrndRegion/2)/$window_size);
-			my $bckCount = $hits[$id]+0;
-			for(my $w = 1; $w <= $nBckWins; $w++){
-				$bckCount += $hits[$id-$w] if ($id > ($w-1) && $hits[$id-$w] ne 'NA');
-				$bckCount += $hits[$id+$w] if (($id + $w) <= $#hits && $hits[$id+$w] ne 'NA');
-			}
-			print OUT "\t$bckCount";
 		}
 		print OUT "\n";
 	}close OUT;
