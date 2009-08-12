@@ -1,17 +1,17 @@
 /* twoBitToFa - Convert all or part of twoBit file to fasta. */
-#include "common.h"
-#include "linefile.h"
-#include "hash.h"
-#include "options.h"
-#include "dnaseq.h"
-#include "fa.h"
-#include "twoBit.h"
-#include "bPlusTree.h"
+#include "inc/common.h"
+#include "inc/linefile.h"
+#include "inc/hash.h"
+#include "inc/options.h"
+#include "inc/dnaseq.h"
+#include "inc/fa.h"
+#include "inc/twoBit.h"
+#include "inc/bPlusTree.h"
 
 static char const rcsid[] = "$Id: twoBitToFa.c,v 1.12 2009/01/09 10:14:33 kent Exp $";
-
+/*
 void usage()
-/* Explain usage and exit. */
+/* Explain usage and exit. 
 {
 errAbort(
   "twoBitToFa - Convert all or part of .2bit file to fasta\n"
@@ -36,7 +36,7 @@ errAbort(
   "      /path/input.2bit:name:start-end\n"
   );
 }
-
+*/
 char *clSeq = NULL;	/* Command line sequence. */
 int clStart = 0;	/* Start from command line. */
 int clEnd = 0;		/* End from command line. */
@@ -82,9 +82,11 @@ for (s = tbss; s != NULL; s = s->next)
     outputOne(tbf, s->name, outFile, s->start, s->end);
 }
 
-void twoBitToFa(char *inName, char *outName)
+void twoBitToFa(char **RinName, char **RoutName)
 /* twoBitToFa - Convert all or part of twoBit file to fasta. */
 {
+char* inName=RinName[0];
+char* outName=RoutName[0] ;
 struct twoBitFile *tbf;
 FILE *outFile = mustOpen(outName, "w");
 struct twoBitSpec *tbs;
@@ -115,8 +117,9 @@ carefulClose(&outFile);
 twoBitClose(&tbf);
 }
 
+/*
 int main(int argc, char *argv[])
-/* Process command line. */
+/* Process command line. 
 {
 optionInit(&argc, argv, options);
 if (argc != 3)
@@ -134,4 +137,4 @@ noMask = optionExists("noMask");
 dnaUtilOpen();
 twoBitToFa(argv[1], argv[2]);
 return 0;
-}
+}*/
