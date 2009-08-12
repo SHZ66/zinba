@@ -1,12 +1,12 @@
 /* twoBitInfo - get information about sequences in a .2bit file. */
-#include "common.h"
-#include "options.h"
-#include "twoBit.h"
+#include "inc/common.h"
+#include "inc/options.h"
+#include "inc/twoBit.h"
 
 static char const rcsid[] = "$Id: twoBitInfo.c,v 1.5 2005/10/18 19:24:58 lowec Exp $";
-
+/*
 void usage()
-/* Explain usage and exit. */
+/* Explain usage and exit. 
 {
 errAbort(
   "twoBitInfo - get information about sequences in a .2bit file\n"
@@ -24,7 +24,7 @@ errAbort(
   "is ignored).\n"
   );
 }
-
+*/
 static struct optionSpec options[] = {
    {"nBed", OPTION_BOOLEAN},
    {"noNs", OPTION_BOOLEAN},
@@ -32,9 +32,11 @@ static struct optionSpec options[] = {
 };
 
 
-void twoBitInfo(char *inName, char *outName)
+void twoBitInfo(char **RinName, char **RoutName)
 /* twoBitInfo - get information about sequences in a .2bit file. */
 {
+char* inName=RinName[0];
+char* outName=RoutName[0];
 struct twoBitFile *tbf;
 FILE *outFile;
 char *seqName = NULL;
@@ -76,12 +78,12 @@ twoBitClose(&tbf);
 carefulClose(&outFile); 
 }
 
-int main(int argc, char *argv[])
+//int main(int argc, char *argv[])
 /* Process command line. */
-{
-optionInit(&argc, argv, options);
-if (argc != 3)
-    usage();
-twoBitInfo(argv[1], argv[2]);
-return 0;
-}
+//{
+//optionInit(&argc, argv, options);
+//if (argc != 3)
+//    usage();
+//twoBitInfo(argv[1], argv[2]);
+//return 0;
+//}
