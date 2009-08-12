@@ -10,7 +10,7 @@ my $usage = <<'USAGE';
 	usage: buildPeakWindows.pl [options]
 
 		--seq data_seq_hits.txt
-		--align alignability_score.wig
+		--align alignability_dir/
 		--input input_seq_hits.txt
 		--cnvarray cnvArray.tsv
 		--twoBit gb.2bit
@@ -33,16 +33,16 @@ my $offset = 0;
 my $align_thresh = 1;
 my $input_hits = "none";
 my $twoBitFile = "none";
-my $align_score = "none";
+my $align_dir = "none";
 my $cnv_array = "none";
 my $transInput = "FALSE";
 
 my $result = GetOptions(
 	"seq=s" => \$seq_hits,
-	"align=s" => \$align_score,
+	"align=s" => \$align_dir,
 	"input=s" => \$input_hits,
 	"cnvarray=s" => \$cnv_array,
-	"gc-file=s" => \$twoBitFile,
+	"twoBit=s" => \$twoBitFile,
 	'window-size=i' => \$window_size,
 	"offset-size=i" => \$offset,
 	"align-thresh=i" => \$align_thresh,
@@ -57,9 +57,11 @@ my @offsets = 0;
 my $numOffsets = 1;
 $numOffsets = int($window_size/$offset) if $offset > 0;
 for (my $o = 1; $o < $numOffsets; $o++){
-	print STDERR "\t" . ($offset*$o) . "bp\n";
 	push(@offsets,($offset*$o));
 }
+
+## DELETE
+print STDERR "Offsets ", join("bp\n",@offsets), "\n";
 
 my (%cnvProbe,$sortCnvStarts);
 if($cnv_array ne "none"){
@@ -98,6 +100,9 @@ if($cnv_array ne "none"){
 	}
 }
 
+##DELETE
+print STDERR "Finished CNV\n";
+
 open(SEQ,$seq_hits) or die;
 my (%count,%chrom,%maxPos);
 my $pat = qr/^(\w+)\t(\d+)$/;
@@ -117,6 +122,9 @@ while(<SEQ> =~ m/$pat/){
 	}
 }close SEQ;
 
+## DELETE
+print STDERR "Finished EXP\n";
+
 if($input_hits ne "none"){
 	open(INPUT,$input_hits) or die;
 	$n = 0;
@@ -129,6 +137,9 @@ if($input_hits ne "none"){
 		}
 	}close INPUT;
 }
+
+## DELETE
+print STDERR "Finished INPUT\n";
 
 my $out = $seq_hits;
 $out =~ s/\..*/\_win$window_size\_/g;
@@ -143,11 +154,14 @@ foreach my $chr(sort{$a<=>$b} keys %chrom){
 		$files{$chr}{$offsets[$o]}{temp} = $cOut;
 #		my $pid = $pm->start and next;
 		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},\%{$cnvProbe{$chrm}},$sortCnvStarts->{$chrm},$o) if $cnv_array ne "none";
-		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},"none",$sortCnvStarts->{$chrm},$o) if $cnv_array eq "none";
+		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},"none","none",$o) if $cnv_array eq "none";
 #		$pm->finish;
 	}
 }
 #$pm->wait_all_children;
+
+## DELETE
+print STDERR "Finished PROCESS CHRM\n";
 
 if($twoBitFile ne "none"){
 	foreach my $chr(sort{$a<=>$b} keys %chrom){
@@ -159,8 +173,8 @@ if($twoBitFile ne "none"){
 			$start-- if $start > 0;
 			my $tempFile = $files{$chr}{$offsets[$o]}{temp};
 			my $winOut = $tempFile;
-			$winOut .= "_GC.temp" if ($align_score ne "none");
-			$winOut =~ s/\..*/\.txt/g if ($align_score eq "none");			
+			$winOut .= "_GC.temp" if ($align_dir ne "none");
+			$winOut =~ s/\..*/\.txt/g if ($align_dir eq "none");
 			$files{$chr}{$offsets[$o]}{temp} = $winOut;
 
 			my $cFileLen = $chrm . "_" . $offset . ".txt";
@@ -179,10 +193,13 @@ if($twoBitFile ne "none"){
 	#$pm->wait_all_children;
 }
 
-if($align_score ne "none"){
+## DELETE
+print STDERR "Finished GC PERC\n";
+
+if($align_dir ne "none"){
 	foreach my $chr(sort{$a<=>$b} keys %chrom){
 		my $chrm = "chr" . $chr;
-		my $aScore = "ALIGN_" . $gb . "_" . $chrm . ".wig";
+		my $aScore = $align_dir . "ALIGN_" . $gb . "_" . $chrm . ".wig";
 		for (my $o = 0; $o <= $#offsets; $o++){
 			my $winOut = $files{$chr}{$offsets[$o]}{temp};
 			$winOut =~ s/\..*/\.txt/g;
@@ -194,9 +211,8 @@ if($align_score ne "none"){
 	#$pm->wait_all_children;
 }
 
-foreach my $chr(sort{$a<=>$b} keys %chrom){
-	unlink($files{$chr}{temp});
-}
+## DELETE
+print STDERR "Finished ALIGNABILITY\n";
 
 sub process_chrm{
 	my ($chrm, $offset,$cOut,$count_ref,$cnv_href,$cnvStarts,$o) = @_;
@@ -262,7 +278,9 @@ sub process_chrm{
 			my $rawData = sprintf "%.5f", (2**$cnvData)**3;
 			print OUT "\t$rawData";
 		}
+
 		print OUT "\n";
+
 	}close OUT;
 }
 
@@ -282,6 +300,9 @@ sub get_align {
 		if($_ =~ 'chromosome'){
 			print OUT "$_\talign\n";
 		}else{
+
+#need to shift scores by 1/2 avg fragment size
+			print OUT "$_";
 			my $alignCount = 0;
 			for (1..$winSize){
 				my $aScore = <ALIGN>;
@@ -291,7 +312,6 @@ sub get_align {
 				}
 			}
 			if(!eof(ALIGN)){
-				print OUT "$_";
 				my $aPerc = sprintf "%.4f", $alignCount/$winSize;
 				print OUT "\t$aPerc\n";
 			}
@@ -308,38 +328,47 @@ sub get_gcPerc {
 	my $gcHeader = <GC>;
 	open(TEMP, $tempWin);
 	open(OUT,">$winOut");
-	my $gcs;
+	my ($gcs,$ncount);
 	my $readLen = 0;
 	while(<TEMP>){
 		chomp;
 		if($_ =~ 'chromosome'){
 			print OUT "$_\tgcPerc\n";
 		}else{
-			my $seq = $_;
-			$readLen += length($seq);
-			if($readLen < $winSize){
-				$seq =~ s/![G|C]//g;
-				$gcs .= $seq;
-			}elsif($readLen == $winSize){
-				$seq =~ s/![G|C]//g;
-				$gcs .= $seq;
-				my $gcP = sprintf "%.4f", length($gcs)/$winSize;
-				print OUT "\t$gcP\n";
-				$gcs = "";
-				$readLen = 0;
-			}elsif($readLen > $winSize){
-				my $tempSeq = substr($seq,($readLen-$winSize));
-				my $seq = substr($seq,0,($readLen-$winSize-1));
-				$seq =~ s/![G|C]//g;
-				$gcs .= $seq;
-				my $gcP = sprintf "%.4f", length($gcs)/$winSize;
-				print OUT "\t$gcP\n";
-				$readLen = length($tempSeq);
-				$tempSeq =~ s/![G|C]//g;
-				$gcs = $tempSeq;
+			my $outLine = $_;
+			my $gcFlag = 0;
+			while($gcFlag == 0){
+				my $seq = <GC>;
+				chomp($seq);
+				$ncount = ($seq =~ tr/N//);
+				#if($ncount/length($seq) <= $nThresh)
+				$readLen += length($seq);
+				if($readLen < $winSize){
+					$seq =~ s/[^GC]//g;
+					$gcs .= $seq;
+				}elsif($readLen == $winSize){
+					$seq =~ s/[^GC]//g;
+					$gcs .= $seq;
+					my $gcP = sprintf "%.4f", length($gcs)/$winSize;
+					print OUT "$outLine\t$gcP\n";
+					$gcs = "";
+					$readLen = 0;
+					$gcFlag = 1;
+				}elsif($readLen > $winSize){
+					my $tempSeq = substr($seq,($readLen-$winSize));
+					my $seq = substr($seq,0,($readLen-$winSize-1));
+					$seq =~ s/[^GC]//g;
+					$gcs .= $seq;
+					my $gcP = sprintf "%.4f", length($gcs)/$winSize;
+					print OUT "$outLine\t$gcP\n";
+					$readLen = length($tempSeq);
+					$tempSeq =~ s/[^GC]//g;
+					$gcs = $tempSeq;
+					$gcFlag = 1;
+				}
 			}
 		}
 	}close TEMP;close OUT;
 	close GC;
-	unlink($tempWin);
+	unlink($tempWin);unlink($gcFile);
 }
