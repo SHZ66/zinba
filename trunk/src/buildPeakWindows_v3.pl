@@ -31,10 +31,10 @@ my ($seq_hits,$cOut,%files,$gb);
 my $window_size = 500;
 my $offset = 0;
 my $align_thresh = 1;
-my $input_hits = "none";
-my $twoBitFile = "none";
-my $align_dir = "none";
-my $cnv_array = "none";
+my $input_hits = undef;
+my $twoBitFile = undef;
+my $align_dir = undef;
+my $cnv_array = undef;
 my $transInput = "FALSE";
 
 my $result = GetOptions(
@@ -60,11 +60,8 @@ for (my $o = 1; $o < $numOffsets; $o++){
 	push(@offsets,($offset*$o));
 }
 
-## DELETE
-print STDERR "Offsets ", join("bp\n",@offsets), "\n";
-
 my (%cnvProbe,$sortCnvStarts);
-if($cnv_array ne "none"){
+if(defined($cnv_array)){
 	open(CNV,$cnv_array) or die;
 	while(<CNV>){
 	    chomp;
@@ -99,10 +96,6 @@ if($cnv_array ne "none"){
 		}
 	}
 }
-
-##DELETE
-print STDERR "Finished CNV\n";
-
 open(SEQ,$seq_hits) or die;
 my (%count,%chrom,%maxPos);
 my $pat = qr/^(\w+)\t(\d+)$/;
@@ -122,10 +115,7 @@ while(<SEQ> =~ m/$pat/){
 	}
 }close SEQ;
 
-## DELETE
-print STDERR "Finished EXP\n";
-
-if($input_hits ne "none"){
+if(defined($input_hits)){
 	open(INPUT,$input_hits) or die;
 	$n = 0;
 	while(<INPUT> =~ m/$pat/){
@@ -137,9 +127,6 @@ if($input_hits ne "none"){
 		}
 	}close INPUT;
 }
-
-## DELETE
-print STDERR "Finished INPUT\n";
 
 my $out = $seq_hits;
 $out =~ s/\..*/\_win$window_size\_/g;
@@ -159,9 +146,6 @@ foreach my $chr(sort{$a<=>$b} keys %chrom){
 	}
 }
 #$pm->wait_all_children;
-
-## DELETE
-print STDERR "Finished PROCESS CHRM\n";
 
 if($twoBitFile ne "none"){
 	foreach my $chr(sort{$a<=>$b} keys %chrom){
@@ -193,9 +177,6 @@ if($twoBitFile ne "none"){
 	#$pm->wait_all_children;
 }
 
-## DELETE
-print STDERR "Finished GC PERC\n";
-
 if($align_dir ne "none"){
 	foreach my $chr(sort{$a<=>$b} keys %chrom){
 		my $chrm = "chr" . $chr;
@@ -210,9 +191,6 @@ if($align_dir ne "none"){
 	}
 	#$pm->wait_all_children;
 }
-
-## DELETE
-print STDERR "Finished ALIGNABILITY\n";
 
 sub process_chrm{
 	my ($chrm, $offset,$cOut,$count_ref,$cnv_href,$cnvStarts,$o) = @_;
