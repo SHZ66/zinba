@@ -1,12 +1,12 @@
 /* twoBitToFa - Convert all or part of twoBit file to fasta. */
-#include "inc/common.h"
-#include "inc/linefile.h"
-#include "inc/hash.h"
-#include "inc/options.h"
-#include "inc/dnaseq.h"
-#include "inc/fa.h"
-#include "inc/twoBit.h"
-#include "inc/bPlusTree.h"
+#include "common.h"
+#include "linefile.h"
+#include "hash.h"
+#include "options.h"
+#include "dnaseq.h"
+#include "fa.h"
+#include "twoBit.h"
+#include "bPlusTree.h"
 
 static char const rcsid[] = "$Id: twoBitToFa.c,v 1.12 2009/01/09 10:14:33 kent Exp $";
 /*

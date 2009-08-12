@@ -1,7 +1,7 @@
 /* twoBitInfo - get information about sequences in a .2bit file. */
-#include "inc/common.h"
-#include "inc/options.h"
-#include "inc/twoBit.h"
+#include "common.h"
+#include "options.h"
+#include "twoBit.h"
 
 static char const rcsid[] = "$Id: twoBitInfo.c,v 1.5 2005/10/18 19:24:58 lowec Exp $";
 /*
