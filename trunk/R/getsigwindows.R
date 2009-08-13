@@ -21,7 +21,7 @@ getsigwindows=function(file,covnames,threshold=.01,output, offset=0){
 	#RESIDUAL STANDARDIZATION########################
 	#TO DO:  unlink design matrices for count and zero models (Z neq X)
 	a=eval(parse(text=modelcommand))
-	print(summary(a))
+#	print(summary(a))
         
 	link=make.link('logit')
 	linkinv=link$linkinv
