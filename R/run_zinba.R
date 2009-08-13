@@ -1,8 +1,13 @@
-run.zinba=function(seq,align=NULL,input=NULL,cnvarray=NULL,twoBit=NULL,winSize=500,offset=0,aThresh=1,gb=NULL){
-    #buildwindowdata=function(seq,align=NULL,input=NULL,cnvarray=NULL,twoBit=NULL,winSize=500,offset=0,aThresh=1,gb=NULL)
+run.zinba=function(seq,align=NULL,input=NULL,cnvarray=NULL,twoBit=NULL,winSize=500,offset=0,aThresh=1,gb=NULL,basecountfile=NULL){
 
-#getsigwindows=function(file,covnames,threshold=.01,output)
-#basecountimport=function(inputfile, coordfile, outputfile, chromosome='all')
+    buildwindowdata=function(seq,align,input,cnvarray,twoBit,winSize,offset,aThresh,gb)
+    
+    #need to run getsigwins for each chrm and offset and assign output file;
+    #this prints 2 files output (.wins) and output_PEAK_COORDS.temp
+#    getsigwindows=function(file,covnames,threshold=.01,output)
+
+    #coordfile is output from previous
+#    basecountimport=function(inputfile, coordfile, outputfile, chromosome='all')
 
 #bpProfiles=read.table(out,header=TRUE,sep="\t")
 #bpVector=bpProfiles[,6:(ncol(bpProfiles)-1)]
