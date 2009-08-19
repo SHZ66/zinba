@@ -1,15 +1,20 @@
 #for covnames, enter desired covariates as c('gcPerc', 'align','cnv') for example
-getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0){
+getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, method='pscl'){
 	time.start <- Sys.time()
         library(zicounts)
 	library(qvalue)
         options(scipen=999)
+	library(pscl)
 	###### USER INPUT ############################
 	data=read.table(file,header=TRUE,sep="\t")
 	covariates=eval(parse(text=paste("cbind(", paste(rep('data$', length(covnames)), covnames, sep='', collapse=',') , ")") ))
 	colnames(covariates)=covnames
 	cov_text=paste( covnames, collapse='+')
-	modelcommand=paste("zicounts(resp = exp_count ~ ., x =  ~ ",cov_text,", z =  ~", cov_text,",data=data)")
+	if(method=='pscl'){
+		modelcommand=paste("zeroinfl(data$exp_count ~ ",cov_text,",dist = 'negbin', EM=TRUE)")
+	}else if(method=='zicounts'){
+		modelcommand=paste("zicounts(resp = exp_count ~ ., x =  ~ ",cov_text,", z =  ~", cov_text,",data=data)")
+	}
 	fdrlevel=threshold
 	##############################################
 	#########PROCESSING STEPS########################
@@ -22,20 +27,22 @@ getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0){
 	#TO DO:  unlink design matrices for count and zero models (Z neq X)
 	a=eval(parse(text=modelcommand))
 #	print(summary(a))
-        
-	link=make.link('logit')
-	linkinv=link$linkinv
-	X=cbind(rep(1, length(leverage)), covariates)
-	coefc=a$coefficients[1:(length(covnames)+1)]
-	coefz=a$coefficients[(length(covnames)+2):(2*length(covnames)+2)]
-        mu <- exp(as.matrix(X) %*% coefc)[,1]
-        phi <- linkinv(as.matrix(X) %*% coefz)[,1]
-        Yhat <- (1-phi) * mu
-        res <- a$data - Yhat
-	
-        theta1 <- 1/exp(a$coefficients[2*(length(covnames)+1)+1])
-	vv <- Yhat * (1 + (phi + theta1) * mu)
-	standardized=res/sqrt(vv*(1-leverage))
+      	if(method=='zicounts'){
+		link=make.link('logit')
+		linkinv=link$linkinv
+		X=cbind(rep(1, length(leverage)), covariates)
+		coefc=a$coefficients[1:(length(covnames)+1)]
+		coefz=a$coefficients[(length(covnames)+2):(2*length(covnames)+2)]
+        	mu <- exp(as.matrix(X) %*% coefc)[,1]
+        	phi <- linkinv(as.matrix(X) %*% coefz)[,1]
+        	Yhat <- (1-phi) * mu
+        	res <- a$data - Yhat
+	        theta1 <- 1/exp(a$coefficients[2*(length(covnames)+1)+1])
+		vv <- Yhat * (1 + (phi + theta1) * mu)
+		standardized=res/sqrt(vv*(1-leverage))
+	}else if(method=='pscl'}
+		standardized=residuals(a)/sqrt(1-leverage)
+	}
 	########output is 'standardized'#################
 	#################################################
 	#THRESHOLDING/PEAK CALLING#######################
