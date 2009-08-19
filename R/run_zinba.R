@@ -3,6 +3,9 @@ run.zinba=function(seq,align=NULL,input=NULL,cnvarray=NULL,twoBit=NULL,winSize=5
 	time.start <- Sys.time()
 	buildwindowdata(seq,align,input,cnvarray,twoBit,winSize,offset,aThresh,gb)
     
+	listFile <- paste(seq,".list",sep="")
+	data_list <- 
+	
     #need to run getsigwins for each chrm and offset and assign output file;
     #this prints 2 files output (.wins) and output_PEAK_COORDS.temp
 #	getsigwindows(file,covnames,threshold=.01,output)

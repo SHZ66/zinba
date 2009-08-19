@@ -20,7 +20,6 @@ my $usage = <<'USAGE';
 		--align-thresh (default = 1)
 		--perc-n-thresh (default 0.1)
 		
-		--print-list
 		--trans-input trasnform input counts, cube root (default FALSE)
 		--gb genome build (example hg18)
 
@@ -39,7 +38,6 @@ my $twoBitFile = undef;
 my $align_dir = undef;
 my $cnv_array = undef;
 my $transInput = "FALSE";
-my $printList = "FALSE";
 
 my $result = GetOptions(
 	"seq=s" => \$seq_hits,
@@ -53,11 +51,13 @@ my $result = GetOptions(
 	"perc-n-thresh=f" => \$nThresh,
 	"gb=s"	=> \$gb,
 	"trans-input"  => sub{$transInput='TRUE'},
-	"print-list"  => sub{$printList='TRUE'},
 	"help|?" => sub{print $usage; exit}
 );
 
 die $usage unless($seq_hits && $gb);
+
+my $dataFile_list = $seq_hits . ".list";
+open(LIST,">$dataFile_list");
 
 my @offsets = 0;
 my $numOffsets = 1;
@@ -141,7 +141,9 @@ $out =~ s/\..*/\_win$window_size\_/g;
 foreach my $chr(sort{$a<=>$b} keys %chrom){
 	my $chrm = "chr" . $chr;
 	for (my $o = 0; $o <= $#offsets; $o++){
-		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".temp";
+		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".temp" if (defined($align_dir) && defined($twoBitFile));
+		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".txt" if (!defined($align_dir) && !defined($twoBitFile));
+		print LIST "$cOut\n" if (!defined($align_dir) && !defined($twoBitFile));
 		my $gcSeq = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".gcseq";
 		$files{$chr}{$offsets[$o]}{gcSeq} = $gcSeq;
 		$files{$chr}{$offsets[$o]}{temp} = $cOut;
@@ -153,6 +155,7 @@ foreach my $chr(sort{$a<=>$b} keys %chrom){
 }
 #$pm->wait_all_children;
 
+
 if(defined($align_dir)){
 	foreach my $chr(sort{$a<=>$b} keys %chrom){
 		my $chrm = "chr" . $chr;
@@ -161,6 +164,7 @@ if(defined($align_dir)){
 			my $tFile = $files{$chr}{$offsets[$o]}{temp};
 			my $winOut = $tFile;
 			$winOut =~ s/\..*/\.txt/g if !defined($twoBitFile);
+			print LIST "$winOut\n" if !defined($twoBitFile);
 			$winOut .= 2 if defined($twoBitFile);
 			$files{$chr}{$offsets[$o]}{temp} = $winOut;
 #			my $pid = $pm->start and next;
@@ -181,6 +185,7 @@ if(defined($twoBitFile)){
 			my $tempFile = $files{$chr}{$offsets[$o]}{temp};
 			my $winOut = $tempFile;
 			$winOut =~ s/\..*/\.txt/g;
+			print LIST "$winOut\n";
 
 			my $cFileLen = $chrm . "_" . $offset . ".txt";
 			`twoBitInfo /gbdb/hg18/hg18.2bit:$chrm $cFileLen`;
@@ -197,6 +202,7 @@ if(defined($twoBitFile)){
 	}
 #	$pm->wait_all_children;
 }
+close LIST;
 
 sub process_chrm{
 	my ($chrm, $offset,$cOut,$count_ref,$cnv_href,$cnvStarts,$o) = @_;
