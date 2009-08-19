@@ -11,7 +11,7 @@ run.zinba=function(seq,align=NULL,input=NULL,cnvarray=NULL,twoBit=NULL,winSize=5
 
 	    getsigwindows(file=data_list[i,1],covnames=covs,threshold=threshold,winout=winout,coordout=coordout,offset=(winSize/2))
 	    basecountimport(inputfile=basecountfile,coordfile=coordout,outputfile=bpOut,chromosome=data_list[i,2])
-	    peakbound=function(profile=bpOut,output=peakout)
+	    peakbound(profile=bpOut,output=peakout)
 
             #unlink(coordout)
             #unlink(winout)
