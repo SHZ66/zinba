@@ -20,6 +20,7 @@ my $usage = <<'USAGE';
 		--align-thresh (default = 1)
 		--perc-n-thresh (default 0.1)
 		
+		--print-list
 		--trans-input trasnform input counts, cube root (default FALSE)
 		--gb genome build (example hg18)
 
@@ -38,6 +39,7 @@ my $twoBitFile = undef;
 my $align_dir = undef;
 my $cnv_array = undef;
 my $transInput = "FALSE";
+my $printList = "FALSE";
 
 my $result = GetOptions(
 	"seq=s" => \$seq_hits,
@@ -51,6 +53,7 @@ my $result = GetOptions(
 	"perc-n-thresh=f" => \$nThresh,
 	"gb=s"	=> \$gb,
 	"trans-input"  => sub{$transInput='TRUE'},
+	"print-list"  => sub{$printList='TRUE'},
 	"help|?" => sub{print $usage; exit}
 );
 
