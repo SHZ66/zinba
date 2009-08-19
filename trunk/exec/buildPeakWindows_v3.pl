@@ -143,8 +143,8 @@ foreach my $chr(sort{$a<=>$b} keys %chrom){
 		$files{$chr}{$offsets[$o]}{gcSeq} = $gcSeq;
 		$files{$chr}{$offsets[$o]}{temp} = $cOut;
 #		my $pid = $pm->start and next;
-		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},\%{$cnvProbe{$chrm}},$sortCnvStarts->{$chrm},$o) if $cnv_array ne "none";
-		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},"none","none",$o) if $cnv_array eq "none";
+		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},\%{$cnvProbe{$chrm}},$sortCnvStarts->{$chrm},$o) if defined($cnv_array);
+		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},"none","none",$o) if !defined($cnv_array);
 #		$pm->finish;
 	}
 }
