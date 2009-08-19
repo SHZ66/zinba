@@ -143,7 +143,7 @@ foreach my $chr(sort{$a<=>$b} keys %chrom){
 	for (my $o = 0; $o <= $#offsets; $o++){
 		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".temp" if (defined($align_dir) && defined($twoBitFile));
 		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".txt" if (!defined($align_dir) && !defined($twoBitFile));
-		print LIST "$cOut\n" if (!defined($align_dir) && !defined($twoBitFile));
+		print LIST "$cOut\t$chrm\n" if (!defined($align_dir) && !defined($twoBitFile));
 		my $gcSeq = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".gcseq";
 		$files{$chr}{$offsets[$o]}{gcSeq} = $gcSeq;
 		$files{$chr}{$offsets[$o]}{temp} = $cOut;
@@ -164,7 +164,7 @@ if(defined($align_dir)){
 			my $tFile = $files{$chr}{$offsets[$o]}{temp};
 			my $winOut = $tFile;
 			$winOut =~ s/\..*/\.txt/g if !defined($twoBitFile);
-			print LIST "$winOut\n" if !defined($twoBitFile);
+			print LIST "$winOut\t$chrm\n" if !defined($twoBitFile);
 			$winOut .= 2 if defined($twoBitFile);
 			$files{$chr}{$offsets[$o]}{temp} = $winOut;
 #			my $pid = $pm->start and next;
@@ -185,7 +185,7 @@ if(defined($twoBitFile)){
 			my $tempFile = $files{$chr}{$offsets[$o]}{temp};
 			my $winOut = $tempFile;
 			$winOut =~ s/\..*/\.txt/g;
-			print LIST "$winOut\n";
+			print LIST "$winOut\t$chrm\n";
 
 			my $cFileLen = $chrm . "_" . $offset . ".txt";
 			`twoBitInfo /gbdb/hg18/hg18.2bit:$chrm $cFileLen`;
