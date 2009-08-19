@@ -1,20 +1,23 @@
-run.zinba=function(seq,align=NULL,input=NULL,cnvarray=NULL,twoBit=NULL,winSize=500,offset=0,aThresh=1,gb=NULL,basecountfile=NULL){
-
+run.zinba=function(seq,align=NULL,input=NULL,cnvarray=NULL,twoBit=NULL,winSize=500,offset=0,aThresh=1,gb=NULL,basecountfile=NULL,covs=NULL,threshold=0.01){
 	time.start <- Sys.time()
-	buildwindowdata(seq,align,input,cnvarray,twoBit,winSize,offset,aThresh,gb)
-    
-	listFile <- paste(seq,".list",sep="")
-	data_list <- 
-	
-    #need to run getsigwins for each chrm and offset and assign output file;
-    #this prints 2 files output (.wins) and output_PEAK_COORDS.temp
-#	getsigwindows(file,covnames,threshold=.01,output)
+	buildwindowdata(seq=seq,align=align,cnvarray=cnvarray,twoBit=twoBit,offset=offset,aThresh=aThresh,gb=gb)    
 
-    #coordfile is output from previous
-#	basecountimport(inputfile, coordfile, outputfile, chromosome='all')
+	data_list <- read.table(paste(seq,".list",sep=""))
+        for (i in 1:nrow(data_list)){
+            coordout <- paste(substr(data_list[i,1],1,((nchar(as.character(data_list[i,1])))-4)),"_PEAK_COORDS.temp",sep="")
+            winout <- paste(substr(data_list[i,1],1,((nchar(as.character(data_list[i,1])))-4)),".wins",sep="")
+            peakout <- paste(substr(data_list[i,1],1,((nchar(as.character(data_list[i,1])))-4)),".peaks",sep="")
+            bpOut <- paste(coordout,"_BPcount",sep="")
 
-#	peakbound=function(profile,output)
+	    getsigwindows(file=data_list[i,1],covnames=covs,threshold=threshold,winout=winout,coordout=coordout,offset=(winSize/2))
+	    basecountimport(inputfile=basecountfile,coordfile=coordout,outputfile=bpOut,chromosome=data_list[i,2])
+	    peakbound=function(profile=bpOut,output=peakout)
 
+#            unlink(coordout)
+#            unlink(winout)
+#            unlink(bpOut)
+        }
+#        unlink(paste(seq,".list",sep=""))
 	time.end <- Sys.time()
 	print(difftime(time.end,time.start))
 }

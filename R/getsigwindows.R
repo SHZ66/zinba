@@ -1,5 +1,5 @@
 #for covnames, enter desired covariates as c('gcPerc', 'align','cnv') for example
-getsigwindows=function(file,covnames,threshold=.01,output, offset=0){
+getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0){
 	time.start <- Sys.time()
         library(zicounts)
 	library(qvalue)
@@ -53,8 +53,7 @@ getsigwindows=function(file,covnames,threshold=.01,output, offset=0){
 ### FORMAT PEAK COORDINATE DATA
 	peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$end,sep=":")
 	coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),"+")
-	out <- paste(output,"_PEAK_COORDS.temp",sep="")
-	write.table(coordinates,out,quote=F,sep="\t",row.names=F,col.names=F)
+	write.table(coordinates,coordout,quote=F,sep="\t",row.names=F,col.names=F)
 ###############################
 
 #	sigpeaksSORTED=sigpeaks[order(sigpeaks[,dim(data)[2]+2], decreasing=TRUE),]
@@ -62,7 +61,7 @@ getsigwindows=function(file,covnames,threshold=.01,output, offset=0){
 	#######output is 'sigpeaks' and 'sigpeaksSORTED'#
 	#################################################
 	print(c(line1, line2,line3))
-	write.table(sigpeaks,output,quote=F,sep="\t",row.names=F)
+	write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
       	time.end <- Sys.time()
 	print(difftime(time.end,time.start))
 }
