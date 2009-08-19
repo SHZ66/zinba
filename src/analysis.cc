@@ -68,7 +68,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 
 						if(outputData( outputFile,printFlag,i->ident,i->chrom,i->start,i->end,i->strand,sizeProfile,profile) != 0){
 							cout << "Error printing output to file, exiting" << endl;
-							exit(1);
+							return 1;
 						}
 						delete [] profile;
 						sizeProfile = NULL;
@@ -81,7 +81,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 				
 				if(coord_slist.empty()){
 					cout << "\nFinished all coordinates, COMPLETE\n";
-					exit(0);
+					return 0;
 				}
 			}
 			istringstream iss(line);
@@ -158,7 +158,8 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 
 				if(outputData( outputFile,printFlag,i->ident,i->chrom,i->start,i->end,i->strand,sizeProfile,profile) != 0){
 					cout << "Error printing output to file, exiting" << endl;
-					exit(1);
+//					exit(1);
+					return 1;
 				}
 
 				delete [] profile;
@@ -171,14 +172,13 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 	}
 	cout << "Finished\nFinished all coordinates, COMPLETE\n";
 	seqfile.close();
-	exit(0);
 	return 0;
 }
 
 int analysis::outputData(const char * outputFile,int pFlag,const char * pId,unsigned short int pChrom,unsigned long int pStart, unsigned long int pStop,const char * pStrand,int printStop,int pProfile[]){
 //int analysis::outputData(const char * outputFile,int pFlag,const char * pId,unsigned short int pChrom,unsigned long int pStart, unsigned long int pStop,const char * pStrand,int printStop,double pProfile[],const char * statoutputFile){
 	FILE * fh;
-	FILE * fhstats;
+//	FILE * fhstats;
 	if(pFlag == 0){
 		fh = fopen(outputFile,"w"); 
 //		fhstats = fopen(statoutputFile,"w");
@@ -187,7 +187,7 @@ int analysis::outputData(const char * outputFile,int pFlag,const char * pId,unsi
 		for(int p = 1;p <= (printStop+1);p++){
 			fprintf(fh,"Position%i\t",p);
 		}
-//		fprintf(fh,"AVG\n");
+		fprintf(fh,"\n");
 	}else if (pFlag == 1){
 		fh = fopen(outputFile,"a");
 //		fhstats = fopen(statoutputFile,"a");
@@ -198,25 +198,26 @@ int analysis::outputData(const char * outputFile,int pFlag,const char * pId,unsi
 //	fprintf(fhstats,"%s\t%s\t%i\t%i\t%s\t",pId,chromName,pStart,pStop,pStrand);
 	char plus[] = "+";
 	char minus[] = "-";
-	double sumScores = 0;
-	double sumScoresX2 = 0;
+//	double sumScores = 0;
+//	double sumScoresX2 = 0;
 	if(strcmp(pStrand,plus) == 0){
 		for(int posP = 0; posP <= printStop;posP++){
 			fprintf(fh,"%i\t",pProfile[posP]);
-			sumScores += pProfile[posP];
-			sumScoresX2 += pow((pProfile[posP]),2);
+//			sumScores += pProfile[posP];
+//			sumScoresX2 += pow((pProfile[posP]),2);
 		}
 	}else if (strcmp(pStrand,minus) == 0){
 		for(int posP = printStop; posP >= 0;posP--){
 			fprintf(fh,"%i\t",pProfile[posP]);
-			sumScores += pProfile[posP];
-			sumScoresX2 += pow((pProfile[posP]),2);
+//			sumScores += pProfile[posP];
+//			sumScoresX2 += pow((pProfile[posP]),2);
 		}
 	}
 //	double avgScore = sumScores/printStop;
 //	double stdevScore = sqrt((sumScoresX2 -((sumScores)*(sumScores)/printStop))/(printStop-1));
 //	fprintf(fhstats,"%f\t%f\n", avgScore, stdevScore);
 //	fprintf(fh,"%f\n", avgScore);
+	fprintf(fh,"\n");
 	fclose (fh);
 //	fclose (fhstats);
 	return 0;

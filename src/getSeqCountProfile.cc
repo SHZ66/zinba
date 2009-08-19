@@ -60,11 +60,11 @@ void getSeqCountProfile(char **Rinputfile, char **Rcoordfile, char **Routputfile
 	if(ret == 1){
 		/*cout << "ERROR opening file " << inputFile;*/
 		Rprintf("ERROR opening file: %s\n",inputFile);
-		exit(1);
+		return;
 	}else if(ret == 2){
 		/* cout << "FILE FORMATTING ERROR- wrong number of columns, exiting" << endl;*/
 		Rprintf("FILE FORMATTING ERROR- wrong number of columns, exiting");
-		exit(1);
+		return;
 	}
 
 	/*cout << "FINISHED importing coordinates" << endl;
@@ -75,15 +75,9 @@ void getSeqCountProfile(char **Rinputfile, char **Rcoordfile, char **Routputfile
 	Rprintf("\nGetting profiles for coordinates %s\n",inputFile);
 	Rprintf("Printing output to %s \n",outputFile);
  
-	ret = newAnalysis.processCoords(inputFile,outputFile,chromosome);		
+	ret = newAnalysis.processCoords(inputFile,outputFile,chromosome);	
 	if(ret == 1){
-		/*cout <<"ERROR: Environment Variable HG_BFADIR not declared, exiting" << endl;*/
-		Rprintf("ERROR: Environment Variable HG_BFADIR not declared, exiting");
-		exit(1);	
-	}else if (ret == 2){
-		/*cout << "Unable to open chrom info file, exiting" << endl;*/
-		Rprintf("Unable to open chrom info file, exiting");
-		exit(1);
+		Rprintf("\nError occurred in processing\n");
 	}
 	/*cout << "\nFinished all coordinates, COMPLETE\n";
 	return 0;*/
