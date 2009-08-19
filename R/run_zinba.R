@@ -3,10 +3,10 @@ run.zinba=function(seq,align=NULL,input=NULL,cnvarray=NULL,twoBit=NULL,winSize=5
 	time.start <- Sys.time()
 	buildwindowdata(seq,align,input,cnvarray,twoBit,winSize,offset,aThresh,gb)
     
-	Perl.Path <- file.path(.path.package("zimba"), "Perl")
-	Fn.Path <- file.path(Perl.Path, "runGetPeaks.pl")
-        CMD=paste("--seq", seq,"--align", align,"--gdna", gdna,"--cnvarray", cnvarray,sep=" ")
-	system(CMD)
+#	Perl.Path <- file.path(.path.package("zimba"), "Perl")
+#	Fn.Path <- file.path(Perl.Path, "runGetPeaks.pl")
+#        CMD=paste("--seq", seq,"--align", align,"--gdna", gdna,"--cnvarray", cnvarray,sep=" ")
+#	system(CMD)
 
     #need to run getsigwins for each chrm and offset and assign output file;
     #this prints 2 files output (.wins) and output_PEAK_COORDS.temp
