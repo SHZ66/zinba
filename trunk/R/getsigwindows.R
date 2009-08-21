@@ -41,7 +41,7 @@ getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, met
 	        theta1 <- 1/exp(a$coefficients[2*(length(covnames)+1)+1])
 		vv <- Yhat * (1 + (phi + theta1) * mu)
 		standardized=res/sqrt(vv*(1-leverage))
-	}else if(method=='pscl'}
+	}else if(method=='pscl'){
 		standardized=residuals(a)/sqrt(1-leverage)
 	}
 	########output is 'standardized'#################
