@@ -4,7 +4,11 @@ getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, met
         library(zicounts)
 	library(qvalue)
         options(scipen=999)
+<<<<<<< .mine
+
+=======
 	library(pscl)
+>>>>>>> .r43
 	###### USER INPUT ############################
 	data=read.table(file,header=TRUE,sep="\t")
 	covariates=eval(parse(text=paste("cbind(", paste(rep('data$', length(covnames)), covnames, sep='', collapse=',') , ")") ))

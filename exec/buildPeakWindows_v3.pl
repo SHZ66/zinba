@@ -276,7 +276,6 @@ sub process_chrm{
 
 sub get_align {
 	my ($alignFile,$tempWin,$winOut,$winSize,$offset) = @_;
-
 	open(ALIGN,$alignFile);
 	my $alignHeader = <ALIGN>;
 	my ($ahFix,$ahChrm,$ahstart,$ahstep) = split(/ /, $alignHeader);
@@ -290,7 +289,6 @@ sub get_align {
 		if($_ =~ 'chromosome'){
 			print OUT "$_\talign\n";
 		}else{
-
 #need to shift scores by 1/2 avg fragment size
 			print OUT "$_";
 			my @line = split(/\t/,$_);
