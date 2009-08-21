@@ -13,7 +13,8 @@
 	    \item{method}{either 'zicounts' or 'pscl'}
           }
           \seealso{
-            \code{\link{save}}.
+            \code{\link{save}}.cd
+
           
           \examples{
 
