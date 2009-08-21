@@ -284,6 +284,9 @@ sub get_align {
 
 	open(TEMP, $tempWin);
 	open(OUT,">$winOut");
+	
+my $aCount = 0;
+	
 	while(<TEMP>){
 		chomp;
 		if($_ =~ 'chromosome'){
@@ -296,6 +299,12 @@ sub get_align {
 				while($line[2] > $currStart){
 					my $temp = <ALIGN>;
 					$currStart++;
+					
+					
+					$aCount++;
+					print STDERR "advancing \n";
+					exit if $aCount == 10;
+					
 				}
 			
 				if($line[2] < $currStart){
