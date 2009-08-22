@@ -1,6 +1,6 @@
 peakbound=function(profile,output){ 
     bpProfiles=read.table(profile,header=TRUE,sep="\t")
-    bpVector=bpProfiles[i,6:(ncol(bpProfiles)-1)]
+    bpVector=bpProfiles[,6:ncol(bpProfiles)]
     peakbound2=function(x){
     	##assuming 500 bp window and flanking 500 bp windows
 	##TO DO: 
@@ -37,7 +37,7 @@ peakbound=function(profile,output){
     	return(c(peakstart, peakend))
     }
     peakCoords=apply(bpVector,1,peakbound2)
-    refPeaks=cbind(bpProfiles[,1:5],peakCoords)
+    refPeaks=cbind(bpProfiles[,1:5],t(peakCoords))
     write.table(refPeaks,output,quote=F,sep="\t",row.names=F,col.names=F)
 }
 
