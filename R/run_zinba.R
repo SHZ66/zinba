@@ -15,7 +15,6 @@ run.zinba=function(seq,align=NULL,input=NULL,cnvarray=NULL,twoBit=NULL,winSize=5
 	    peakbound(profile=bpOut,output=peakout)
 
             unlink(coordout)
-            unlink(winout)
             unlink(bpOut)
 	    gc()
         }
