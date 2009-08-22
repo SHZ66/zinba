@@ -17,6 +17,7 @@ run.zinba=function(seq,align=NULL,input=NULL,cnvarray=NULL,twoBit=NULL,winSize=5
             unlink(coordout)
             unlink(winout)
             unlink(bpOut)
+	    gc()
         }
         unlink(paste(seq,".list",sep=""))
 	time.end <- Sys.time()
