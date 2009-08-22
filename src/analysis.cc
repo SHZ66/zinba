@@ -80,7 +80,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 				cout << "Finished\n";
 				
 				if(coord_slist.empty()){
-					cout << "\nFinished all coordinates, COMPLETE\n";
+//					cout << "\nFinished all coordinates, COMPLETE\n";
 					return 0;
 				}
 			}

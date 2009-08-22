@@ -296,22 +296,16 @@ my $aCount = 0;
 			print OUT "$_";
 			my @line = split(/\t/,$_);
 			if(!eof(ALIGN)){
-				while($line[2] > $currStart){
+				while($line[1] > $currStart){
 					my $temp = <ALIGN>;
 					$currStart++;
-					
-					
-					$aCount++;
-					print STDERR "advancing \n";
-					exit if $aCount == 10;
-					
 				}
-			
-				if($line[2] < $currStart){
+
+				if($line[1] < $currStart){
 					print OUT "\tNA\n";
-				}else{
+				}elsif($line[1] == $currStart){
 					my $alignCount = 0;
-					while($currStart <= $line[3]){
+					while($currStart <= $line[2]){
 						my $aScore = <ALIGN>;
 						chomp($aScore);
 						$currStart++;
