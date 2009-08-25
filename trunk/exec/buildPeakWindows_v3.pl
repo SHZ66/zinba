@@ -1,8 +1,9 @@
 #!/usr/bin/perl
 use strict;
 use Getopt::Long;
-#
-use Parallel::ForkManager;
+BEGIN { push @INC,'.'; }
+#use Parallel::ForkManager;
+require Parallel::ForkManager;
 
 my $usage = <<'USAGE';
 
@@ -39,6 +40,7 @@ my $twoBitFile = undef;
 my $align_dir = undef;
 my $cnv_array = undef;
 my $transInput = "FALSE";
+my $nProcesses = 1;
 
 my $result = GetOptions(
 	"seq=s" => \$seq_hits,
@@ -50,6 +52,7 @@ my $result = GetOptions(
 	"offset-size=i" => \$offset,
 	"align-thresh=i" => \$align_thresh,
 	"perc-n-thresh=f" => \$nThresh,
+	"processes=i" => \$nProcesses,
 	"gb=s"	=> \$gb,
 	"trans-input"  => sub{$transInput='TRUE'},
 	"help|?" => sub{print $usage; exit}
@@ -58,7 +61,7 @@ my $result = GetOptions(
 die $usage unless($seq_hits && $gb);
 
 #
-my $pm = new Parallel::ForkManager(8);
+my $pm = new Parallel::ForkManager($nProcesses);
 
 my $dataFile_list = $seq_hits . ".list";
 open(LIST,">$dataFile_list");

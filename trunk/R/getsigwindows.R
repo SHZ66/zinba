@@ -3,9 +3,9 @@ getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, met
 	time.start <- Sys.time()
         library(zicounts)
 	library(qvalue)
+        library(pscl)
         options(scipen=999)
 
-	library(pscl)
 	###### USER INPUT ############################
 	data=read.table(file,header=TRUE,sep="\t")
 	covariates=eval(parse(text=paste("cbind(", paste(rep('data$', length(covnames)), covnames, sep='', collapse=',') , ")") ))
