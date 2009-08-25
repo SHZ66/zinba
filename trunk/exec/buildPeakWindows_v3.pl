@@ -1,7 +1,8 @@
 #!/usr/bin/perl
 use strict;
 use Getopt::Long;
-#use Parallel::ForkManager;
+#
+use Parallel::ForkManager;
 
 my $usage = <<'USAGE';
 
@@ -55,6 +56,9 @@ my $result = GetOptions(
 );
 
 die $usage unless($seq_hits && $gb);
+
+#
+my $pm = new Parallel::ForkManager(8);
 
 my $dataFile_list = $seq_hits . ".list";
 open(LIST,">$dataFile_list");
@@ -147,13 +151,16 @@ foreach my $chr(sort{$a<=>$b} keys %chrom){
 		my $gcSeq = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".gcseq";
 		$files{$chr}{$offsets[$o]}{gcSeq} = $gcSeq;
 		$files{$chr}{$offsets[$o]}{temp} = $cOut;
-#		my $pid = $pm->start and next;
+#
+my $pid = $pm->start and next;
 		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},\%{$cnvProbe{$chrm}},$sortCnvStarts->{$chrm},$o) if defined($cnv_array);
 		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},"none","none",$o) if !defined($cnv_array);
-#		$pm->finish;
+#
+$pm->finish;
 	}
 }
-#$pm->wait_all_children;
+#
+$pm->wait_all_children;
 
 
 if(defined($align_dir)){
@@ -167,12 +174,15 @@ if(defined($align_dir)){
 			print LIST "$winOut\t$chrm\n" if !defined($twoBitFile);
 			$winOut .= 2 if defined($twoBitFile);
 			$files{$chr}{$offsets[$o]}{temp} = $winOut;
-#			my $pid = $pm->start and next;
+#
+my $pid = $pm->start and next;
 			&get_align($aScore,$tFile,$winOut,$window_size,$offsets[$o]);
-#			$pm->finish;
+#
+$pm->finish;
 		}
 	}
-#	$pm->wait_all_children;
+#
+$pm->wait_all_children;
 }
 
 if(defined($twoBitFile)){
@@ -195,12 +205,15 @@ if(defined($twoBitFile)){
 			my ($cInfo,$cLength) = split(/\t/, $line);
 			close CLEN; unlink($cFileLen);
 			`twoBitToFa -noMask -seq=$chrm -start=$start -end=$cLength $twoBitFile $gcSeq 2> /dev/null`;
-#			my $pid = $pm->start and next;
+#
+my $pid = $pm->start and next;
 			&get_gcPerc($gcSeq,$tempFile,$winOut,$window_size);
-#			$pm->finish;
+#
+$pm->finish;
 		}
 	}
-#	$pm->wait_all_children;
+#
+$pm->wait_all_children;
 }
 close LIST;
 
@@ -285,15 +298,13 @@ sub get_align {
 	open(TEMP, $tempWin);
 	open(OUT,">$winOut");
 	
-my $aCount = 0;
-	
 	while(<TEMP>){
 		chomp;
 		if($_ =~ 'chromosome'){
 			print OUT "$_\talign\n";
 		}else{
 #need to shift scores by 1/2 avg fragment size
-			print OUT "$_";
+			my $pLine = $_;
 			my @line = split(/\t/,$_);
 			if(!eof(ALIGN)){
 				while($line[1] > $currStart){
@@ -301,8 +312,8 @@ my $aCount = 0;
 					$currStart++;
 				}
 
-				if($line[1] < $currStart){
-					print OUT "\tNA\n";
+				if($line[2] < $currStart){
+					print OUT "$pLine\tNA\n";
 				}elsif($line[1] == $currStart){
 					my $alignCount = 0;
 					while($currStart <= $line[2]){
@@ -314,10 +325,10 @@ my $aCount = 0;
 						}
 					}
 					my $aPerc = sprintf "%.4f", $alignCount/$winSize;
-					print OUT "\t$aPerc\n";
+					print OUT "$pLine\t$aPerc\n";
 				}
 			}else{
-				print OUT "\tNA\n";
+				print OUT "$pLine\tNA\n";
 			}
 		}
 		
@@ -346,15 +357,11 @@ sub get_gcPerc {
 				my $seq = <GC>;
 				chomp($seq);
 				$readLen += length($seq);
-				if($readLen < $winSize){
+				if($readLen == $winSize || eof(GC)){
 					$ncount += ($seq =~ tr/N//);
 					$seq =~ s/[^GC]//g;
 					$gcs .= $seq;
-				}elsif($readLen == $winSize){
-					$ncount += ($seq =~ tr/N//);
-					$seq =~ s/[^GC]//g;
-					$gcs .= $seq;
-					if($ncount/$readLen < $nThresh){
+					if($ncount/$winSize < $nThresh){
 						my $gcP = sprintf "%.4f", length($gcs)/$winSize;
 						print OUT "$outLine\t$gcP\n";
 					}
@@ -362,13 +369,17 @@ sub get_gcPerc {
 					$readLen = 0;
 					$ncount = 0;
 					$gcFlag = 1;
+				}elsif($readLen < $winSize){
+					$ncount += ($seq =~ tr/N//);
+					$seq =~ s/[^GC]//g;
+					$gcs .= $seq;
 				}elsif($readLen > $winSize){
 					my $tempSeq = substr($seq,($readLen-$winSize));
 					my $seq = substr($seq,0,($readLen-$winSize-1));
 					$ncount += ($seq =~ tr/N//);
 					$seq =~ s/[^GC]//g;
 					$gcs .= $seq;
-					if($ncount/$readLen < $nThresh){
+					if($ncount/$winSize < $nThresh){
 						my $gcP = sprintf "%.4f", length($gcs)/$winSize;
 						print OUT "$outLine\t$gcP\n";
 					}

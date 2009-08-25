@@ -1,7 +1,9 @@
-run.zinba=function(seq,align=NULL,input=NULL,cnvarray=NULL,twoBit=NULL,winSize=500,offset=0,aThresh=1,percN=0.1,gb=NULL,basecountfile=NULL,covs=NULL,threshold=0.01,method='pscl'){
+#run.zinba=function(seq,align=NULL,input=NULL,cnvarray=NULL,twoBit=NULL,winSize=500,offset=0,aThresh=1,percN=0.1,gb=NULL,basecountfile=NULL,covs=NULL,threshold=0.01,method='pscl'){
+run.zinba=function(list,winSize=500,basecountfile=NULL,covs=NULL,threshold=0.01,method='pscl'){
 	time.start <- Sys.time()
-	buildwindowdata(seq=seq,align=align,input=input,cnvarray=cnvarray,twoBit=twoBit,winSize=winSize,offset=offset,aThresh=aThresh,percN=percN,gb=gb)
-	data_list <- read.table(paste(seq,".list",sep=""))
+#	buildwindowdata(seq=seq,align=align,input=input,cnvarray=cnvarray,twoBit=twoBit,winSize=winSize,offset=offset,aThresh=aThresh,percN=percN,gb=gb)
+#	data_list <- read.table(paste(seq,".list",sep=""))
+	data_list <- read.table(list)
 
         for (i in 1:nrow(data_list)){
 	    print(paste("Getting windows for ",as.character(data_list[i,1])))
