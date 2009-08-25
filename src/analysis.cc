@@ -76,11 +76,11 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 						coord_slist.erase(i);
 					}
 				}
-////				delete [] basepair;
 				cout << "Finished\n";
 				
 				if(coord_slist.empty()){
 //					cout << "\nFinished all coordinates, COMPLETE\n";
+					delete [] basepair;
 					return 0;
 				}
 			}
