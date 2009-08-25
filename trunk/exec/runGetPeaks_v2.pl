@@ -28,7 +28,7 @@ my $pm = new Parallel::ForkManager($concurr_process);
 open(LIST,$inputFileList);
 while(<LIST>){
     chomp;
-    my $inputFile = $_;
+    my ($inputFile,$chrm) = split(/\t/,$_);
     
     my $coordout = $inputFile . "_PEAK_COORDS.temp";
     my $winout = $inputFile;
@@ -42,15 +42,17 @@ while(<LIST>){
 #	    peakbound(profile=bpOut,output=peakout)
 
     my $pid = $pm->start and next;
-    &run_zinba($inputFile,$coordout,$winout,$peakout,$bpOut,$covariates,$threshold,$winsize,$method);
+    &run_zinba($inputFile,$coordout,$winout,$peakout,$bpOut,$covariates,$threshold,$winsize,$method,$bpCountFile,$chrm);
     $pm->finish;
 }close LIST;
 $pm->wait_all_children;
 
 sub run_zinba{
-    my ($inputFile,$coordout,$winout,$peakout,$bpOut,$covs,$threshold,$winSize) = @_;
+    my ($inputFile,$coordout,$winout,$peakout,$bpOut,$covs,$threshold,$winSize,$method,$bpCountFile,$chrm) = @_;
     my $off = $winSize/2;
-    system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",covnames="$covs",threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method=$method);\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
+    system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",covnames="$covs",threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method=$method);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpOut",chromosome="$chrm");\npeakbound(profile="$bpOut",output="$peakout");\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
+    unlink($bpOut);
+    unlink($coordout);
     return;
 }
 
