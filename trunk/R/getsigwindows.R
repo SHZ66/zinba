@@ -1,5 +1,5 @@
 #for covnames, enter desired covariates as c('gcPerc', 'align','cnv') for example
-getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, method='pscl'){
+getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, method='zicounts'){
 	time.start <- Sys.time()
         library(zicounts)
 	library(qvalue)
@@ -28,6 +28,16 @@ getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, met
 	#RESIDUAL STANDARDIZATION########################
 	#TO DO:  unlink design matrices for count and zero models (Z neq X)
 	a=eval(parse(text=modelcommand))
+	if(as.character(a$se[length(a$se)])=="NaN" || a$coefficients[length(a$coefficients)]>15){
+		#checks for NaN in theta or hugely inflated then, switches to pscl if using zicounts
+		if(method=="zicounts"){
+			cov_text=paste(rep('data$', length(covnames)), covnames, sep='', collapse='+')
+			modelcommand=paste("zeroinfl(data$exp_count ~ ",cov_text,",dist = 'negbin', EM=TRUE)")
+			a=eval(parse(text=modelcommand))
+			#now switch method to pscl for residual estimation
+			method='pscl'
+		}
+	}
 #	print(summary(a))
       	if(method=='zicounts'){
 		link=make.link('logit')
