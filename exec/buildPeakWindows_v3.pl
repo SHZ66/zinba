@@ -14,7 +14,9 @@ my $usage = <<'USAGE';
 		--seq data_seq_hits.txt
 		--align alignability_dir/
 		--input input_seq_hits.txt
+		--rand rand_read_hits.txt
 		--cnvarray cnvArray.tsv
+		--cnv-exp cnv_expRes.txt
 		--twoBit gb.2bit
 		
 		--window-size (default = 500 bp)
@@ -39,6 +41,9 @@ my $input_hits = undef;
 my $twoBitFile = undef;
 my $align_dir = undef;
 my $cnv_array = undef;
+my $cnv_exp = undef;
+my $rand_hits = undef;
+my $input_rand_log2 = "FALSE";
 my $transInput = "FALSE";
 my $nProcesses = 1;
 
@@ -47,6 +52,9 @@ my $result = GetOptions(
 	"align=s" => \$align_dir,
 	"input=s" => \$input_hits,
 	"cnvarray=s" => \$cnv_array,
+	"cnv-exp=s" => \$cnv_exp,
+	"rand=s" => \$rand_hits,
+	"input_rand_log2" => sub{$input_rand_log2 = 'TRUE'},
 	"twoBit=s" => \$twoBitFile,
 	'window-size=i' => \$window_size,
 	"offset-size=i" => \$offset,
@@ -59,8 +67,6 @@ my $result = GetOptions(
 );
 
 die $usage unless($seq_hits && $gb);
-
-#
 my $pm = new Parallel::ForkManager($nProcesses);
 
 my $dataFile_list = $seq_hits . ".list";
@@ -109,12 +115,20 @@ if(defined($cnv_array)){
 		}
 	}
 }
+
+my(%cnvExpCoords);
+if(defined($cnv_exp)){
+	open(CNVEXP,$cnv_exp);
+	while(<CNVEXP>){
+		chomp;
+		
+	}close CNVEXP;
+}
+
 open(SEQ,$seq_hits) or die;
 my (%count,%chrom,%maxPos);
 my $pat = qr/^(\w+)\t(\d+)$/;
-my $n = 0;
 while(<SEQ> =~ m/$pat/){
-	$n++;
 	unless($1 =~ '_'){
 		$chrom{$1}=1;
 		for (my $o = 0; $o <= $#offsets; $o++){
@@ -130,15 +144,22 @@ while(<SEQ> =~ m/$pat/){
 
 if(defined($input_hits)){
 	open(INPUT,$input_hits) or die;
-	$n = 0;
 	while(<INPUT> =~ m/$pat/){
-		$n++;
-		print STDERR "$n " if $n%1000000 == 0;
 		for (my $o = 0; $o <= $#offsets; $o++){
 			my $window_pos = int(($2-$offsets[$o])/$window_size);
 			$count{$1}->[1][$o][$window_pos]++;
 		}
 	}close INPUT;
+}
+
+if(defined($rand_hits)){
+	open(RAND,$rand_hits) or die;
+	while(<RAND> =~ m/$pat/){
+		for (my $o = 0; $o <= $#offsets; $o++){
+			my $window_pos = int(($2-$offsets[$o])/$window_size);
+			$count{$1}->[2][$o][$window_pos]++;
+		}
+	}close RAND;
 }
 
 my $out = $seq_hits;
@@ -148,7 +169,7 @@ $out =~ s/\..*/\_win$window_size\_/g;
 foreach my $chr(sort{$a<=>$b} keys %chrom){
 	my $chrm = "chr" . $chr;
 	for (my $o = 0; $o <= $#offsets; $o++){
-		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".temp" if (defined($align_dir) && defined($twoBitFile));
+		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".temp" if (defined($align_dir) || defined($twoBitFile));
 		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".txt" if (!defined($align_dir) && !defined($twoBitFile));
 		print LIST "$cOut\t$chrm\n" if (!defined($align_dir) && !defined($twoBitFile));
 		my $gcSeq = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".gcseq";
@@ -229,7 +250,9 @@ sub process_chrm{
 
 	print OUT "chromosome\tstart\tend\texp_count";
 	print OUT "\tinput_count" if defined($input_hits);
+	print OUT "\trand_count" if defined($rand_hits);
 	print OUT "\tcrt_input" if $transInput eq "TRUE";
+	print OUT "\tinput_rand_log2" if $input_rand_log2 eq "TRUE";
 	print OUT "\tcube_cnvArray" if defined($cnv_array);
 	print OUT "\n";
 
@@ -243,13 +266,24 @@ sub process_chrm{
 		
 		my $input_raw;
 		if (defined($input_hits)){
-			my $input_raw = ${$count_ref->[1][$o]}[$id]+0;
+			$input_raw = ${$count_ref->[1][$o]}[$id]+0;
 			print OUT "\t$input_raw";
+		}
+		
+		my $rand_raw;
+		if (defined($rand_hits)){
+			$rand_raw = ${$count_ref->[2][$o]}[$id]+0;
+			print OUT "\t$rand_raw";
 		}
 		
 		if ($transInput eq "TRUE"){
 			my $crt = ($input_raw+1)**0.3;
 			print OUT "\t$crt";
+		}
+
+		if ($input_rand_log2 eq "TRUE"){
+			my $log2 = sprintf "%.4f", log(($input_raw+1)/($rand_raw+1))/log(2);
+			print OUT "\t$log2";
 		}
 
 		if (defined($cnv_array)){
