@@ -2,5 +2,5 @@ buildwindowdata=function(seq, align=NULL, input=NULL, cnvarray=NULL,twoBit=NULL,
 	Perl.Path <- file.path(.path.package("zinba"), "exec")
 	Fn.Path <- file.path(Perl.Path, "buildPeakWindows_v3.pl")
         CMD=paste(Fn.Path,"--seq", seq,"--align", align,"--cnvarray", cnvarray,"--twoBit",twoBit,"--window-size",winSize,"--offset-size",offset,"--align-thresh",aThresh,"--perc-n-thresh",percN,"--gb",gb,"--processes",nProcess,sep=" ")
-	system(CMD)    
+	system(CMD)
 }
