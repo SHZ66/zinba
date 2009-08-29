@@ -28,7 +28,23 @@ my $pm = new Parallel::ForkManager($concurr_process);
 open(LIST,$inputFileList);
 while(<LIST>){
     chomp;
-    my ($inputFile,$chrm) = split(/\t/,$_);
+#    my ($inputFile,$chrm) = split(/\t/,$_);
+
+#######
+        my $inputFile = $_;
+	my $getOffset = $inputFile;
+	$getOffset =~ s/^.*\///g;
+	my @fileName = split(/\_/, $getOffset);
+	my ($offset,$chrm);
+	foreach my $elem (@fileName){
+		$offset = $elem if $elem =~ 'offset';
+		$chrm = $elem if $elem =~ /chr[0-9|X|Y]/;
+	}
+	$offset =~ s/offset//g;
+	$offset =~ s/bp//g;
+	$chrm =~ s/\.txt//g;
+#######
+
     print STDERR "Processing $inputFile\n";
     
     my $coordout = $inputFile . "_PEAK_COORDS.temp";
