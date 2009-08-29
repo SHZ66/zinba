@@ -173,6 +173,7 @@ sub get_gcPerc {
                                 $ncount = ($tempSeq =~ tr/N//);
                                 $gcFlag = 1;
                         }
+		}
 	}close TEMP;close OUT;
 	close GC;
 	unlink($tempWin);unlink($gcFile);

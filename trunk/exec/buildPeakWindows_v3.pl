@@ -1,8 +1,7 @@
 #!/usr/bin/perl
 use strict;
 use Getopt::Long;
-BEGIN { push @INC,'.'; }
-#use Parallel::ForkManager;
+BEGIN { push @INC,'.'; } 
 require Parallel::ForkManager;
 
 my $usage = <<'USAGE';
@@ -116,12 +115,15 @@ if(defined($cnv_array)){
 	}
 }
 
-my(%cnvExpCoords);
+my(%cnvExpCoords,$cnvWinSize);
 if(defined($cnv_exp)){
 	open(CNVEXP,$cnv_exp);
 	while(<CNVEXP>){
 		chomp;
-		
+		unless($_ =~ 'chromosome'){
+			my @line = split(/\t/, $_);
+			$cnvExpCoords{$line[0]}{$line[1]} = $line[4];
+		}
 	}close CNVEXP;
 }
 
@@ -165,7 +167,6 @@ if(defined($rand_hits)){
 my $out = $seq_hits;
 $out =~ s/\..*/\_win$window_size\_/g;
 
-#$pm->set_max_procs(25);
 foreach my $chr(sort{$a<=>$b} keys %chrom){
 	my $chrm = "chr" . $chr;
 	for (my $o = 0; $o <= $#offsets; $o++){
@@ -175,15 +176,12 @@ foreach my $chr(sort{$a<=>$b} keys %chrom){
 		my $gcSeq = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".gcseq";
 		$files{$chr}{$offsets[$o]}{gcSeq} = $gcSeq;
 		$files{$chr}{$offsets[$o]}{temp} = $cOut;
-#
-my $pid = $pm->start and next;
+		my $pid = $pm->start and next;
 		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},\%{$cnvProbe{$chrm}},$sortCnvStarts->{$chrm},$o) if defined($cnv_array);
 		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},"none","none",$o) if !defined($cnv_array);
-#
-$pm->finish;
+		$pm->finish;
 	}
 }
-#
 $pm->wait_all_children;
 
 
@@ -198,15 +196,12 @@ if(defined($align_dir)){
 			print LIST "$winOut\t$chrm\n" if !defined($twoBitFile);
 			$winOut .= 2 if defined($twoBitFile);
 			$files{$chr}{$offsets[$o]}{temp} = $winOut;
-#
-my $pid = $pm->start and next;
+			my $pid = $pm->start and next;
 			&get_align($aScore,$tFile,$winOut,$window_size,$offsets[$o]);
-#
-$pm->finish;
+			$pm->finish;
 		}
 	}
-#
-$pm->wait_all_children;
+	$pm->wait_all_children;
 }
 
 if(defined($twoBitFile)){
@@ -229,14 +224,11 @@ if(defined($twoBitFile)){
 			my ($cInfo,$cLength) = split(/\t/, $line);
 			close CLEN; unlink($cFileLen);
 			`twoBitToFa -noMask -seq=$chrm -start=$start -end=$cLength $twoBitFile $gcSeq 2> /dev/null`;
-#
-my $pid = $pm->start and next;
+			my $pid = $pm->start and next;
 			&get_gcPerc($gcSeq,$tempFile,$winOut,$window_size);
-#
-$pm->finish;
+			$pm->finish;
 		}
 	}
-#
 $pm->wait_all_children;
 }
 close LIST;
@@ -253,6 +245,7 @@ sub process_chrm{
 	print OUT "\trand_count" if defined($rand_hits);
 	print OUT "\tcrt_input" if $transInput eq "TRUE";
 	print OUT "\tinput_rand_log2" if $input_rand_log2 eq "TRUE";
+	print OUT "\texp_cnv" if defined($cnv_exp);
 	print OUT "\tcube_cnvArray" if defined($cnv_array);
 	print OUT "\n";
 
@@ -286,6 +279,37 @@ sub process_chrm{
 			print OUT "\t$log2";
 		}
 
+		if (defined($cnv_exp)){
+			my @sortStarts = sort { $a <=> $b } keys %{$cnvExpCoords{$chrm}};
+			my $aIndex = 0;
+			my $zwin = int((($start+$end)/2));
+			my ($sum,$count) = (0,0);
+			my $mFlag = 0;
+
+			while ($zwin > ($sortStarts[$aIndex]+25000) && $mFlag == 0){
+				$mFlag = 1 if $aIndex == $#sortStarts;
+				$aIndex++ if $aIndex < $#sortStarts;
+			}
+
+			my $startIndex = $aIndex;
+			while($mFlag == 0){
+				if($zwin < $sortStarts[$startIndex] || $startIndex > $#sortStarts){
+					$mFlag = 1;
+				}elsif($zwin >= $sortStarts[$startIndex] && $zwin <= ($sortStarts[$startIndex]+25000)){
+					$sum += $cnvExpCoords{$chrm}{$sortStarts[$startIndex]};
+					$count++;
+				}
+				$startIndex++;
+			}
+			
+			if($count > 0){
+				my $avg = sprintf "%.4f", $sum/$count;
+				print OUT "\t$avg";
+			}else{
+				print OUT "\t0";
+			}
+		}
+
 		if (defined($cnv_array)){
 			my $cnvData;
 			my $winPos = int((((${$cnv_href}{${$cnvStarts}[$cnvIndex]}{stop}+${$cnv_href}{${$cnvStarts}[$cnvIndex]}{start})/2)-$offset)/$window_size);
@@ -313,14 +337,11 @@ sub process_chrm{
 				}elsif($cnvIndex == $#{$cnvStarts}){
 					$cnvData = ${$cnv_href}{${$cnvStarts}[$cnvIndex]}{avg};
 				}
-			}
-	
+			}	
 			my $rawData = sprintf "%.5f", (2**$cnvData)**3;
 			print OUT "\t$rawData";
 		}
-
 		print OUT "\n";
-
 	}close OUT;
 }
 
