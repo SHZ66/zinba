@@ -32,12 +32,9 @@ getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, met
 	if(method=="zicounts"){
             print(paste("For ",file," se is ",as.character(a$se[length(a$se)]),sep=""))
             print(paste("For ",file," coeff is ",a$coefficients[length(a$coefficients)],sep=""))
-        }
-        
-	if(as.character(a$se[length(a$se)])=="NaN" || a$coefficients[length(a$coefficients)]>15){
-		#checks for NaN in theta or hugely inflated then, switches to pscl if using zicounts
-		if(method=="zicounts"){
-                        print("Switching to zeroinfl")
+        	if(as.character(a$se[length(a$se)])=="NaN" || a$coefficients[length(a$coefficients)]>15){
+			#checks for NaN in theta or hugely inflated then, switches to pscl if using zicounts
+			print("Switching to zeroinfl")
 			cov_text=paste(rep('data$', length(covnames)), covnames, sep='', collapse='+')
 			modelcommand=paste("zeroinfl(data$exp_count ~ ",cov_text,",dist = 'negbin', EM=TRUE)")
 			a=eval(parse(text=modelcommand))
