@@ -5,10 +5,9 @@ getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, met
 	library(qvalue)
         library(pscl)
         options(scipen=999)
-
 	###### USER INPUT ############################
 	data=read.table(file,header=TRUE,sep="\t")
-	covariates=eval(parse(text=paste("cbind(", paste(rep('data$', length(covnameshttp://www.google.com/search?hl=en&safe=off&client=firefox-a&rls=com.ubuntu%3Aen-US%3Aunofficial&hs=AZw&q=mixture+model+regression+genomics&aq=f&oq=&aqi=)), covnames, sep='', collapse=',') , ")") ))
+	covariates=eval(parse(text=paste("cbind(", paste(rep('data$', length(covnames)), covnames, sep='', collapse=',') , ")") ))
 	colnames(covariates)=covnames
 	if(method=='pscl'){
 		cov_text=paste(rep('data$', length(covnames)), covnames, sep='', collapse='+')
