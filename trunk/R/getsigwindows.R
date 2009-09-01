@@ -8,7 +8,7 @@ getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, met
 
 	###### USER INPUT ############################
 	data=read.table(file,header=TRUE,sep="\t")
-	covariates=eval(parse(text=paste("cbind(", paste(rep('data$', length(covnames)), covnames, sep='', collapse=',') , ")") ))
+	covariates=eval(parse(text=paste("cbind(", paste(rep('data$', length(covnameshttp://www.google.com/search?hl=en&safe=off&client=firefox-a&rls=com.ubuntu%3Aen-US%3Aunofficial&hs=AZw&q=mixture+model+regression+genomics&aq=f&oq=&aqi=)), covnames, sep='', collapse=',') , ")") ))
 	colnames(covariates)=covnames
 	if(method=='pscl'){
 		cov_text=paste(rep('data$', length(covnames)), covnames, sep='', collapse='+')
@@ -30,11 +30,11 @@ getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, met
 	a=eval(parse(text=modelcommand))
         
 	if(method=="zicounts"){
-            print(paste("For ",file," se is ",as.character(a$se[length(a$se)]),sep=""))
-            print(paste("For ",file," coeff is ",a$coefficients[length(a$coefficients)],sep=""))
         	if(as.character(a$se[length(a$se)])=="NaN" || a$coefficients[length(a$coefficients)]>15){
 			#checks for NaN in theta or hugely inflated then, switches to pscl if using zicounts
 			print("Switching to zeroinfl")
+                  	print(paste("For ",file," se is ",as.character(a$se[length(a$se)]),sep=""))
+                        print(paste("For ",file," coeff is ",a$coefficients[length(a$coefficients)],sep=""))			
 			cov_text=paste(rep('data$', length(covnames)), covnames, sep='', collapse='+')
 			modelcommand=paste("zeroinfl(data$exp_count ~ ",cov_text,",dist = 'negbin', EM=TRUE)")
 			a=eval(parse(text=modelcommand))
