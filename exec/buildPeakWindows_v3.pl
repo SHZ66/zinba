@@ -79,7 +79,7 @@ for (my $o = 1; $o < $numOffsets; $o++){
 }
 
 my (%cnvProbe,$sortCnvStarts);
-if($cnv_array ne 'NULL'){
+if($cnv_array){
 	open(CNV,$cnv_array) or die;
 	while(<CNV>){
 	    chomp;
@@ -115,14 +115,25 @@ if($cnv_array ne 'NULL'){
 	}
 }
 
-my(%cnvExpCoords,$cnvWinSize);
-if($cnv_exp ne 'NULL'){
+my(%cnvExpCoords,@cnv_offsets);
+my ($cnv_winSize,$cnv_offset) = (25000,5000);
+if($cnv_exp){
+	@cnv_offsets = 0;
+	my $cnvNumOffsets = int($cnv_winSize/$cnv_offset);
+	for (my $o = 1; $o < $cnvNumOffsets; $o++){
+		push(@cnv_offsets,($cnv_offset*$o));
+	}
+
 	open(CNVEXP,$cnv_exp);
 	while(<CNVEXP>){
 		chomp;
-		unless($_ =~ 'chromosome'){
+		if($_ =~ /\#PARAMS/){
+			my @head = split(/\t/, $_);
+			($cnv_winSize,$cnv_offset) = ($head[1],$head[2]);
+		}else{
 			my @line = split(/\t/, $_);
-			$cnvExpCoords{$line[0]}{$line[1]} = $line[3];
+			my $window_pos = int(((int($line[2]+$line[1])/2)-$line[3])/$cnv_winSize);
+			$cnvExpCoords{$line[0]}->[$line[3]][$window_pos] = $line[4];
 		}
 	}close CNVEXP;
 }
@@ -135,16 +146,12 @@ while(<SEQ> =~ m/$pat/){
 		$chrom{$1}=1;
 		for (my $o = 0; $o <= $#offsets; $o++){
 			my $window_pos = int(($2-$offsets[$o])/$window_size);
-			if(!defined($maxPos{$1}{$offsets[$o]}) && !exists($maxPos{$1}{$offsets[$o]})){
-				$maxPos{$1}{$offsets[$o]} = 0;
-			}
-			$maxPos{$1}{$offsets[$o]} = $window_pos if $maxPos{$1}{$offsets[$o]} < $window_pos;
 			$count{$1}->[0][$o][$window_pos]++;
 		}
 	}
 }close SEQ;
 
-if($input_hits ne 'NULL'){
+if($input_hits){
 	open(INPUT,$input_hits) or die;
 	while(<INPUT> =~ m/$pat/){
 		for (my $o = 0; $o <= $#offsets; $o++){
@@ -154,7 +161,7 @@ if($input_hits ne 'NULL'){
 	}close INPUT;
 }
 
-if($rand_hits ne 'NULL'){
+if($rand_hits){
 	open(RAND,$rand_hits) or die;
 	while(<RAND> =~ m/$pat/){
 		for (my $o = 0; $o <= $#offsets; $o++){
@@ -170,33 +177,32 @@ $out =~ s/\..*/\_win$window_size\_/g;
 foreach my $chr(sort{$a<=>$b} keys %chrom){
 	my $chrm = "chr" . $chr;
 	for (my $o = 0; $o <= $#offsets; $o++){
-		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".temp" if ($align_dir ne 'NULL' || $twoBitFile ne 'NULL');
-		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".txt" if ($align_dir eq 'NULL' && $twoBitFile eq 'NULL');
-		print LIST "$cOut\t$chrm\n" if ($align_dir eq 'NULL' && $twoBitFile eq 'NULL');
+		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".temp" if ($align_dir || $twoBitFile);
+		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".txt" if (!defined($align_dir) && !defined($twoBitFile));
+		print LIST "$cOut\t$chrm\n" if (!defined($align_dir) && !defined($twoBitFile));
 		my $gcSeq = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".gcseq";
 		$files{$chr}{$offsets[$o]}{gcSeq} = $gcSeq;
 		$files{$chr}{$offsets[$o]}{temp} = $cOut;
 		my $pid = $pm->start and next;
-		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},\%{$cnvExpCoords{$chrm}},\%{$cnvProbe{$chrm}},$sortCnvStarts->{$chrm},$o) if $cnv_array ne 'NULL' && $cnv_exp ne 'NULL';
-		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},\%{$cnvExpCoords{$chrm}},"none","none",$o) if $cnv_array eq 'NULL' && $cnv_exp ne 'NULL';
-		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},"none",\%{$cnvProbe{$chrm}},$sortCnvStarts->{$chrm},$o) if $cnv_array ne 'NULL' && $cnv_exp eq 'NULL';
-		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},"none","none","none",$o) if $cnv_array eq 'NULL' && $cnv_exp eq 'NULL';
+		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},$cnvExpCoords{$chrm},\%{$cnvProbe{$chrm}},$sortCnvStarts->{$chrm},$o) if ($cnv_array && $cnv_exp);
+		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},$cnvExpCoords{$chrm},"none","none",$o) if (!defined($cnv_array) && $cnv_exp);
+		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},"none",\%{$cnvProbe{$chrm}},$sortCnvStarts->{$chrm},$o) if ($cnv_array && !defined($cnv_exp));
+		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},"none","none","none",$o) if (!defined($cnv_array) && !defined($cnv_exp));
 		$pm->finish;
 	}
 }
 $pm->wait_all_children;
 
-
-if($align_dir ne 'NULL'){
+if($align_dir){
 	foreach my $chr(sort{$a<=>$b} keys %chrom){
 		my $chrm = "chr" . $chr;
 		my $aScore = $align_dir . "ALIGN_" . $gb . "_" . $chrm . ".wig";
 		for (my $o = 0; $o <= $#offsets; $o++){
 			my $tFile = $files{$chr}{$offsets[$o]}{temp};
 			my $winOut = $tFile;
-			$winOut =~ s/\..*/\.txt/g if $twoBitFile eq 'NULL';
-			print LIST "$winOut\t$chrm\n" if $twoBitFile eq 'NULL';
-			$winOut .= 2 if $twoBitFile ne 'NULL';
+			$winOut =~ s/\..*/\.txt/g if !defined($twoBitFile);
+			print LIST "$winOut\t$chrm\n" if !defined($twoBitFile);
+			$winOut .= 2 if $twoBitFile;
 			$files{$chr}{$offsets[$o]}{temp} = $winOut;
 			my $pid = $pm->start and next;
 			&get_align($aScore,$tFile,$winOut,$window_size,$offsets[$o]);
@@ -206,7 +212,7 @@ if($align_dir ne 'NULL'){
 	$pm->wait_all_children;
 }
 
-if($twoBitFile ne 'NULL'){
+if($twoBitFile){
 	foreach my $chr(sort{$a<=>$b} keys %chrom){
 		my $chrm = "chr" . $chr;
 		for (my $o = 0; $o <= $#offsets; $o++){
@@ -232,8 +238,7 @@ if($twoBitFile ne 'NULL'){
 		}
 	}
 $pm->wait_all_children;
-}
-close LIST;
+}close LIST;
 
 sub process_chrm{
 	my ($chrm, $offset,$cOut,$count_ref,$cnvExp_href,$cnv_href,$cnvStarts,$o) = @_;
@@ -243,12 +248,12 @@ sub process_chrm{
 	open(OUT, ">$cOut");
 
 	print OUT "chromosome\tstart\tend\texp_count";
-	print OUT "\tinput_count" if $input_hits ne 'NULL';
-	print OUT "\trand_count" if $rand_hits ne 'NULL';
+	print OUT "\tinput_count" if $input_hits;
+	print OUT "\trand_count" if $rand_hits;
 	print OUT "\tcrt_input" if $transInput eq "TRUE";
 	print OUT "\tinput_rand_log2" if $input_rand_log2 eq "TRUE";
-	print OUT "\texp_cnv_raw\texp_cnv_log" if $cnv_exp ne 'NULL';
-	print OUT "\tcube_cnvArray" if $cnv_array ne 'NULL';
+	print OUT "\texp_cnv_raw\texp_cnv_log" if $cnv_exp;
+	print OUT "\tcube_cnvArray" if $cnv_array;
 	print OUT "\n";
 
 	for my $id (0..$#hits){
@@ -260,18 +265,18 @@ sub process_chrm{
 		print OUT "$chrm\t$start\t$end\t$hits_raw";
 		
 		my $input_raw;
-		if ($input_hits ne 'NULL'){
+		if ($input_hits){
 			$input_raw = ${$count_ref->[1][$o]}[$id]+0;
 			print OUT "\t$input_raw";
 		}
 		
 		my $rand_raw;
-		if ($rand_hits ne 'NULL'){
+		if ($rand_hits){
 			$rand_raw = ${$count_ref->[2][$o]}[$id]+0;
 			print OUT "\t$rand_raw";
 		}
 		
-		if ($transInput ne "TRUE"){
+		if ($transInput eq "TRUE"){
 			my $crt = ($input_raw+1)**0.3;
 			print OUT "\t$crt";
 		}
@@ -281,38 +286,29 @@ sub process_chrm{
 			print OUT "\t$log2";
 		}
 
-		if ($cnv_exp ne 'NULL'){
-			my @sortStarts = sort { $a <=> $b } keys %{$cnvExp_href};
-			my $aIndex = 0;
+		if ($cnv_exp){
+			
 			my $zwin = int((($start+$end)/2));
 			my ($sum,$count) = (0,0);
-			my $mFlag = 0;
-
-			while ($zwin > ($sortStarts[$aIndex]+25000) && $mFlag == 0){
-				$mFlag = 1 if $aIndex == $#sortStarts;
-				$aIndex++ if $aIndex < $#sortStarts;
-			}
-
-			my $startIndex = $aIndex;
-			while($mFlag == 0){
-				if($zwin < $sortStarts[$startIndex] || $startIndex > $#sortStarts){
-					$mFlag = 1;
-				}elsif($zwin >= $sortStarts[$startIndex] && $zwin <= ($sortStarts[$startIndex]+25000)){
-					$sum += ${$cnvExp_href}{$sortStarts[$startIndex]};
+			
+			for (my $co = 0; $co <= $#cnv_offsets; $co++){
+				my $window_pos = int(($zwin-$cnv_offsets[$co])/$cnv_winSize);
+				if(defined(${$cnvExp_href->[$cnv_offsets[$co]]}[$window_pos])){
+					$sum += ${$cnvExp_href->[$cnv_offsets[$co]]}[$window_pos];
 					$count++;
 				}
-				$startIndex++;
 			}
 			
 			if($count > 0){
-				my $avg = sprintf "%.4f", $sum/$count;
-				print OUT "\t$avg\t" . log($avg+1);
+				my $avg = sprintf "%.2f", $sum/$count;
+				my $log = sprintf "%.3f", log($avg+1); 
+				print OUT "\t$avg\t$log";
 			}else{
 				print OUT "\t0\t0";
 			}
 		}
 
-		if ($cnv_array ne 'NULL'){
+		if ($cnv_array){
 			my $cnvData;
 			my $winPos = int((((${$cnv_href}{${$cnvStarts}[$cnvIndex]}{stop}+${$cnv_href}{${$cnvStarts}[$cnvIndex]}{start})/2)-$offset)/$window_size);
 			if($id < $winPos){

@@ -14,7 +14,7 @@ my $usage = <<'USAGE';
 		--seq data_seq_hits.txt
 		--twoBit gb.2bit
 		
-		--window-size (default = 500 bp)
+		--window-size (default = 25000 bp)
 		--offset-size (default = 0)
 		--perc-n-thresh (default 0.1)
 		
@@ -23,7 +23,7 @@ my $usage = <<'USAGE';
 USAGE
 
 my ($seq_hits,$cOut,%files);
-my $window_size = 500;
+my $window_size = 25000;
 my $offset = 0;
 my $nThresh = 0.1;
 my $twoBitFile = undef;
@@ -65,8 +65,11 @@ my $cnv_wins = $seq_hits;
 my $out = $seq_hits;
 $out =~ s/\..*//g;
 $cnv_wins =~ s/\..*/\.cnvs/g;
-my @delFiles;
-my $catCMD = "cat ";
+my @delFiles = ("tempHead.txt");
+open(TEMP,">tempHead.txt");
+print TEMP "#PARAMS\t$window_size\t$offset\n";
+close TEMP;
+my $catCMD = "cat tempHead.txt ";
 
 foreach my $chr(sort{$a<=>$b} keys %chrom){
 	my $chrm = "chr" . $chr;
@@ -132,7 +135,7 @@ sub process_chrm{
 		my $end = $start+$window_size-1;
 
 		my $hits_raw = $hits[$id]+0;
-		print OUT "$chrm\t$start\t$end\t$hits_raw\n";
+		print OUT "$chrm\t$start\t$end\t$offset\t$hits_raw\n";
 	}close OUT;
 }
 
