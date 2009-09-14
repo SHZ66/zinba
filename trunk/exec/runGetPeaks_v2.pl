@@ -11,7 +11,8 @@ my $threshold = 0.01;
 my $covariates = "FALSE";
 my $concurr_process = 1;
 my $winsize = 0;
-my $method = "zicounts";
+my $method = "pscl";
+my $printLog = "FALSE";
 
 my $result = GetOptions(
 	"win-file=s" => \$inputFileList,
@@ -20,7 +21,8 @@ my $result = GetOptions(
 	"win-size=i" => \$winsize,
 	"method=s" => \$method,
 	"covs=s" => \$covariates,
-	"processes=i" => \$concurr_process
+	"processes=i" => \$concurr_process,
+	"print-log" => sub{$printLog='TRUE'}
 );
 
 my $pm = new Parallel::ForkManager($concurr_process);
@@ -28,23 +30,7 @@ my $pm = new Parallel::ForkManager($concurr_process);
 open(LIST,$inputFileList);
 while(<LIST>){
     chomp;
-#    my ($inputFile,$chrm) = split(/\t/,$_);
-
-#######
-        my $inputFile = $_;
-	my $getOffset = $inputFile;
-	$getOffset =~ s/^.*\///g;
-	my @fileName = split(/\_/, $getOffset);
-	my ($offset,$chrm);
-	foreach my $elem (@fileName){
-		$offset = $elem if $elem =~ 'offset';
-		$chrm = $elem if $elem =~ /chr[0-9|X|Y]/;
-	}
-	$offset =~ s/offset//g;
-	$offset =~ s/bp//g;
-	$chrm =~ s/\.txt//g;
-#######
-
+    my ($inputFile,$chrm) = split(/\t/,$_);
     print STDERR "Processing $inputFile\n";
     
     my $coordout = $inputFile . "_PEAK_COORDS.temp";
@@ -60,21 +46,17 @@ while(<LIST>){
     
     my $bpOut = $coordout . "_BPcount";
 
-#	    getsigwindows(file=as.character(data_list[i,1]),covnames=covs,threshold=threshold,winout=winout,coordout=coordout,offset=(winSize/2),method=method)
-#	    basecountimport(inputfile=basecountfile,coordfile=coordout,outputfile=bpOut,chromosome=data_list[i,2])
-#	    peakbound(profile=bpOut,output=peakout)
-
     my $pid = $pm->start and next;
-    &run_zinba($inputFile,$coordout,$winout,$peakout,$bpOut,$covariates,$threshold,$winsize,$method,$bpCountFile,$chrm,$stdLog,$errLog);
+    &run_zinba($inputFile,$coordout,$winout,$peakout,$bpOut,$covariates,$threshold,$winsize,$method,$bpCountFile,$chrm,$stdLog,$errLog,$printLog);
     $pm->finish;
 }close LIST;
 $pm->wait_all_children;
 
 sub run_zinba{
-    my ($inputFile,$coordout,$winout,$peakout,$bpOut,$covs,$threshold,$winSize,$method,$bpCountFile,$chrm,$stdLog,$errLog) = @_;
+    my ($inputFile,$coordout,$winout,$peakout,$bpOut,$covs,$threshold,$winSize,$method,$bpCountFile,$chrm,$stdLog,$errLog,$printLog) = @_;
     my $off = $winSize/2;
-    system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",covnames="$covs",threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method="$method");\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpOut",chromosome="$chrm");\npeakbound(profile="$bpOut",output="$peakout");\n' | R --vanilla --slave > $stdLog 2> $errLog`);
-#    system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",covnames="$covs",threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method="$method");\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpOut",chromosome="$chrm");\npeakbound(profile="$bpOut",output="$peakout");\n' | R --vanilla --slave`);
+    system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",covnames="$covs",threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method="$method");\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpOut",chromosome="$chrm");\npeakbound(profile="$bpOut",output="$peakout");\n' | R --vanilla --slave > $stdLog 2> $errLog`) if $printLog eq "TRUE";
+    system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",covnames="$covs",threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method="$method");\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpOut",chromosome="$chrm");\npeakbound(profile="$bpOut",output="$peakout");\n' | R --vanilla --slave`) if $printLog eq "FALSE";
     unlink($bpOut);
     unlink($coordout);
     return;
