@@ -12,7 +12,7 @@ my $covariates = "FALSE";
 my $concurr_process = 1;
 my $winsize = 0;
 my $method = "pscl";
-my $printLog = "FALSE";
+my $printLog = 0;
 
 my $result = GetOptions(
 	"win-file=s" => \$inputFileList,
@@ -22,7 +22,7 @@ my $result = GetOptions(
 	"method=s" => \$method,
 	"covs=s" => \$covariates,
 	"processes=i" => \$concurr_process,
-	"print-log" => sub{$printLog='TRUE'}
+	"print-log=i" => \$printLog
 );
 
 my $pm = new Parallel::ForkManager($concurr_process);
@@ -55,8 +55,11 @@ $pm->wait_all_children;
 sub run_zinba{
     my ($inputFile,$coordout,$winout,$peakout,$bpOut,$covs,$threshold,$winSize,$method,$bpCountFile,$chrm,$stdLog,$errLog,$printLog) = @_;
     my $off = $winSize/2;
-    system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",covnames="$covs",threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method="$method");\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpOut",chromosome="$chrm");\npeakbound(profile="$bpOut",output="$peakout");\n' | R --vanilla --slave > $stdLog 2> $errLog`) if $printLog eq "TRUE";
-    system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",covnames="$covs",threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method="$method");\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpOut",chromosome="$chrm");\npeakbound(profile="$bpOut",output="$peakout");\n' | R --vanilla --slave`) if $printLog eq "FALSE";
+    if ($printLog == 0){
+        system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",covnames="$covs",threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method="$method");\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpOut",chromosome="$chrm");\npeakbound(profile="$bpOut",output="$peakout");\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
+    }else{
+        system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",covnames="$covs",threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method="$method");\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpOut",chromosome="$chrm");\npeakbound(profile="$bpOut",output="$peakout");\n' | R --vanilla --slave > $stdLog 2> $errLog`);
+    }
     unlink($bpOut);
     unlink($coordout);
     return;
