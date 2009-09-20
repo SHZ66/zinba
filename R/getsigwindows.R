@@ -50,7 +50,7 @@ getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, met
       	if(method=='zicounts'){
 		link=make.link('logit')
 		linkinv=link$linkinv
-		X=cbind(rep(1, length(leverage)), covariates)
+		X=covariates
 		coefc=a$coefficients[1:(length(covnames)+1)]
 		coefz=a$coefficients[(length(covnames)+2):(2*length(covnames)+2)]
         	mu <- exp(as.matrix(X) %*% coefc)[,1]
