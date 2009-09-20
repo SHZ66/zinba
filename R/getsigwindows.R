@@ -7,12 +7,15 @@ getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, met
         options(scipen=999)
 	###### USER INPUT ############################
 	data=read.table(file,header=TRUE,sep="\t")
-	covariates=eval(parse(text=paste("cbind(", paste(rep('data$', length(covnames)), covnames, sep='', collapse=',') , ")") ))
-	colnames(covariates)=covnames
+	
 	if(method=='pscl'){
 		cov_text=paste(rep('data$', length(covnames)), covnames, sep='', collapse='+')
+		covariates=eval(parse(text=paste("model.matrix(~", paste(covnames, sep='', collapse='+'), ",data)")))
+		colnames(covariates)=covnames
 		modelcommand=paste("zeroinfl(data$exp_count ~ ",cov_text,",dist = 'negbin', EM=TRUE)")
 	}else if(method=='zicounts'){
+		covariates=eval(parse(text=paste("model.matrix(~", paste(covnames, sep='', collapse='+'), ",data)")))
+		colnames(covariates)=covnames
 		cov_text=paste( covnames, collapse='+')
 		modelcommand=paste("zicounts(resp = exp_count ~ ., x =  ~ ",cov_text,", z =  ~", cov_text,",data=data)")
 	}
