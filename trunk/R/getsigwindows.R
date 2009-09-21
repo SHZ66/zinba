@@ -4,9 +4,8 @@ getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, met
 	library(qvalue)
         library(pscl)
         options(scipen=999)
-	###### USER INPUT ############################
-	data=chr22
-	
+	###### USER INPUT############################
+	data=read.table(file, header=TRUE)
 	if(method=='pscl'){
 		cov_text=paste(covnames, sep='', collapse='+')
 		covariates=eval(parse(text=paste("model.matrix(~", paste(covnames, sep='', collapse='+'), ",data)")))
