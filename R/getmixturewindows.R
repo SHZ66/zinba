@@ -101,5 +101,5 @@ print(time.start-time.end)
 print(start)
 peaks=cbind(data[which(probi2>peakconfidence),],probi2[probi2>peakconfidence])
 
-write.table(outputpath, peaks)
+write.table(peaks,outputpath)
 }
