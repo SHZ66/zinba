@@ -1,22 +1,19 @@
 #for covnames, enter desired covariates as c('gcPerc', 'align','cnv') for example
 getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, method='zicounts'){
-	time.start <- Sys.time()
-        library(zicounts)
+	library(zicounts)
 	library(qvalue)
         library(pscl)
         options(scipen=999)
 	###### USER INPUT ############################
-	data=read.table(file,header=TRUE,sep="\t")
+	data=chr22
 	
 	if(method=='pscl'){
-		cov_text=paste(rep('data$', length(covnames)), covnames, sep='', collapse='+')
+		cov_text=paste(covnames, sep='', collapse='+')
 		covariates=eval(parse(text=paste("model.matrix(~", paste(covnames, sep='', collapse='+'), ",data)")))
-		colnames(covariates)=covnames
-		modelcommand=paste("zeroinfl(data$exp_count ~ ",cov_text,",dist = 'negbin', EM=TRUE)")
+		modelcommand=paste("zeroinfl(exp_count ~ ",cov_text,",data=data,dist = 'negbin', EM=TRUE)")
 	}else if(method=='zicounts'){
 		covariates=eval(parse(text=paste("model.matrix(~", paste(covnames, sep='', collapse='+'), ",data)")))
-		colnames(covariates)=covnames
-		cov_text=paste( covnames, collapse='+')
+		cov_text=paste(covnames, sep='', collapse='+')
 		modelcommand=paste("zicounts(resp = exp_count ~ ., x =  ~ ",cov_text,", z =  ~", cov_text,",data=data)")
 	}
 	fdrlevel=threshold
@@ -51,8 +48,8 @@ getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, met
 		link=make.link('logit')
 		linkinv=link$linkinv
 		X=covariates
-		coefc=a$coefficients[1:(length(covnames)+1)]
-		coefz=a$coefficients[(length(covnames)+2):(2*length(covnames)+2)]
+		coefc=a$coefficients[1:dim(X)[2]]
+		coefz=a$coefficients[(dim(X)[2]+1):(2*dim(X)[2])]
         	mu <- exp(as.matrix(X) %*% coefc)[,1]
         	phi <- linkinv(as.matrix(X) %*% coefz)[,1]
         	Yhat <- (1-phi) * mu
