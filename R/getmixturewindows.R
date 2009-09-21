@@ -32,7 +32,7 @@ linkinv <- linkobj$linkinv
 
 
 #starting params for ze0 component
-model_zero <- glm.fit(Z, as.integer(Y0),family = binomial(link = linkstr))
+model_zero <- suppressWarnings(glm.fit(Z, as.integer(Y0),family = binomial(link = linkstr)))
 prop0=sum( model_zero$fitted)/n
 
 #starting params for count componenets
@@ -43,8 +43,8 @@ n1  = round(length(Y) * (1 - prop2))
 priorCOUNTweight=rep(1, length(Y))      
 priorCOUNTweight[odY[1:n1]]=0
 
-model_count1 <- glm.fit(X, Y, family = poisson(), weights = (1-priorCOUNTweight))
-model_count2 <- glm.fit(X, Y, family = poisson(), weights = (priorCOUNTweight))
+model_count1 <- suppressWarnings(glm.fit(X, Y, family = poisson(), weights = (1-priorCOUNTweight)))
+model_count2 <- suppressWarnings(glm.fit(X, Y, family = poisson(), weights = (priorCOUNTweight)))
 
 #start parameter vector
 start <- list(count1 = model_count1$coefficients, count2 = model_count2$coefficients,zero = model_zero$coefficients)
