@@ -38,7 +38,7 @@ my $result = GetOptions(
 	"window_file=s" => \$window_file,
 	'window-size=i' => \$window_size,
 	"offset-size=i" => \$offset,
-	"gb" => \$gb,
+	"gb=s" => \$gb,
 	"processes=i" => \$nProcesses,
 );
 
@@ -88,13 +88,18 @@ while(<SEQ> =~ m/$pat/){
 }close SEQ;
 
 my $cnv_wins = $seq_hits;
-$cnv_wins =~ s/\..*/\.cnvs/g;
+$cnv_wins =~ s/\..*//g;
+$cnv_wins .= $window_file if ($window_file);
+$cnv_wins =~ s/\..*/\.cnvs/g if ($window_file);
+$cnv_wins .= "_win" . $window_size . "_offset" . $offset . ".cnvs" if (!defined($window_file));
+
 my $out = $seq_hits;
 $out =~ s/\..*//g;
 
 my @delFiles = ("tempHead.txt");
 open(TEMP,">tempHead.txt");
 print TEMP "#PARAMS\t$window_size\t$offset\n" if (!defined($window_file));
+print TEMP "#PARAMS\tcustom\n" if (defined($window_file));
 close TEMP;
 my $catCMD = "cat tempHead.txt ";
 
@@ -125,7 +130,7 @@ $pm->wait_all_children;
 
 if($alignDir){
 	foreach my $chrm (keys %files){
-		my $align_file = "ALIGN_" . $gb . "_" . $chrm . "_ADJUST.wig";
+		my $align_file = $alignDir . "ALIGN_" . $gb . "_" . $chrm . "_ADJUST.wig";
 		foreach my $off (keys %{$files{$chrm}}){
 			my $temp_input = $files{$chrm}{$off}{temp};
 			$files{$chrm}{$off}{temp} .= ".align";
@@ -167,34 +172,30 @@ sub get_align {
 	
 	while(<TEMP>){
 		chomp;
-		if($_ =~ 'chromosome'){
-			print OUT "$_\talign_count\tnumReads_alignBp\n";
-		}else{
-			my $pLine = $_;
-			my @line = split(/\t/,$_);
-			if(!eof(ALIGN)){
-				while($line[1] > $currStart){
-					my $temp = <ALIGN>;
-					$currStart++;
-				}
-
-				if($line[2] < $currStart){
-					print OUT "$pLine\tNA\tNA\n";
-				}elsif($line[1] == $currStart){
-					my $alignCount = 0;
-					while($currStart <= $line[2]){
-						my $aScore = <ALIGN>;
-						chomp($aScore);
-						$currStart++;
-						$alignCount += $aScore;
-					}
-					my $reads_alignbp = 0;
-					$reads_alignbp = sprintf "%.5f", $line[4]/$alignCount if $alignCount > 0;
-					print OUT "$pLine\t$alignCount\t$reads_alignbp\n";
-				}
-			}else{
-				print OUT "$pLine\tNA\tNA\n";
+		my $pLine = $_;
+		my @line = split(/\t/,$_);
+		if(!eof(ALIGN)){
+			while($line[1] > $currStart){
+				my $temp = <ALIGN>;
+				$currStart++;
 			}
+
+			if($line[2] < $currStart){
+				print OUT "$pLine\tNA\tNA\tstop before curr start\n";
+			}elsif($line[1] == $currStart){
+				my $alignCount = 0;
+				while($currStart <= $line[2]){
+					my $aScore = <ALIGN>;
+					chomp($aScore);
+					$currStart++;
+					$alignCount += $aScore;
+				}
+				my $reads_alignbp = 0;
+				$reads_alignbp = sprintf "%.5f", $line[4]/$alignCount if $alignCount > 0;
+				print OUT "$pLine\t$alignCount\t$reads_alignbp\n";
+			}
+		}else{
+			print OUT "$pLine\tNA\tNA\tend of align file\n";
 		}
 	}close TEMP;close OUT;
 	close ALIGN;
