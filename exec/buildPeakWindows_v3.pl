@@ -196,7 +196,7 @@ $pm->wait_all_children;
 if($align_dir){
 	foreach my $chr(sort{$a<=>$b} keys %chrom){
 		my $chrm = "chr" . $chr;
-		my $aScore = $align_dir . "ALIGN_" . $gb . "_" . $chrm . ".wig";
+		my $aScore = $align_dir . "ALIGN_" . $gb . "_" . $chrm . "_ADJUST.wig";
 		for (my $o = 0; $o <= $#offsets; $o++){
 			my $tFile = $files{$chr}{$offsets[$o]}{temp};
 			my $winOut = $tFile;
@@ -346,10 +346,11 @@ sub process_chrm{
 sub get_align {
 	my ($alignFile,$tempWin,$winOut,$winSize,$offset) = @_;
 	open(ALIGN,$alignFile);
-	my $alignHeader = <ALIGN>;
-	my ($ahFix,$ahChrm,$ahstart,$ahstep) = split(/ /, $alignHeader);
-	$ahstart =~ s/start\=//g;
-	my $currStart = $ahstart;
+#	my $alignHeader = <ALIGN>;
+#	my ($ahFix,$ahChrm,$ahstart,$ahstep) = split(/ /, $alignHeader);
+#	$ahstart =~ s/start\=//g;
+#	my $currStart = $ahstart;
+	my $currStart = 1;
 
 	open(TEMP, $tempWin);
 	open(OUT,">$winOut");
@@ -359,7 +360,6 @@ sub get_align {
 		if($_ =~ 'chromosome'){
 			print OUT "$_\talign\n";
 		}else{
-#need to shift scores by 1/2 avg fragment size
 			my $pLine = $_;
 			my @line = split(/\t/,$_);
 			if(!eof(ALIGN)){
@@ -376,12 +376,14 @@ sub get_align {
 						my $aScore = <ALIGN>;
 						chomp($aScore);
 						$currStart++;
-						if($aScore <= $align_thresh && $aScore > 0 && !eof(ALIGN)){
-							$alignCount++;
-						}
+#						if($aScore <= $align_thresh && $aScore > 0 && !eof(ALIGN)){
+#							$alignCount++;
+#						}
+						$alignCount += $aScore;
 					}
-					my $aPerc = sprintf "%.4f", $alignCount/$winSize;
-					print OUT "$pLine\t$aPerc\n";
+#					my $aPerc = sprintf "%.4f", $alignCount/$winSize;
+#					print OUT "$pLine\t$aPerc\n";
+					print OUT "$pLine\t$alignCount\n";
 				}
 			}else{
 				print OUT "$pLine\tNA\n";

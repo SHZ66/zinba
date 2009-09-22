@@ -1,5 +1,6 @@
 #for covnames, enter desired covariates as c('gcPerc', 'align','cnv') for example
 getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, method='zicounts'){
+	time.start <- Sys.time()
 	library(zicounts)
 	library(qvalue)
         library(pscl)
