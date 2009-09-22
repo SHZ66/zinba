@@ -12,11 +12,12 @@ my $usage = <<'USAGE';
 	usage: buildCNVWindows.pl [options]
 
 		--seq data_seq_hits.txt
-		--twoBit gb.2bit
-		
+		--align-dir align_dir/
+		--window_file cnv_coord.txt
 		--window-size (default = 25000 bp)
 		--offset-size (default = 0)
-		--perc-n-thresh (default 0.1)
+		--gb genome build (default hg18)
+		--processes num parallel processes (default 1)
 		
 #########################################
 
@@ -24,17 +25,20 @@ USAGE
 
 my ($seq_hits,$cOut,%files);
 my $window_size = 25000;
+my $window_file = undef;
+my $alignDir = undef;
 my $offset = 0;
-my $nThresh = 0.1;
 my $twoBitFile = undef;
 my $nProcesses = 1;
+my $gb = "hg18";
 
 my $result = GetOptions(
 	"seq=s" => \$seq_hits,
-	"twoBit=s" => \$twoBitFile,
+	"align-dir=s" => \$alignDir,
+	"window_file=s" => \$window_file,
 	'window-size=i' => \$window_size,
 	"offset-size=i" => \$offset,
-	"perc-n-thresh=f" => \$nThresh,
+	"gb" => \$gb,
 	"processes=i" => \$nProcesses,
 );
 
@@ -43,82 +47,97 @@ my $pm = new Parallel::ForkManager($nProcesses);
 
 my @offsets = 0;
 my $numOffsets = 1;
-$numOffsets = int($window_size/$offset) if $offset > 0;
-for (my $o = 1; $o < $numOffsets; $o++){
-	push(@offsets,($offset*$o));
+my (%cnvCoords,$cnvStarts);
+if(!defined($window_file)){
+	$numOffsets = int($window_size/$offset) if $offset > 0;
+	for (my $o = 1; $o < $numOffsets; $o++){
+		push(@offsets,($offset*$o));
+	}
+}else{
+	open(CNV,$window_file);
+	while(<CNV>){
+		chomp;
+		my ($chrm,$start,$stop) = split(/\t/, $_);
+		$cnvCoords{$chrm}{$start} = {
+			stop => $stop,
+			count => 0
+		};
+		push(@{$cnvStarts->{$chrm}}, $start);
+	}close CNV;
+	
+	foreach my $chrm (keys %{$cnvStarts}){
+		@{$cnvStarts->{$chrm}} = sort {$a <=> $b} @{$cnvStarts->{$chrm}};
+	}
 }
 
 open(SEQ,$seq_hits) or die;
-my (%count,%chrom);
+my (%count,%chrom,$reads);
 my $pat = qr/^(\w+)\t(\d+)$/;
 while(<SEQ> =~ m/$pat/){
 	unless($1 =~ '_'){
 		$chrom{$1}=1;
-		for (my $o = 0; $o <= $#offsets; $o++){
-			my $window_pos = int(($2-$offsets[$o])/$window_size);
-			$count{$1}->[0][$o][$window_pos]++;
+		if(!defined($window_file)){
+			for (my $o = 0; $o <= $#offsets; $o++){
+				my $window_pos = int(($2-$offsets[$o])/$window_size);
+				$count{$1}->[0][$o][$window_pos]++;
+			}
+		}else{
+			push(@{$reads->{$1}},$2);
 		}
 	}
 }close SEQ;
 
 my $cnv_wins = $seq_hits;
+$cnv_wins =~ s/\..*/\.cnvs/g;
 my $out = $seq_hits;
 $out =~ s/\..*//g;
-$cnv_wins =~ s/\..*/\.cnvs/g;
+
 my @delFiles = ("tempHead.txt");
 open(TEMP,">tempHead.txt");
-print TEMP "#PARAMS\t$window_size\t$offset\n";
+print TEMP "#PARAMS\t$window_size\t$offset\n" if (!defined($window_file));
 close TEMP;
 my $catCMD = "cat tempHead.txt ";
 
 foreach my $chr(sort{$a<=>$b} keys %chrom){
 	my $chrm = "chr" . $chr;
-	for (my $o = 0; $o <= $#offsets; $o++){
-		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".temp";
-		$files{$chr}{$offsets[$o]}{gcSeq} = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".gcseq";
-		$files{$chr}{$offsets[$o]}{temp} = $cOut;
-		if (!defined($twoBitFile)){
-			$catCMD .= $cOut . " ";
-			push(@delFiles,$cOut);
+	if(defined($window_file)){
+		$cOut = $out . "_" . $chrm . ".temp";
+		$files{$chrm}{0}{temp} = $cOut;
+		my $pid = $pm->start and next;
+		&bst_readsTOcnv(\@{$cnvStarts->{$chr}},\%{$cnvCoords{$chr}},\@{$reads->{$chr}},$chrm,$cOut);
+		$pm->finish;
+	}else{
+		for (my $o = 0; $o <= $#offsets; $o++){
+			$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".temp";
+			$files{$chrm}{$offsets[$o]}{temp} = $cOut;
+			my $pid = $pm->start and next;
+			&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},$o);
+			$pm->finish;
 		}
+	}
 
-                my $pid = $pm->start and next;
-		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},$o);
-                $pm->finish;
+	if (!defined($alignDir)){
+		$catCMD .= $cOut . " ";
+		push(@delFiles,$cOut);
 	}
 }
 $pm->wait_all_children;
 
-if(defined($twoBitFile)){
-	foreach my $chr(sort{$a<=>$b} keys %chrom){
-		my $chrm = "chr" . $chr;
-		for (my $o = 0; $o <= $#offsets; $o++){
-			my $gcSeq = $files{$chr}{$offsets[$o]}{gcSeq};
-			my $start = $offsets[$o];
-			$start-- if $start > 0;
-			my $tempFile = $files{$chr}{$offsets[$o]}{temp};
-			my $winOut = $tempFile . 2;
-			$catCMD .= $winOut . " ";
-			push(@delFiles,$winOut);
-
-			my $cFileLen = $chrm . "_" . $offset . ".txt";
-			`twoBitInfo /gbdb/hg18/hg18.2bit:$chrm $cFileLen`;
-			open(CLEN,$cFileLen);
-			my $line = <CLEN>;
-			chomp($line);
-			my ($cInfo,$cLength) = split(/\t/, $line);
-			close CLEN; unlink($cFileLen);
-			`twoBitToFa -noMask -seq=$chrm -start=$start -end=$cLength $twoBitFile $gcSeq 2> /dev/null`;
-
-                        my $pid = $pm->start and next;
-			&get_gcPerc($gcSeq,$tempFile,$winOut,$window_size);
-                        $pm->finish;
+if($alignDir){
+	foreach my $chrm (keys %files){
+		my $align_file = "ALIGN_" . $gb . "_" . $chrm . "_ADJUST.wig";
+		foreach my $off (keys %{$files{$chrm}}){
+			my $temp_input = $files{$chrm}{$off}{temp};
+			$files{$chrm}{$off}{temp} .= ".align";
+			$catCMD .= $files{$chrm}{$off}{temp} . " ";
+			push(@delFiles,$files{$chrm}{$off}{temp});
+			my $pid = $pm->start and next;
+			&get_align($align_file,$temp_input,$files{$chrm}{$off}{temp});
+			$pm->finish;
 		}
 	}
-	$pm->wait_all_children;
-	
-
 }
+$pm->wait_all_children;
 
 $catCMD .= " > $cnv_wins";
 system($catCMD);
@@ -139,45 +158,70 @@ sub process_chrm{
 	}close OUT;
 }
 
-sub get_gcPerc {
-	my ($gcFile,$tempWin,$winOut,$winSize) = @_;
-	open(GC,$gcFile);
-	my $gcHeader = <GC>;
+sub get_align {
+	my ($alignFile,$tempWin,$winOut) = @_;
+	open(ALIGN,$alignFile);
+	my $currStart = 1;
 	open(TEMP, $tempWin);
 	open(OUT,">$winOut");
-	my $readLen = 0;
-	my $ncount = 0;
+	
 	while(<TEMP>){
 		chomp;
-                my $outLine = $_;
-                my $gcFlag = 0;
-                while($gcFlag == 0){
-                        my $seq = <GC>;
-                        chomp($seq);
-                        $readLen += length($seq);
-                        if($readLen == $winSize || eof(GC)){
-                                $ncount += ($seq =~ tr/N//);
-                                if($ncount/$winSize < $nThresh){
-                                        print OUT "$outLine\n";
-                                }
-                                $readLen = 0;
-                                $ncount = 0;
-                                $gcFlag = 1;
-                        }elsif($readLen < $winSize){
-                                $ncount += ($seq =~ tr/N//);
-                        }elsif($readLen > $winSize){
-                                my $tempSeq = substr($seq,($readLen-$winSize));
-                                my $seq = substr($seq,0,($readLen-$winSize-1));
-                                $ncount += ($seq =~ tr/N//);
-                                if($ncount/$winSize < $nThresh){
-                                        print OUT "$outLine\n";
-                                }
-                                $readLen = length($tempSeq);
-                                $ncount = ($tempSeq =~ tr/N//);
-                                $gcFlag = 1;
-                        }
+		if($_ =~ 'chromosome'){
+			print OUT "$_\talign_count\tnumReads_alignBp\n";
+		}else{
+			my $pLine = $_;
+			my @line = split(/\t/,$_);
+			if(!eof(ALIGN)){
+				while($line[1] > $currStart){
+					my $temp = <ALIGN>;
+					$currStart++;
+				}
+
+				if($line[2] < $currStart){
+					print OUT "$pLine\tNA\tNA\n";
+				}elsif($line[1] == $currStart){
+					my $alignCount = 0;
+					while($currStart <= $line[2]){
+						my $aScore = <ALIGN>;
+						chomp($aScore);
+						$currStart++;
+						$alignCount += $aScore;
+					}
+					my $reads_alignbp = 0;
+					$reads_alignbp = sprintf "%.5f", $line[4]/$alignCount if $alignCount > 0;
+					print OUT "$pLine\t$alignCount\t$reads_alignbp\n";
+				}
+			}else{
+				print OUT "$pLine\tNA\tNA\n";
+			}
 		}
 	}close TEMP;close OUT;
-	close GC;
-	unlink($tempWin);unlink($gcFile);
+	close ALIGN;
+	unlink($tempWin);
+}
+
+sub bst_readsTOcnv {
+	my ($cnvStarts_aref,$cnvCoords_href,$readCoord_aref,$chrm,$tempOut) = @_;
+	foreach my $read_coord (@{$readCoord_aref}){
+		my $findOverlap = 0;
+		my ($maxInt,$minInt) = ($#{$cnvStarts_aref},0);
+		while( ($minInt <= $maxInt) && $findOverlap == 0){
+			my $node = int(($maxInt + $minInt)/2);
+			if($read_coord < ${$cnvStarts_aref}[$node]){
+				$maxInt = $node - 1;
+			}elsif($read_coord > $cnvCoords_href->{${$cnvStarts_aref}[$node]}{stop}){
+				$minInt = $node + 1;
+			}elsif( $read_coord >= ${$cnvStarts_aref}[$node] && $read_coord <= $cnvCoords_href->{${$cnvStarts_aref}[$node]}{stop}){
+				$cnvCoords_href->{${$cnvStarts_aref}[$node]}{count}++;
+				$findOverlap = 1;
+			}
+		}
+	}
+	
+	open(OUT,">$tempOut");
+	foreach my $start (@{$cnvStarts_aref}){
+		my $stop = $cnvCoords_href->{$start}{stop};
+		print OUT "$chrm\t$start\t$stop\t0\t" . $cnvCoords_href->{$start}{count} . "\n";
+	}close OUT;
 }

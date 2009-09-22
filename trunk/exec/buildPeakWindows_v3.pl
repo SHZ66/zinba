@@ -127,6 +127,7 @@ if($cnv_exp){
 	open(CNVEXP,$cnv_exp);
 	while(<CNVEXP>){
 		chomp;
+#need to edit to deal with cnv not in equally spaced windows
 		if($_ =~ /\#PARAMS/){
 			my @head = split(/\t/, $_);
 			($cnv_winSize,$cnv_offset) = ($head[1],$head[2]);
