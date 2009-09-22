@@ -1,9 +1,10 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 use strict;
 use Getopt::Long;
-BEGIN { push @INC,'.'; }
+use FindBin qw($Bin);
+BEGIN { unshift @INC,$Bin; }
 #use Parallel::ForkManager;
-require Parallel::ForkManager;
+use ForkManager_pg;
 
 my $usage = <<'USAGE';
 
@@ -43,7 +44,8 @@ my $result = GetOptions(
 );
 
 die $usage unless($seq_hits);
-my $pm = new Parallel::ForkManager($nProcesses);
+#my $pm = new Parallel::ForkManager($nProcesses);
+my $pm = new ForkManager_pg($nProcesses);
 
 my @offsets = 0;
 my $numOffsets = 1;
@@ -89,7 +91,7 @@ while(<SEQ> =~ m/$pat/){
 
 my $cnv_wins = $seq_hits;
 $cnv_wins =~ s/\..*//g;
-$cnv_wins .= $window_file if ($window_file);
+$cnv_wins .= "_" . $window_file if ($window_file);
 $cnv_wins =~ s/\..*/\.cnvs/g if ($window_file);
 $cnv_wins .= "_win" . $window_size . "_offset" . $offset . ".cnvs" if (!defined($window_file));
 
