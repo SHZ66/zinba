@@ -80,7 +80,7 @@ while(abs((ll_old - ll_new)/ll_old) > 10^-5) {
 	 #updated values for parameters of component means
          
 	model_zero <- glm.fit(Z, probi0, family = binomial(link = linkstr), start = start$zero)
-	model_count1 <- glm.nb(Y ~ 0 + X, weights = (probi1),start = start$count1, init.theta = start$theta1)
+	model_count1 <- glm.nb(Y ~ 0 + X, weights = (probi1),start = start$count1, init.theta = start$theta2)
 	model_count2 <- glm.nb(Y ~ 0 + X, weights = (probi2),start = start$count1, init.theta = start$theta1)
 	start <- list(count1 = model_count1$coefficients, count2 = model_count2$coefficients,theta1 = model_count1$theta, theta2 = model_count2$theta, zero = model_zero$coefficients)
 
