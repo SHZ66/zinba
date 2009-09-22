@@ -347,10 +347,6 @@ sub process_chrm{
 sub get_align {
 	my ($alignFile,$tempWin,$winOut,$winSize,$offset) = @_;
 	open(ALIGN,$alignFile);
-#	my $alignHeader = <ALIGN>;
-#	my ($ahFix,$ahChrm,$ahstart,$ahstep) = split(/ /, $alignHeader);
-#	$ahstart =~ s/start\=//g;
-#	my $currStart = $ahstart;
 	my $currStart = 1;
 
 	open(TEMP, $tempWin);
@@ -359,7 +355,7 @@ sub get_align {
 	while(<TEMP>){
 		chomp;
 		if($_ =~ 'chromosome'){
-			print OUT "$_\talign\n";
+			print OUT "$_\talign_count\talign_perc\n";
 		}else{
 			my $pLine = $_;
 			my @line = split(/\t/,$_);
@@ -377,14 +373,10 @@ sub get_align {
 						my $aScore = <ALIGN>;
 						chomp($aScore);
 						$currStart++;
-#						if($aScore <= $align_thresh && $aScore > 0 && !eof(ALIGN)){
-#							$alignCount++;
-#						}
 						$alignCount += $aScore;
 					}
-#					my $aPerc = sprintf "%.4f", $alignCount/$winSize;
-#					print OUT "$pLine\t$aPerc\n";
-					print OUT "$pLine\t$alignCount\n";
+					my $aPerc = sprintf "%.4f", $alignCount/($winSize*2);
+					print OUT "$pLine\t$alignCount\t$aPerc\n";
 				}
 			}else{
 				print OUT "$pLine\tNA\n";
