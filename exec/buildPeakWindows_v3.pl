@@ -1,8 +1,12 @@
 #!/usr/bin/perl
 use strict;
 use Getopt::Long;
-BEGIN { push @INC,'.'; } 
-require Parallel::ForkManager;
+use FindBin qw($Bin);
+BEGIN { unshift @INC,$Bin; }
+#use Parallel::ForkManager;
+use ForkManager_pg;
+#BEGIN { push @INC,'.'; } 
+#require Parallel::ForkManager;
 
 my $usage = <<'USAGE';
 
@@ -15,16 +19,18 @@ my $usage = <<'USAGE';
 		--input input_seq_hits.txt
 		--rand rand_read_hits.txt
 		--cnvarray cnvArray.tsv
-		--cnv-exp cnv_expRes.txt
+		--cnv-expwin cnv_expSlideWin.txt
+		--cnv-expcustom cnv_expCustom.txt
 		--twoBit gb.2bit
 		
 		--window-size (default = 500 bp)
 		--offset-size (default = 0)
-		--align-thresh (default = 1)
-		--perc-n-thresh (default 0.1)
 		
 		--trans-input trasnform input counts, cube root (default FALSE)
+		--input_rand_log2 calc log2 ratio of input counts over rand (default FALSE)
 		--gb genome build (example hg18)
+		--perc-n-thresh percent of bases in window that can be N (default 0.1)
+		--processes number of concurrent jobs (default 1)
 
 		--help
 #########################################
@@ -34,13 +40,13 @@ USAGE
 my ($seq_hits,$cOut,%files,$gb);
 my $window_size = 500;
 my $offset = 0;
-my $align_thresh = 1;
 my $nThresh = 0.1;
 my $input_hits = undef;
 my $twoBitFile = undef;
 my $align_dir = undef;
 my $cnv_array = undef;
-my $cnv_exp = undef;
+my $cnv_exp_win = undef;
+my $cnv_exp_custom = undef;
 my $rand_hits = undef;
 my $input_rand_log2 = "FALSE";
 my $transInput = "FALSE";
@@ -51,22 +57,23 @@ my $result = GetOptions(
 	"align=s" => \$align_dir,
 	"input=s" => \$input_hits,
 	"cnvarray=s" => \$cnv_array,
-	"cnv-exp=s" => \$cnv_exp,
+	"cnv-expwin=s" => \$cnv_exp_win,
+	"cnv-expcustom=s" => \$cnv_exp_custom,
 	"rand=s" => \$rand_hits,
 	"input_rand_log2" => sub{$input_rand_log2 = 'TRUE'},
 	"twoBit=s" => \$twoBitFile,
 	'window-size=i' => \$window_size,
 	"offset-size=i" => \$offset,
-	"align-thresh=i" => \$align_thresh,
-	"perc-n-thresh=f" => \$nThresh,
 	"processes=i" => \$nProcesses,
+	"perc-n-thresh=f" => \$nThresh,
 	"gb=s"	=> \$gb,
 	"trans-input"  => sub{$transInput='TRUE'},
 	"help|?" => sub{print $usage; exit}
 );
 
 die $usage unless($seq_hits && $gb);
-my $pm = new Parallel::ForkManager($nProcesses);
+#my $pm = new Parallel::ForkManager($nProcesses);
+my $pm = new ForkManager_pg($nProcesses);
 
 my $dataFile_list = $seq_hits . ".list";
 open(LIST,">$dataFile_list");
@@ -76,67 +83,6 @@ my $numOffsets = 1;
 $numOffsets = int($window_size/$offset) if $offset > 0;
 for (my $o = 1; $o < $numOffsets; $o++){
 	push(@offsets,($offset*$o));
-}
-
-my (%cnvProbe,$sortCnvStarts);
-if($cnv_array){
-	open(CNV,$cnv_array) or die;
-	while(<CNV>){
-	    chomp;
-	    unless($_ =~ '#'){
-		my ($probe,$chrm,$start,$stop,$ratio) = split(/\t/, $_);
-		$cnvProbe{$chrm}{$probe} = {
-		    start   =>  $start,
-		    stop    =>  $stop,
-		};
-		$cnvProbe{$chrm}{$probe}{sum} += $ratio;
-		$cnvProbe{$chrm}{$probe}{count}++;
-	    }
-	}close CNV;
-	foreach my $chrm (keys %cnvProbe){
-		@{$sortCnvStarts->{$chrm}} = sort {  $cnvProbe{$chrm}{$a}{start} <=> $cnvProbe{$chrm}{$b}{start} } keys %{$cnvProbe{$chrm}};
-		for (my $pID = 0;$pID <= $#{$sortCnvStarts->{$chrm}}; $pID++){
-			if($pID > 0){
-				if(($cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID-1]}{stop}+$window_size) >= $cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID]}{start}){
-					$cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID-1]}{sum} += $cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID]}{sum};
-					$cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID-1]}{count} += $cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID]}{count};
-					$cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID-1]}{stop} = $cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID]}{stop};
-					delete($cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID]});
-					splice(@{$sortCnvStarts->{$chrm}},$pID,1);
-				}
-			}
-		}
-	
-		foreach my $pID (@{$sortCnvStarts->{$chrm}}){
-			$cnvProbe{$chrm}{$pID}{avg} = $cnvProbe{$chrm}{$pID}{sum}/$cnvProbe{$chrm}{$pID}{count};
-			delete($cnvProbe{$chrm}{$pID}{sum});
-			delete($cnvProbe{$chrm}{$pID}{count});
-		}
-	}
-}
-
-my(%cnvExpCoords,@cnv_offsets);
-my ($cnv_winSize,$cnv_offset) = (25000,5000);
-if($cnv_exp){
-	@cnv_offsets = 0;
-	my $cnvNumOffsets = int($cnv_winSize/$cnv_offset);
-	for (my $o = 1; $o < $cnvNumOffsets; $o++){
-		push(@cnv_offsets,($cnv_offset*$o));
-	}
-
-	open(CNVEXP,$cnv_exp);
-	while(<CNVEXP>){
-		chomp;
-#need to edit to deal with cnv not in equally spaced windows
-		if($_ =~ /\#PARAMS/){
-			my @head = split(/\t/, $_);
-			($cnv_winSize,$cnv_offset) = ($head[1],$head[2]);
-		}else{
-			my @line = split(/\t/, $_);
-			my $window_pos = int(((int($line[2]+$line[1])/2)-$line[3])/$cnv_winSize);
-			$cnvExpCoords{$line[0]}->[$line[3]][$window_pos] = $line[4];
-		}
-	}close CNVEXP;
 }
 
 open(SEQ,$seq_hits) or die;
@@ -172,6 +118,99 @@ if($rand_hits){
 	}close RAND;
 }
 
+my (%cnvProbe,$sortCnvStarts);
+if($cnv_array){
+	open(CNV,$cnv_array) or die;
+	while(<CNV>){
+	    chomp;
+	    unless($_ =~ '#'){
+		my ($probe,$chrm,$start,$stop,$ratio) = split(/\t/, $_);
+		$chrm =~ s/chr//g;
+		$cnvProbe{$chrm}{$probe} = {
+		    start   =>  $start,
+		    stop    =>  $stop,
+		};
+		$cnvProbe{$chrm}{$probe}{sum} += $ratio;
+		$cnvProbe{$chrm}{$probe}{count}++;
+	    }
+	}close CNV;
+	foreach my $chrm (keys %cnvProbe){
+		@{$sortCnvStarts->{$chrm}} = sort {  $cnvProbe{$chrm}{$a}{start} <=> $cnvProbe{$chrm}{$b}{start} } keys %{$cnvProbe{$chrm}};
+		for (my $pID = 0;$pID <= $#{$sortCnvStarts->{$chrm}}; $pID++){
+			if($pID > 0){
+				if(($cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID-1]}{stop}+$window_size) >= $cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID]}{start}){
+					$cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID-1]}{sum} += $cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID]}{sum};
+					$cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID-1]}{count} += $cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID]}{count};
+					$cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID-1]}{stop} = $cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID]}{stop};
+					delete($cnvProbe{$chrm}{${$sortCnvStarts->{$chrm}}[$pID]});
+					splice(@{$sortCnvStarts->{$chrm}},$pID,1);
+				}
+			}
+		}
+	
+		foreach my $pID (@{$sortCnvStarts->{$chrm}}){
+			$cnvProbe{$chrm}{$pID}{avg} = $cnvProbe{$chrm}{$pID}{sum}/$cnvProbe{$chrm}{$pID}{count};
+			delete($cnvProbe{$chrm}{$pID}{sum});
+			delete($cnvProbe{$chrm}{$pID}{count});
+		}
+	}
+}else{
+	foreach my $chrm (%chrom){
+		$cnvProbe{$chrm} = 0;
+		@{$sortCnvStarts->{$chrm}} = 0;
+	}
+}
+
+my(%cnvExpCoords,$cnv_winSize,$cnv_offset);
+my @cnv_offsets = 0;
+if($cnv_exp_win){
+	open(CNVEXP,$cnv_exp_win);
+	while(<CNVEXP>){
+		chomp;
+		if($_ =~ /\#PARAMS/){
+			my @head = split(/\t/, $_);
+			($cnv_winSize,$cnv_offset) = ($head[1],$head[2]);
+			my $cnvNumOffsets = int($cnv_winSize/$cnv_offset);
+			for (my $o = 1; $o < $cnvNumOffsets; $o++){
+				push(@cnv_offsets,($cnv_offset*$o));
+			}
+		}else{
+			my @line = split(/\t/, $_);
+			my $window_pos = int(((int($line[2]+$line[1])/2)-$line[3])/$cnv_winSize);
+			$cnvExpCoords{$line[0]}->[$line[3]][$window_pos] = $line[4];
+		}
+	}close CNVEXP;
+}else{
+	foreach my $chrm (%chrom){
+		$cnvExpCoords{$chrm} = 0;
+	}
+}
+
+my (%cnvCusExpCoords,$cnvExpStarts);
+if($cnv_exp_custom){
+	open(CNVEXP,$cnv_exp_custom);
+	while(<CNVEXP>){
+		chomp;
+		unless($_ =~ /\#PARAMS/){
+			my @line = split(/\t/, $_);
+			my $chrm = "chr" . $line[0];
+			$cnvCusExpCoords{$chrm}{$line[1]} = {
+				stop => $line[2],
+				score => $line[6]
+			};
+			push(@{$cnvExpStarts->{$chrm}}, $line[1]);
+		}
+	}close CNVEXP;
+	foreach my $chrm (keys %{$cnvExpStarts}){
+		@{$cnvExpStarts->{$chrm}} = sort {$a <=> $b} @{$cnvExpStarts->{$chrm}};
+	}
+}else{
+	foreach my $chrm (%chrom){
+		$cnvCusExpCoords{$chrm} = 0;
+		@{$cnvExpStarts->{$chrm}} = 0;
+	}
+}
+
 my $out = $seq_hits;
 $out =~ s/\..*/\_win$window_size\_/g;
 
@@ -185,10 +224,7 @@ foreach my $chr(sort{$a<=>$b} keys %chrom){
 		$files{$chr}{$offsets[$o]}{gcSeq} = $gcSeq;
 		$files{$chr}{$offsets[$o]}{temp} = $cOut;
 		my $pid = $pm->start and next;
-		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},$cnvExpCoords{$chrm},\%{$cnvProbe{$chrm}},$sortCnvStarts->{$chrm},$o) if ($cnv_array && $cnv_exp);
-		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},$cnvExpCoords{$chrm},"none","none",$o) if (!defined($cnv_array) && $cnv_exp);
-		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},"none",\%{$cnvProbe{$chrm}},$sortCnvStarts->{$chrm},$o) if ($cnv_array && !defined($cnv_exp));
-		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},"none","none","none",$o) if (!defined($cnv_array) && !defined($cnv_exp));
+		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},$cnvExpCoords{$chrm},\%{$cnvCusExpCoords{$chrm}},\@{$cnvExpStarts->{$chrm}},\%{$cnvProbe{$chrm}},\@{$sortCnvStarts->{$chrm}},$o);
 		$pm->finish;
 	}
 }
@@ -238,11 +274,11 @@ if($twoBitFile){
 			$pm->finish;
 		}
 	}
-$pm->wait_all_children;
+	$pm->wait_all_children;
 }close LIST;
 
 sub process_chrm{
-	my ($chrm, $offset,$cOut,$count_ref,$cnvExp_href,$cnv_href,$cnvStarts,$o) = @_;
+	my ($chrm, $offset,$cOut,$count_ref,$cnvCustom,$cnvExp_href,$cnvCusExp_href,$cnvExpStarts_aref,$cnv_href,$cnvStarts,$o) = @_;
 	my $cnvIndex = 0;
 	my @hits = @{$count_ref->[0][$o]};
 	my $numWins = @hits;
@@ -253,7 +289,8 @@ sub process_chrm{
 	print OUT "\trand_count" if $rand_hits;
 	print OUT "\tcrt_input" if $transInput eq "TRUE";
 	print OUT "\tinput_rand_log2" if $input_rand_log2 eq "TRUE";
-	print OUT "\texp_cnv_raw\texp_cnv_log" if $cnv_exp;
+	print OUT "\texp_cnv_raw\texp_cnv_log" if $cnv_exp_win;
+	print OUT "\texp_cnv_est\texp_cnv_avg" if $cnv_exp_custom;
 	print OUT "\tcube_cnvArray" if $cnv_array;
 	print OUT "\n";
 
@@ -287,19 +324,16 @@ sub process_chrm{
 			print OUT "\t$log2";
 		}
 
-		if ($cnv_exp){
-			
+		if ($cnv_exp_win){
 			my $zwin = int((($start+$end)/2));
 			my ($sum,$count) = (0,0);
-			
 			for (my $co = 0; $co <= $#cnv_offsets; $co++){
 				my $window_pos = int(($zwin-$cnv_offsets[$co])/$cnv_winSize);
 				if(defined(${$cnvExp_href->[$cnv_offsets[$co]]}[$window_pos])){
 					$sum += ${$cnvExp_href->[$cnv_offsets[$co]]}[$window_pos];
 					$count++;
 				}
-			}
-			
+			}				
 			if($count > 0){
 				my $avg = sprintf "%.2f", $sum/$count;
 				my $log = sprintf "%.3f", log($avg+1); 
@@ -307,6 +341,25 @@ sub process_chrm{
 			}else{
 				print OUT "\t0\t0";
 			}
+		}
+		
+		if($cnv_exp_custom){
+			my $zwin = int((($start+$end)/2));
+			my $findOverlap = 0;
+			my ($maxInt,$minInt) = ($#{$cnvExpStarts_aref},0);
+			while( ($minInt <= $maxInt) && $findOverlap == 0){
+				my $node = int(($maxInt + $minInt)/2);
+				if($zwin < ${$cnvExpStarts_aref}[$node]){
+					$maxInt = $node - 1;
+				}elsif($zwin > $cnvCusExp_href->{${$cnvExpStarts_aref}[$node]}{stop}){
+					$minInt = $node + 1;
+				}elsif( $zwin >= ${$cnvExpStarts_aref}[$node] && $zwin <= $cnvCusExp_href->{${$cnvExpStarts_aref}[$node]}{stop}){
+					my $est_score = sprintf "%.2f", $cnvCusExp_href->{${$cnvExpStarts_aref}[$node]}{score} * (2*$window_size);
+					print OUT "$est_score\t" . $cnvCusExp_href->{${$cnvExpStarts_aref}[$node]}{score};
+					$findOverlap = 1;
+				}
+			}
+			print OUT "\t0\t0" if($findOverlap == 0);
 		}
 
 		if ($cnv_array){
@@ -379,7 +432,7 @@ sub get_align {
 					print OUT "$pLine\t$alignCount\t$aPerc\n";
 				}
 			}else{
-				print OUT "$pLine\tNA\n";
+				print OUT "$pLine\tNA\tNA\n";
 			}
 		}
 		
