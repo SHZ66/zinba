@@ -1,4 +1,4 @@
-buildwindowdata=function(seq=NULL, align=NULL, input=NULL, cnvarray=NULL,cnvexp=NULL,rand=NULL,twoBit=NULL,winSize=500,offset=0,aThresh=1,inputTrans=NULL,percN=0.1,gb="hg18",nProcess=1){
+buildwindowdata=function(seq=NULL, align=NULL, input=NULL, cnvarray=NULL,cnvexpwin=NULL,cnvexpcustom=NULL,rand=NULL,twoBit=NULL,winSize=500,offset=0,inputTrans=NULL,inputRandLog=NULL,percN=0.1,gb="hg18",nProcess=1){
 	Perl.Path <- file.path(.path.package("zinba"), "exec")
 	Fn.Path <- file.path(Perl.Path, "buildPeakWindows_v3.pl")
         CMD=paste(Fn.Path,"--seq", seq,sep=" ")
@@ -14,8 +14,11 @@ buildwindowdata=function(seq=NULL, align=NULL, input=NULL, cnvarray=NULL,cnvexp=
 		if (!is.null(cnvarray)){
 			CMD=paste(CMD,"--cnvarray",cnvarray,sep=" ")
 		}
-		if (!is.null(cnvexp)){
-			CMD=paste(CMD,"--cnv-exp",cnvexp,sep=" ")
+		if (!is.null(cnvexpwin)){
+			CMD=paste(CMD,"--cnv-expwin",cnvexpwin,sep=" ")
+		}
+		if (!is.null(cnvexpcustom)){
+			CMD=paste(CMD,"--cnv-expcustom",cnvexpcustom,sep=" ")
 		}
 		if (!is.null(rand)){
 			CMD=paste(CMD,"--rand",rand,sep=" ")
@@ -23,9 +26,12 @@ buildwindowdata=function(seq=NULL, align=NULL, input=NULL, cnvarray=NULL,cnvexp=
 		if (!is.null(twoBit)){
 			CMD=paste(CMD,"--twoBit",twoBit,sep=" ")
 		}
-		CMD=paste(CMD,"--window-size",winSize,"--offset-size",offset,"--align-thresh",aThresh,"--perc-n-thresh",percN,"--gb",gb,"--processes",nProcess,sep=" ")
+		CMD=paste(CMD,"--window-size",winSize,"--offset-size",offset,"--perc-n-thresh",percN,"--gb",gb,"--processes",nProcess,sep=" ")
 		if (!is.null(inputTrans)){
 			CMD=paste(CMD,"--trans-input",sep=" ")
+		}
+		if (!is.null(inputRandLog)){
+			CMD=paste(CMD,"--input_rand_log2",sep=" ")
 		}
 		system(CMD)
 	}
