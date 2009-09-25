@@ -1,6 +1,5 @@
 getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakprop=.15, winout,coordout,offset=0, tol=10^-5, method='pscl'){
 	time.start <- Sys.time()	
-	time.start <- Sys.time()
 	library(zicounts)
 	library(qvalue)
         library(pscl)
