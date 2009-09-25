@@ -1,5 +1,5 @@
-#for covnames, enter desired covariates as c('gcPerc', 'align','cnv') for example
-getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, method='zicounts'){
+getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakprop=.15, winout,coordout,offset=0, tol=10^-5, method='pscl'){
+	time.start <- Sys.time()	
 	time.start <- Sys.time()
 	library(zicounts)
 	library(qvalue)
@@ -7,83 +7,125 @@ getsigwindows=function(file,covnames,threshold=.01,winout,coordout,offset=0, met
         options(scipen=999)
 	###### USER INPUT############################
 	data=read.table(file, header=TRUE)
+	mf <- model.frame(formula=formula, data=data)
+	X <- model.matrix(attr(mf, "terms"), data=mf)	
 	if(method=='pscl'){
-		cov_text=paste(covnames, sep='', collapse='+')
-		covariates=eval(parse(text=paste("model.matrix(~", paste(covnames, sep='', collapse='+'), ",data)")))
-		modelcommand=paste("zeroinfl(exp_count ~ ",cov_text,",data=data,dist = 'negbin', EM=TRUE)")
-	}else if(method=='zicounts'){
-		covariates=eval(parse(text=paste("model.matrix(~", paste(covnames, sep='', collapse='+'), ",data)")))
-		cov_text=paste(covnames, sep='', collapse='+')
-		modelcommand=paste("zicounts(resp = exp_count ~ ., x =  ~ ",cov_text,", z =  ~", cov_text,",data=data)")
-	}
-	fdrlevel=threshold
-	##############################################
-	#########PROCESSING STEPS########################
-	#################################################
-	#LEVERAGE CALCULATION############################
-	leverage=hat(covariates, intercept=FALSE)
-	########output is 'leverage'#####################
-	#################################################
-	#RESIDUAL STANDARDIZATION########################
-	#TO DO:  unlink design matrices for count and zero models (Z neq X)
-	a=eval(parse(text=modelcommand))
-        
-	if(method=="zicounts"){
-        	if(as.character(a$se[length(a$se)])=="NaN" || a$coefficients[length(a$coefficients)]>15){
-			#checks for NaN in theta or hugely inflated then, switches to pscl if using zicounts
-			print("Switching to zeroinfl")
-                  	print(paste("For ",file," se is ",as.character(a$se[length(a$se)]),sep=""))
-                        print(paste("For ",file," coeff is ",a$coefficients[length(a$coefficients)],sep=""))			
-			cov_text=paste(rep('data$', length(covnames)), covnames, sep='', collapse='+')
-			modelcommand=paste("zeroinfl(data$exp_count ~ ",cov_text,",dist = 'negbin', EM=TRUE)")
-			a=eval(parse(text=modelcommand))
-			#now switch method to pscl for residual estimation
-			method='pscl'
-                        print(paste("se now ",as.character(a$se[length(a$se)]),sep=""))
-                        print(paste("coeff now ",a$coefficients[length(a$coefficients)],sep=""))
-		}
-	}
-#	print(summary(a))
-      	if(method=='zicounts'){
-		link=make.link('logit')
-		linkinv=link$linkinv
-		X=covariates
-		coefc=a$coefficients[1:dim(X)[2]]
-		coefz=a$coefficients[(dim(X)[2]+1):(2*dim(X)[2])]
-        	mu <- exp(as.matrix(X) %*% coefc)[,1]
-        	phi <- linkinv(as.matrix(X) %*% coefz)[,1]
-        	Yhat <- (1-phi) * mu
-        	res <- a$data - Yhat
-	        theta1 <- 1/exp(a$coefficients[2*(length(covnames)+1)+1])
-		vv <- Yhat * (1 + (phi + theta1) * mu)
-		standardized=res/sqrt(vv*(1-leverage))
-	}else if(method=='pscl'){
+		a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE)	
+		leverage=hat(X, intercept=FALSE)
+		fdrlevel=threshold
 		standardized=residuals(a)/sqrt(1-leverage)
+		pval=1-pnorm(as.matrix(standardized))
+		fdr=qvalue(pval)
+		numpeaks=length(which(fdr[[3]]<fdrlevel))
+		minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
+		sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
+	colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
+	}else if(method=='mixture'){
+		loglikfun=function(parms){
+			mu1=exp(X%*%parms[1:kx])
+			mu2=exp(X%*%parms[(kx+1):(kx+kz)])
+			theta1 <- exp(parms[(kx+kz+kz)+1])
+		        theta2 <- exp(parms[(kx+kz+kz)+2])	
+			prob0 <- as.vector(linkinv(Z %*% parms[(kx+kz+1):(kx+kz+kz)]))
+			prop1=parms[kx+kz+kz+3]
+			prop2=parms[kx+kz+kz+4]
+			loglik=sum(log(prob0*Y0+prop1*dnbinom(Y, size = theta1, mu = mu1)+prop2*dnbinom(Y, size = theta2, mu = mu2)))
+			loglik
+		}
+		Y <- model.response(mf)
+		Z=X
+		n <- length(Y)
+		kx <- NCOL(X)
+		kz <- NCOL(Z)
+		Y0 <- Y <= 0
+		Y1 <- Y > 0
+
+		linkstr <- 'logit'
+		linkobj <- make.link(linkstr)
+		linkinv <- linkobj$linkinv
+
+
+		#starting params for ze0 component
+		model_zero <- suppressWarnings(glm.fit(Z, as.integer(Y0),family = binomial(link = linkstr)))
+		prop0=sum( model_zero$fitted)/n
+
+		#starting params for count componenets
+		prop2=priorpeakprop
+		prop1=1-prop0-prop2
+		odY = order(Y)
+		n1  = round(length(Y) * (1 - prop2))
+		priorCOUNTweight=rep(1, length(Y))      
+		priorCOUNTweight[odY[1:n1]]=0
+
+		model_count1 <- suppressWarnings(glm.fit(X, Y, family = poisson(), weights = (1-priorCOUNTweight)))
+		model_count2 <- suppressWarnings(glm.fit(X, Y, family = poisson(), weights = (priorCOUNTweight)))
+
+		#start parameter vector
+		start <- list(count1 = model_count1$coefficients, count2 = model_count2$coefficients,zero = model_zero$coefficients)
+		start$theta1 <- 1
+		start$theta2 <- 1
+
+		#starting prior probs
+		mui1  <- model_count1$fitted
+		mui2  <- model_count2$fitted
+		probi0 <- model_zero$fitted
+
+		probi0=probi0/(probi0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+		probi0[Y1]=0
+		probi1  <- prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+		probi2  <- prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+		ll_new <- loglikfun(c(start$count1, start$count2, start$zero, log(start$theta1), log(start$theta2), prop1, prop2))
+
+		ll_old <- 2 * ll_new      
+
+		if(!require("MASS")) {
+			ll_old <- ll_new
+			warning("EM estimation of starting values not available")
+		}
+		ll=matrix(0, 1, 10000)
+		ll[1]=ll_new
+		i=2
+		while(abs((ll_old - ll_new)/ll_old) > tol) {
+#			print(ll_new)
+			ll_old <- ll[max(1, i-10)]
+			 prop1=sum(probi1)/n
+			 prop2=sum(probi2)/n
+			 #updated values for parameters of component means
+		         
+			model_zero <- suppressWarnings(glm.fit(Z, probi0, family = binomial(link = linkstr), start = start$zero))
+			model_count1 <- glm.nb(Y ~ 0 + X, weights = (probi1),start = start$count1, init.theta = start$theta1)
+			model_count2 <- glm.nb(Y ~ 0 + X, weights = (probi2),start = start$count2, init.theta = start$theta2)
+			start <- list(count1 = model_count1$coefficients, count2 = model_count2$coefficients,theta1 = 				model_count1$theta, theta2 = model_count2$theta, zero = model_zero$coefficients)
+
+			mui1  <- model_count1$fitted
+			mui2  <- model_count2$fitted
+			probi0 <- model_zero$fitted
+
+			probi0=probi0/(probi0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+			probi0[Y1]=0
+			probi1  <- prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+			probi2  <- prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+
+			ll_new <- loglikfun(c(start$count1, start$count2, start$zero, log(start$theta1), log(start$theta2), prop1, prop2))
+
+			ll[i]=ll_new
+			i=i+1 
+		}
+		numpeaks=length(which(probi2>peakconfidence))	
+
+		minresid='NA'		
+		sigpeaks=cbind(data[which(probi2>peakconfidence),],probi2[probi2>peakconfidence])
+		colnames(sigpeaks)[dim(sigpeaks)[2]]='peakprob'
 	}
-	########output is 'standardized'#################
-	#################################################
-	#THRESHOLDING/PEAK CALLING#######################
-	#TO DO:  implement weighting to remove sig small count windows
-	pval=1-pnorm(as.matrix(standardized))
-	fdr=qvalue(pval)
-	numpeaks=length(which(fdr[[3]]<fdrlevel))
-	minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
 	line1='|Selection Summary|'
 	line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
 	line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
-	sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
-	colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
+	
 
 ### FORMAT PEAK COORDINATE DATA
 	peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$end,sep=":")
 	coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),"+")
 	write.table(coordinates,coordout,quote=F,sep="\t",row.names=F,col.names=F)
-###############################
-
-#	sigpeaksSORTED=sigpeaks[order(sigpeaks[,dim(data)[2]+2], decreasing=TRUE),]
-#	colnames(sigpeaksSORTED)[c(dim(sigpeaksSORTED)[2]-1, dim(sigpeaksSORTED)[2])]=c('q-value', 'residual')
-	#######output is 'sigpeaks' and 'sigpeaksSORTED'#
-	#################################################
 	print(c(line1, line2,line3))
 	write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
       	time.end <- Sys.time()
