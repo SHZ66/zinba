@@ -1,4 +1,4 @@
-run.zinba=function(win_list=NULL,seq,align=NULL,input=NULL,cnvarray=NULL,cnvexpwin=NULL,cnvexpcustom=NULL,rand=NULL,twoBit=NULL,winSize=500,offset=0,percN=0.1,inputTrans=NULL,inputRandLog=NULL,gb="hg18",basecountfile=NULL,covs="",threshold=0.01,numProc=1,printLog=0,method='pscl'){
+run.zinba=function(win_list=NULL,seq=NULL,align=NULL,input=NULL,cnvarray=NULL,cnvexpwin=NULL,cnvexpcustom=NULL,rand=NULL,twoBit=NULL,winSize=500,offset=0,percN=0.1,inputTrans=NULL,inputRandLog=NULL,gb="hg18",basecountfile=NULL,covs="",threshold=0.01,numProc=1,printLog=0,method='pscl'){
 	time.start <- Sys.time()
         if(is.null(win_list)){
             buildwindowdata(seq=seq,align=align,input=input,cnvarray=cnvarray,cnvexpwin=cnvexpwin,cnvexpcustom=cnvexpcustom,rand=rand,twoBit=twoBit,winSize=winSize,offset=offset,inputTrans=inputTrans,inputRandLog=inputRandLog,percN=percN,gb=gb,nProcess=numProc)

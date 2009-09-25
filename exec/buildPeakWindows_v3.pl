@@ -177,6 +177,7 @@ if($cnv_exp_win){
 		}else{
 			my @line = split(/\t/, $_);
 			my $window_pos = int(((int($line[2]+$line[1])/2)-$line[3])/$cnv_winSize);
+#			$cnvExpCoords{$line[0]}->[$line[3]][$window_pos] = $line[6];
 			$cnvExpCoords{$line[0]}->[$line[3]][$window_pos] = $line[4];
 		}
 	}close CNVEXP;
@@ -193,7 +194,8 @@ if($cnv_exp_custom){
 		chomp;
 		unless($_ =~ /\#PARAMS/){
 			my @line = split(/\t/, $_);
-			my $chrm = "chr" . $line[0];
+			my $chrm = $line[0];
+			$chrm =~ s/chr//g;
 			$cnvCusExpCoords{$chrm}{$line[1]} = {
 				stop => $line[2],
 				score => $line[6]
@@ -224,7 +226,7 @@ foreach my $chr(sort{$a<=>$b} keys %chrom){
 		$files{$chr}{$offsets[$o]}{gcSeq} = $gcSeq;
 		$files{$chr}{$offsets[$o]}{temp} = $cOut;
 		my $pid = $pm->start and next;
-		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},$cnvExpCoords{$chrm},\%{$cnvCusExpCoords{$chrm}},\@{$cnvExpStarts->{$chrm}},\%{$cnvProbe{$chrm}},\@{$sortCnvStarts->{$chrm}},$o);
+		&process_chrm($chrm,$offsets[$o],$cOut,$count{$chr},$cnvExpCoords{$chrm},\%{$cnvCusExpCoords{$chr}},$cnvExpStarts->{$chr},\%{$cnvProbe{$chrm}},$sortCnvStarts->{$chrm},$o);
 		$pm->finish;
 	}
 }
@@ -278,7 +280,7 @@ if($twoBitFile){
 }close LIST;
 
 sub process_chrm{
-	my ($chrm, $offset,$cOut,$count_ref,$cnvCustom,$cnvExp_href,$cnvCusExp_href,$cnvExpStarts_aref,$cnv_href,$cnvStarts,$o) = @_;
+	my ($chrm, $offset,$cOut,$count_ref,$cnvExp_href,$cnvCusExp_href,$cnvExpStartsC,$cnv_href,$cnvStarts,$o) = @_;
 	my $cnvIndex = 0;
 	my @hits = @{$count_ref->[0][$o]};
 	my $numWins = @hits;
@@ -289,8 +291,8 @@ sub process_chrm{
 	print OUT "\trand_count" if $rand_hits;
 	print OUT "\tcrt_input" if $transInput eq "TRUE";
 	print OUT "\tinput_rand_log2" if $input_rand_log2 eq "TRUE";
-	print OUT "\texp_cnv_raw\texp_cnv_log" if $cnv_exp_win;
-	print OUT "\texp_cnv_est\texp_cnv_avg" if $cnv_exp_custom;
+	print OUT "\texp_cnvwin_est\texp_cnvwin_log" if $cnv_exp_win;
+	print OUT "\texp_cnvcustom_est\texp_cnvcustom_log" if $cnv_exp_custom;
 	print OUT "\tcube_cnvArray" if $cnv_array;
 	print OUT "\n";
 
@@ -335,7 +337,8 @@ sub process_chrm{
 				}
 			}				
 			if($count > 0){
-				my $avg = sprintf "%.2f", $sum/$count;
+				my $avg = sprintf "%.2f", ($sum/$count);
+#				my $avg = sprintf "%.2f", ($sum/$count)*(2*$window_size);
 				my $log = sprintf "%.3f", log($avg+1); 
 				print OUT "\t$avg\t$log";
 			}else{
@@ -346,16 +349,17 @@ sub process_chrm{
 		if($cnv_exp_custom){
 			my $zwin = int((($start+$end)/2));
 			my $findOverlap = 0;
-			my ($maxInt,$minInt) = ($#{$cnvExpStarts_aref},0);
+			my ($maxInt,$minInt) = ($#{$cnvExpStartsC},0);
 			while( ($minInt <= $maxInt) && $findOverlap == 0){
 				my $node = int(($maxInt + $minInt)/2);
-				if($zwin < ${$cnvExpStarts_aref}[$node]){
+				if($zwin < ${$cnvExpStartsC}[$node]){
 					$maxInt = $node - 1;
-				}elsif($zwin > $cnvCusExp_href->{${$cnvExpStarts_aref}[$node]}{stop}){
+				}elsif($zwin > $cnvCusExp_href->{${$cnvExpStartsC}[$node]}{stop}){
 					$minInt = $node + 1;
-				}elsif( $zwin >= ${$cnvExpStarts_aref}[$node] && $zwin <= $cnvCusExp_href->{${$cnvExpStarts_aref}[$node]}{stop}){
-					my $est_score = sprintf "%.2f", $cnvCusExp_href->{${$cnvExpStarts_aref}[$node]}{score} * (2*$window_size);
-					print OUT "$est_score\t" . $cnvCusExp_href->{${$cnvExpStarts_aref}[$node]}{score};
+				}elsif( $zwin >= ${$cnvExpStartsC}[$node] && $zwin <= $cnvCusExp_href->{${$cnvExpStartsC}[$node]}{stop}){
+					my $est_score = sprintf "%.2f", $cnvCusExp_href->{${$cnvExpStartsC}[$node]}{score} * (2*$window_size);
+					my $log = sprintf "%.3f", log($est_score+1);
+					print OUT "\t$est_score\t$log";
 					$findOverlap = 1;
 				}
 			}
