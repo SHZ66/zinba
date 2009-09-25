@@ -56,9 +56,9 @@ sub run_zinba{
     my ($inputFile,$coordout,$winout,$peakout,$bpOut,$covs,$threshold,$winSize,$method,$bpCountFile,$chrm,$stdLog,$errLog,$printLog) = @_;
     my $off = $winSize/2;
     if ($printLog == 0){
-        system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",covnames="$covs",threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method="$method");\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpOut",chromosome="$chrm");\npeakbound(profile="$bpOut",output="$peakout");\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
+        system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",formula="$covs",threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method="$method");\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpOut",chromosome="$chrm");\npeakbound(profile="$bpOut",output="$peakout");\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
     }else{
-        system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",covnames="$covs",threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method="$method");\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpOut",chromosome="$chrm");\npeakbound(profile="$bpOut",output="$peakout");\n' | R --vanilla --slave > $stdLog 2> $errLog`);
+        system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",formula="$covs",threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method="$method");\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpOut",chromosome="$chrm");\npeakbound(profile="$bpOut",output="$peakout");\n' | R --vanilla --slave > $stdLog 2> $errLog`);
     }
     unlink($bpOut);
     unlink($coordout);
