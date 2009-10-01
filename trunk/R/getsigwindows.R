@@ -10,40 +10,40 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 	if(method=='pscl'){
 		files = unlist(strsplit(file,";"))
 		for(i in 1:length(files)){
-			print(paste("Processing ",files[i]))
-			data=read.table(files[i], header=TRUE)
-			mf <- model.frame(formula=formula, data=data)
-			X <- model.matrix(attr(mf, "terms"), data=mf)
-			if(i == 1){
-				a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE)
-			}else{
-				a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE,start=param)
-			}
-			leverage=hat(X, intercept=FALSE)
-			fdrlevel=threshold
-			standardized=residuals(a)/sqrt(1-leverage)
-			pval=1-pnorm(as.matrix(standardized))
-			fdr=qvalue(pval)
-			numpeaks=length(which(fdr[[3]]<fdrlevel)) 
-			minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
-			sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
-			colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
-			param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
+                    print(paste("Processing ",files[i]))
+                    data=read.table(files[i], header=TRUE)
+                    mf <- model.frame(formula=formula, data=data)
+                    X <- model.matrix(attr(mf, "terms"), data=mf)
+                    if(i == 1){
+                            a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE)
+                    }else{
+                            a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE,start=param)
+                    }
+                    leverage=hat(X, intercept=FALSE)
+                    fdrlevel=threshold
+                    standardized=residuals(a)/sqrt(1-leverage)
+                    pval=1-pnorm(as.matrix(standardized))
+                    fdr=qvalue(pval)
+                    numpeaks=length(which(fdr[[3]]<fdrlevel)) 
+                    minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
+                    sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
+                    colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
+                    param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
 
-			line1='|Selection Summary|'
-			line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
-			line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
+                    line1='|Selection Summary|'
+                    line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
+                    line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
 
-	### FORMAT PEAK COORDINATE DATA
-			peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$end,sep=":")
-			coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),"+")
-			write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
-			print(c(line1, line2,line3))
-                        if(i==1){
-                            write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
-                        }else{
-                            write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
-                        }
+    ### FORMAT PEAK COORDINATE DATA
+                    peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$end,sep=":")
+                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),"+")
+                    write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
+                    print(c(line1, line2,line3))
+                    if(i==1){
+                        write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
+                    }else{
+                        write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+                    }
 		}
 	}else if(method=='mixture'){
 		loglikfun=function(parms){
@@ -155,4 +155,5 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 	}
 	time.end <- Sys.time()
 	print(difftime(time.end,time.start))
+        gc()
 }

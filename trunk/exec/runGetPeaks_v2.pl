@@ -58,7 +58,9 @@ $pm->wait_all_children;
 if ($printLog == 0){
     system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout");\npeakbound(profile="$bpout",output="$peakout");\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
 }else{
+    print STDERR "bpout file is $bpout\n";
     system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout");\npeakbound(profile="$bpout",output="$peakout");\n' | R --vanilla --slave >> $stdlog 2>> $errlog`);
+    system(qq`echo 'library(zinba);\npeakbound(profile="$bpout",output="$peakout");\n' | R --vanilla --slave >> $stdlog 2>> $errlog`);
 }
 unlink($bpout);
 unlink($coordout);
