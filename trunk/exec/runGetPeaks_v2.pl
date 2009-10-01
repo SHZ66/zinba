@@ -50,23 +50,27 @@ foreach my $chrm (keys %{$filesOffsets}){
     print STDERR "Processing $chrm\n";
     my $offsetFiles = join(";",@{$filesOffsets->{$chrm}});
     my $pid = $pm->start and next;
-    &run_zinba($offsetFiles,$coordout,$winout,$peakout,$bpout,$formula,$threshold,$winsize,$method,$bpCountFile,$chrm,$stdlog,$errlog,$printLog);
+    &run_zinba($offsetFiles,$coordout,$winout,$formula,$threshold,$winsize,$method,$stdlog,$errlog,$printLog);
     $pm->finish;
 }
 $pm->wait_all_children;
 
-#\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpOut",chromosome="$chrm");\npeakbound(profile="$bpOut",output="$peakout");
+if ($printLog == 0){
+    system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout");\npeakbound(profile="$bpout",output="$peakout");\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
+}else{
+    system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout");\npeakbound(profile="$bpout",output="$peakout");\n' | R --vanilla --slave >> $stdlog 2>> $errlog`);
+}
+unlink($bpout);
+unlink($coordout);
 
 sub run_zinba{
-    my ($inputFile,$coordout,$winout,$peakout,$bpOut,$formula,$threshold,$winSize,$method,$bpCountFile,$chrm,$stdLog,$errLog,$printLog) = @_;
+    my ($inputFile,$coordout,$winout,$formula,$threshold,$winSize,$method,$stdLog,$errLog,$printLog) = @_;
     my $off = $winSize/2;
     if ($printLog == 0){
         system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",formula=$formula,threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method="$method");\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
     }else{
         system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",formula=$formula,threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,method="$method");\n' | R --vanilla --slave >> $stdLog 2>> $errLog`);
     }
-    unlink($bpOut);
-    unlink($coordout);
     return;
 }
 
