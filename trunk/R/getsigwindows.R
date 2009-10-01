@@ -1,4 +1,4 @@
-getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakprop=.15, winout,coordout,offset=0, tol=10^-5, method='pscl', tol=10^-5){
+getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakprop=.15, winout,coordout,offset=0, tol=10^-5, method='pscl', chromosome=NULL){
 	time.start <- Sys.time()
 	library(qvalue)
         library(pscl)
@@ -8,16 +8,24 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 	mf <- model.frame(formula=formula, data=data)
 	X <- model.matrix(attr(mf, "terms"), data=mf)	
 	if(method=='pscl'){
-		a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE)	
+		parmpath=paste(coordout,chromosome, '.txt', sep='')	
+		if(file.exists(parmpath)){
+			load(parmpath)
+			a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE,start=param)
+		}else{
+			a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE)	
+		}
 		leverage=hat(X, intercept=FALSE)
 		fdrlevel=threshold
 		standardized=residuals(a)/sqrt(1-leverage)
 		pval=1-pnorm(as.matrix(standardized))
 		fdr=qvalue(pval)
-		numpeaks=length(which(fdr[[3]]<fdrlevel))
+		numpeaks=length(which(fdr[[3]]<fdrlevel)), 
 		minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
 		sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
-	colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
+		colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
+		param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
+		save(param, file=parmpath)
 	}else if(method=='mixture'){
 		loglikfun=function(parms){
 			mu1=exp(X%*%parms[1:kx])
