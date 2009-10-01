@@ -4,28 +4,47 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
         library(pscl)
         options(scipen=999)
 	###### USER INPUT############################
-	data=read.table(file, header=TRUE)
-	mf <- model.frame(formula=formula, data=data)
-	X <- model.matrix(attr(mf, "terms"), data=mf)	
+#	data=read.table(file, header=TRUE)
+#	mf <- model.frame(formula=formula, data=data)
+#	X <- model.matrix(attr(mf, "terms"), data=mf)
 	if(method=='pscl'){
-		parmpath=paste(coordout,chromosome, '.txt', sep='')	
-		if(file.exists(parmpath)){
-			load(parmpath)
-			a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE,start=param)
-		}else{
-			a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE)	
+		files = unlist(strsplit(file,";"))
+		for(i in 1:length(files)){
+			print(paste("Processing ",files[i]))
+			data=read.table(files[i], header=TRUE)
+			mf <- model.frame(formula=formula, data=data)
+			X <- model.matrix(attr(mf, "terms"), data=mf)
+			if(i == 1){
+				a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE)
+			}else{
+				a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE,start=param)
+			}
+			leverage=hat(X, intercept=FALSE)
+			fdrlevel=threshold
+			standardized=residuals(a)/sqrt(1-leverage)
+			pval=1-pnorm(as.matrix(standardized))
+			fdr=qvalue(pval)
+			numpeaks=length(which(fdr[[3]]<fdrlevel)) 
+			minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
+			sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
+			colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
+			param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
+
+			line1='|Selection Summary|'
+			line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
+			line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
+
+	### FORMAT PEAK COORDINATE DATA
+			peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$end,sep=":")
+			coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),"+")
+			write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
+			print(c(line1, line2,line3))
+                        if(i==1){
+                            write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
+                        }else{
+                            write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+                        }
 		}
-		leverage=hat(X, intercept=FALSE)
-		fdrlevel=threshold
-		standardized=residuals(a)/sqrt(1-leverage)
-		pval=1-pnorm(as.matrix(standardized))
-		fdr=qvalue(pval)
-		numpeaks=length(which(fdr[[3]]<fdrlevel)) 
-		minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
-		sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
-		colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
-		param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
-		save(param, file=parmpath)
 	}else if(method=='mixture'){
 		loglikfun=function(parms){
 			mu1=exp(X%*%parms[1:kx])
@@ -101,7 +120,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 			model_zero <- suppressWarnings(glm.fit(Z, probi0, family = binomial(link = linkstr), start = start$zero))
 			model_count1 <- glm.nb(Y ~ 0 + X, weights = (probi1),start = start$count1, init.theta = start$theta1)
 			model_count2 <- glm.nb(Y ~ 0 + X, weights = (probi2),start = start$count2, init.theta = start$theta2)
-			start <- list(count1 = model_count1$coefficients, count2 = model_count2$coefficients,theta1 = 				model_count1$theta, theta2 = model_count2$theta, zero = model_zero$coefficients)
+			start <- list(count1 = model_count1$coefficients, count2 = model_count2$coefficients,theta1 = model_count1$theta, theta2 = model_count2$theta, zero = model_zero$coefficients)
 
 			mui1  <- model_count1$fitted
 			mui2  <- model_count2$fitted
@@ -122,18 +141,18 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 		minresid='NA'		
 		sigpeaks=cbind(data[which(probi2>peakconfidence),],probi2[probi2>peakconfidence])
 		colnames(sigpeaks)[dim(sigpeaks)[2]]='peakprob'
-	}
-	line1='|Selection Summary|'
-	line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
-	line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
-	
 
-### FORMAT PEAK COORDINATE DATA
-	peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$end,sep=":")
-	coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),"+")
-	write.table(coordinates,coordout,quote=F,sep="\t",row.names=F,col.names=F)
-	print(c(line1, line2,line3))
-	write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
-      	time.end <- Sys.time()
+		line1='|Selection Summary|'
+		line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
+		line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
+
+	### FORMAT PEAK COORDINATE DATA
+		peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$end,sep=":")
+		coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),"+")
+		write.table(coordinates,coordout,quote=F,sep="\t",row.names=F,col.names=F)
+		print(c(line1, line2,line3))
+		write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
+	}
+	time.end <- Sys.time()
 	print(difftime(time.end,time.start))
 }
