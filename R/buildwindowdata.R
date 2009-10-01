@@ -1,4 +1,4 @@
-buildwindowdata=function(seq=NULL, align=NULL, input=NULL, cnvarray=NULL,cnvexpwin=NULL,cnvexpcustom=NULL,rand=NULL,twoBit=NULL,winSize=500,offset=0,inputTrans=NULL,inputRandLog=NULL,percN=0.1,gb="hg18",nProcess=1){
+buildwindowdata=function(paramFile=NULL,seq=NULL, align=NULL, input=NULL, cnvarray=NULL,cnvexpwin=NULL,cnvexpcustom=NULL,rand=NULL,twoBit=NULL,winSize=500,offset=0,inputTrans=NULL,inputRandLog=NULL,percN=0.1,gb="hg18",nProcess=1){
 	Perl.Path <- file.path(.path.package("zinba"), "exec")
 	Fn.Path <- file.path(Perl.Path, "buildPeakWindows_v3.pl")
         CMD=paste(Fn.Path,"--seq", seq,sep=" ")
@@ -25,6 +25,9 @@ buildwindowdata=function(seq=NULL, align=NULL, input=NULL, cnvarray=NULL,cnvexpw
 		}
 		if (!is.null(twoBit)){
 			CMD=paste(CMD,"--twoBit",twoBit,sep=" ")
+		}
+		if (!is.null(paramFile)){
+			CMD=paste(CMD,"--param-file",paramFile,sep=" ")
 		}
 		CMD=paste(CMD,"--window-size",winSize,"--offset-size",offset,"--perc-n-thresh",percN,"--gb",gb,"--processes",nProcess,sep=" ")
 		if (!is.null(inputTrans)){

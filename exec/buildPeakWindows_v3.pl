@@ -41,6 +41,7 @@ my ($seq_hits,$cOut,%files,$gb);
 my $window_size = 500;
 my $offset = 0;
 my $nThresh = 0.1;
+my $paramFile = undef;
 my $input_hits = undef;
 my $twoBitFile = undef;
 my $align_dir = undef;
@@ -62,6 +63,7 @@ my $result = GetOptions(
 	"rand=s" => \$rand_hits,
 	"input_rand_log2" => sub{$input_rand_log2 = 'TRUE'},
 	"twoBit=s" => \$twoBitFile,
+	"param-file=s" => \$paramFile,
 	'window-size=i' => \$window_size,
 	"offset-size=i" => \$offset,
 	"processes=i" => \$nProcesses,
@@ -75,8 +77,9 @@ die $usage unless($seq_hits && $gb);
 #my $pm = new Parallel::ForkManager($nProcesses);
 my $pm = new ForkManager_pg($nProcesses);
 
-my $dataFile_list = $seq_hits . ".list";
-open(LIST,">$dataFile_list");
+$paramFile = $seq_hits . ".list" if(!defined($paramFile));
+$paramFile =~ s/^.*\///g if(!defined($paramFile));
+open(LIST,">>$paramFile");
 
 my @offsets = 0;
 my $numOffsets = 1;
@@ -177,13 +180,13 @@ if($cnv_exp_win){
 		}else{
 			my @line = split(/\t/, $_);
 			my $window_pos = int(((int($line[2]+$line[1])/2)-$line[3])/$cnv_winSize);
-#			$cnvExpCoords{$line[0]}->[$line[3]][$window_pos] = $line[6];
-			$cnvExpCoords{$line[0]}->[$line[3]][$window_pos] = $line[4];
+			$cnvExpCoords{$line[0]}->[$line[3]][$window_pos] = $line[6]; # Avg # Reads / Alignable Base
+#			$cnvExpCoords{$line[0]}->[$line[3]][$window_pos] = $line[4]; # Total Number Reads in Window
 		}
 	}close CNVEXP;
 }else{
 	foreach my $chrm (%chrom){
-		$cnvExpCoords{$chrm} = 0;
+		$cnvExpCoords{$chrm}->[0][0] = 0;
 	}
 }
 
@@ -208,12 +211,13 @@ if($cnv_exp_custom){
 	}
 }else{
 	foreach my $chrm (%chrom){
-		$cnvCusExpCoords{$chrm} = 0;
+		$cnvCusExpCoords{$chrm}{$chrm} = 0;
 		@{$cnvExpStarts->{$chrm}} = 0;
 	}
 }
 
 my $out = $seq_hits;
+$out =~ s/^.*\///g;
 $out =~ s/\..*/\_win$window_size\_/g;
 
 foreach my $chr(sort{$a<=>$b} keys %chrom){
@@ -221,7 +225,7 @@ foreach my $chr(sort{$a<=>$b} keys %chrom){
 	for (my $o = 0; $o <= $#offsets; $o++){
 		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".temp" if ($align_dir || $twoBitFile);
 		$cOut = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".txt" if (!defined($align_dir) && !defined($twoBitFile));
-		print LIST "$cOut\t$chrm\n" if (!defined($align_dir) && !defined($twoBitFile));
+		print LIST "\#DATA\t$cOut\t$chrm\t$offsets[$o]\n" if (!defined($align_dir) && !defined($twoBitFile));
 		my $gcSeq = $out . "offset" . $offsets[$o] . "bp_" . $chrm . ".gcseq";
 		$files{$chr}{$offsets[$o]}{gcSeq} = $gcSeq;
 		$files{$chr}{$offsets[$o]}{temp} = $cOut;
@@ -240,7 +244,7 @@ if($align_dir){
 			my $tFile = $files{$chr}{$offsets[$o]}{temp};
 			my $winOut = $tFile;
 			$winOut =~ s/\..*/\.txt/g if !defined($twoBitFile);
-			print LIST "$winOut\t$chrm\n" if !defined($twoBitFile);
+			print LIST "\#DATA\t$winOut\t$chrm\t$offsets[$o]\n" if !defined($twoBitFile);
 			$winOut .= 2 if $twoBitFile;
 			$files{$chr}{$offsets[$o]}{temp} = $winOut;
 			my $pid = $pm->start and next;
@@ -261,7 +265,7 @@ if($twoBitFile){
 			my $tempFile = $files{$chr}{$offsets[$o]}{temp};
 			my $winOut = $tempFile;
 			$winOut =~ s/\..*/\.txt/g;
-			print LIST "$winOut\t$chrm\n";
+			print LIST "\#DATA\t$winOut\t$chrm\t$offsets[$o]\n";
 
 			my $cFileLen = $chrm . "_" . $offset . ".txt";
 			`twoBitInfo /gbdb/hg18/hg18.2bit:$chrm $cFileLen`;
@@ -317,7 +321,7 @@ sub process_chrm{
 		}
 		
 		if ($transInput eq "TRUE"){
-			my $crt = ($input_raw+1)**0.3;
+			my $crt = sprintf "%.4f", ($input_raw+1)**0.3;
 			print OUT "\t$crt";
 		}
 
@@ -337,8 +341,8 @@ sub process_chrm{
 				}
 			}				
 			if($count > 0){
-				my $avg = sprintf "%.2f", ($sum/$count);
-#				my $avg = sprintf "%.2f", ($sum/$count)*(2*$window_size);
+#				my $avg = sprintf "%.2f", ($sum/$count); # Avg Number of Total Reads in Large Windows
+				my $avg = sprintf "%.2f", ($sum/$count)*(2*$window_size); # Est Number Reads Based on Avg # Reads/Alignable Bases
 				my $log = sprintf "%.3f", log($avg+1); 
 				print OUT "\t$avg\t$log";
 			}else{
