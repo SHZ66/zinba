@@ -20,7 +20,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 		standardized=residuals(a)/sqrt(1-leverage)
 		pval=1-pnorm(as.matrix(standardized))
 		fdr=qvalue(pval)
-		numpeaks=length(which(fdr[[3]]<fdrlevel)), 
+		numpeaks=length(which(fdr[[3]]<fdrlevel)) 
 		minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
 		sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
 		colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
