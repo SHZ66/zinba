@@ -39,10 +39,10 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
                     coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),"+")
                     write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
                     print(c(line1, line2,line3))
-                    if(i==1){
-                        write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
-                    }else{
+                    if(file.exists(winout)){
                         write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+                    }else{
+                        write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
                     }
 		}
 	}else if(method=='mixture'){
@@ -155,5 +155,4 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 	}
 	time.end <- Sys.time()
 	print(difftime(time.end,time.start))
-        gc()
 }
