@@ -1,8 +1,9 @@
-peakbound=function(profile,output){
+peakbound=function(bpprofile,output){
 
-print(paste("Profile file name is ",as.character(profile)))
+print(paste("bpprofile file name is ",bpprofile))
+print(paste("output is ",output))
 
-    bpProfiles=read.table(as.character(profile),header=TRUE,sep="\t")
+    bpProfiles=read.table(bpprofile,header=TRUE,sep="\t")
     bpVector=bpProfiles[,6:ncol(bpProfiles)]
     peakbound2=function(x){
     	##assuming 500 bp window and flanking 500 bp windows
