@@ -56,9 +56,10 @@ foreach my $chrm (keys %{$filesOffsets}){
 $pm->wait_all_children;
 
 if ($printLog == 0){
-    system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout");\npeakbound(bpprofile="$bpout",output="$peakout");\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
+#    system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout");\npeakbound(bpprofile="$bpout",output="$peakout");\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
 }else{
-    system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout");\npeakbound(bpprofile="$bpout",output="$peakout");\n' | R --vanilla --slave >> $stdlog 2>> $errlog`);
+    system(qq`echo 'basecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout");\npeakbound(bpprofile="$bpout",output="$peakout");\n'`);
+#    system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout");\npeakbound(bpprofile="$bpout",output="$peakout");\n' | R --vanilla --slave >> $stdlog 2>> $errlog`);
 }
 #unlink($bpout);
 #unlink($coordout);
