@@ -46,7 +46,12 @@ print(paste("output is ",output))
     }
     peakCoords=apply(bpVector,1,peakbound2)
     refPeaks1=cbind(bpProfiles[,1:5],t(peakCoords))
-    refPeaks=refPeaks1[-which(refPeaks1[,6]=='NA'),]
+    removeNAs=which(refPeaks1[,6]=='NA')
+    if(length(removeNAs)>0){
+	    refPeaks=refPeaks1[-which(refPeaks1[,6]=='NA'),]
+    }else{
+	    refPeaks=refPeaks1
+    }	
     write.table(refPeaks,output,quote=F,sep="\t",row.names=F,col.names=F, append=TRUE)
 }
 
