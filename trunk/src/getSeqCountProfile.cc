@@ -27,20 +27,18 @@ extern "C" {
 
 		if(ret == 1){
 			Rprintf("ERROR opening file: %s\n",inputFile);
-			return;
 		}else if(ret == 2){
 			Rprintf("FILE FORMATTING ERROR- wrong number of columns, exiting");
-			return;
-		}
-
-		Rprintf("FINISHED importing coordinates");
-		Rprintf("\nGetting profiles for coordinates %s\n",inputFile);
-		Rprintf("Printing output to %s \n",outputFile);
+		}else{
+			Rprintf("FINISHED importing coordinates");
+			Rprintf("\nGetting profiles for coordinates %s\n",inputFile);
+			Rprintf("Printing output to %s \n",outputFile);
 	 
-		ret = newAnalysis.processCoords(inputFile,outputFile,chromosome);	
-		if(ret == 1){
-			Rprintf("\nError occurred in processing\n");
+			ret = newAnalysis.processCoords(inputFile,outputFile,chromosome);	
+			if(ret == 1){
+				Rprintf("\nError occurred in processing\n");
+			}
+			Rprintf("\ngetSeqCountProfile COMPLETE\n");
 		}
-		Rprintf("\nFinished all coordinates, COMPLETE\n");
 	}
 }

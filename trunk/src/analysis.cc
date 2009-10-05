@@ -37,7 +37,10 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 	int * basepair = NULL;
 	int * profile = NULL;
 	int cSize = 250000000;
-	basepair = new int[cSize];
+
+	basepair = (int*)malloc(sizeof(int) * cSize);
+//	basepair = new int[cSize];
+
 	basepair[cSize] = 0;
 
 	char *chChr = (char *) malloc(1024);
@@ -57,7 +60,10 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 				for(i = coord_slist.begin();i!=coord_slist.end();i++){
 					if(i->chrom == chromInt){
 						sizeProfile = i->end - i->start;
-						profile = new int[(sizeProfile + 1)];
+
+						profile = (int*)malloc(sizeof(int) * (sizeProfile + 1));
+//						profile = new int[(sizeProfile + 1)];
+
 						int pIndex = 0;
 						for(int s = i->start; s <= i->end; s++){
 							profile[pIndex] = basepair[s];
@@ -68,7 +74,11 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 							cout << "Error printing output to file, exiting" << endl;
 							return 1;
 						}
-						delete [] profile;
+
+						free((void*)profile);
+//						delete [] profile;
+//						profile = NULL;
+//
 						sizeProfile = NULL;
 						printFlag = 1;
 						coord_slist.erase(i);
@@ -78,7 +88,12 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 				
 				if(coord_slist.empty()){
 					cout << "\nFinished all coordinates, COMPLETE\n";
-					delete [] basepair;
+
+					free((void*)basepair);					
+//					delete [] basepair;
+//					basepair = NULL;
+//
+					seqfile.close();
 					return 0;
 				}
 			}
@@ -148,13 +163,20 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 					return 1;
 				}
 
-				delete [] profile;
+				free((void*)profile);
+//				delete [] profile;
+//				profile = NULL;
+//
 				sizeProfile = NULL;
 				printFlag = 1;
 				coord_slist.erase(i);
 			}
 		}
-		delete [] basepair;
+
+		free((void*)basepair);
+//		delete [] basepair;
+//		basepair = NULL;
+//
 	}
 	cout << "Finished\nFinished all coordinates, COMPLETE\n";
 	seqfile.close();
@@ -258,18 +280,14 @@ int analysis::importCoords(const char * signalFile){
 
 	while(!feof(fh)){
 		int readResult = fscanf(fh,"%s%s%lu%lu%s",id,cChrom,&iStart,&iEnd,strand);
-		if(lineCount < 5){
-			cout << "readResult is " << readResult << "\n";
-		}
-		
-//		if(readResult==1){
+		if(readResult == 5){
 			unsigned short int chromInt = getHashValue(cChrom);
 			coord c(id,chromInt,iStart,iEnd,strand);
 			lineCount++;
 			back = coord_slist.insert_after(back,c);
-//		}
+		}
 	}
 	fclose(fh);
-	cout << lineCount << " or " << coord_slist.size() << " coordinates imported\n";
+	cout << lineCount << " coordinates imported\n";
 	return 0;
 }

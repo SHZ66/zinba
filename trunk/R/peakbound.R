@@ -1,7 +1,8 @@
 peakbound=function(bpprofile,output){
 
-print(paste("bpprofile file name is ",bpprofile))
-print(paste("output is ",output))
+str(bpprofile)
+str(output)
+print(paste("bpprofile file name is ",bpprofile," output is ",output))
 
     bpProfiles=read.table(bpprofile,header=TRUE,sep="\t")
     bpVector=bpProfiles[,6:ncol(bpProfiles)]
