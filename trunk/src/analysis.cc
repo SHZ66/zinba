@@ -43,7 +43,6 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 	char *chChr = (char *) malloc(1024);
 
 	unsigned long int sizeProfile = 0;
-////	unsigned long int countBases = 0;
 	unsigned long int countBases = cSize;
 	
 	unsigned long int startOffset = 0;
@@ -58,7 +57,6 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 				for(i = coord_slist.begin();i!=coord_slist.end();i++){
 					if(i->chrom == chromInt){
 						sizeProfile = i->end - i->start;
-//						profile = new double[(sizeProfile + 1)];
 						profile = new int[(sizeProfile + 1)];
 						int pIndex = 0;
 						for(int s = i->start; s <= i->end; s++){
@@ -79,7 +77,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 				cout << "Finished\n";
 				
 				if(coord_slist.empty()){
-//					cout << "\nFinished all coordinates, COMPLETE\n";
+					cout << "\nFinished all coordinates, COMPLETE\n";
 					delete [] basepair;
 					return 0;
 				}
@@ -93,9 +91,6 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 					}
 					strcpy(chChr,chrom.c_str());
 					chromInt = getHashValue(chChr);
-////					map<int, int>::iterator cIter;
-////					cIter = chrom_stop.find(chromInt);
-////					cEnd = cIter->second;
 					
 					string allChrm = "all";
 					if(strcmp(chrmSearch.c_str(),allChrm.c_str()) == 0){
@@ -109,11 +104,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 					
 					if(getChrmData == 1){
 						cout << "\nLoading data for " << chChr << "\nInitializing array...";
-//						basepair = new int[(cEnd+1)];
-////						basepair = new double[(cEnd+1)];
-////						for(int p = 0;p <= cEnd;p++){
 						for(int p = startOffset;p <= countBases;p++){
-////
 							basepair[p] = 0;
 						}
 						cout << "Finished\n";
@@ -134,12 +125,9 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 				collectData = 1;
 				countBases++;
 				basepair[countBases] = atoi(line.c_str());
-//				basepair[countBases] = atof(line.c_str());
-////				if(countBases > cEnd){
 				if(countBases > cSize){
 					cout << "Print some error, adding more data than basepairs in chrom\n";
 				}
-////		}
 		}
 	}
 
@@ -148,7 +136,6 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 		for(i = coord_slist.begin();i!=coord_slist.end();i++){
 			if(i->chrom == chromInt){
 				sizeProfile = i->end - i->start;
-//				profile = new double[(sizeProfile + 1)];
 				profile = new int[(sizeProfile + 1)];
 				int pIndex = 0;
 				for(int s = i->start; s <= i->end; s++){
@@ -158,7 +145,6 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 
 				if(outputData( outputFile,printFlag,i->ident,i->chrom,i->start,i->end,i->strand,sizeProfile,profile) != 0){
 					cout << "Error printing output to file, exiting" << endl;
-//					exit(1);
 					return 1;
 				}
 
@@ -176,50 +162,33 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 }
 
 int analysis::outputData(const char * outputFile,int pFlag,const char * pId,unsigned short int pChrom,unsigned long int pStart, unsigned long int pStop,const char * pStrand,int printStop,int pProfile[]){
-//int analysis::outputData(const char * outputFile,int pFlag,const char * pId,unsigned short int pChrom,unsigned long int pStart, unsigned long int pStop,const char * pStrand,int printStop,double pProfile[],const char * statoutputFile){
 	FILE * fh;
-//	FILE * fhstats;
 	if(pFlag == 0){
 		fh = fopen(outputFile,"w"); 
-//		fhstats = fopen(statoutputFile,"w");
-		fprintf(fh,"COORDID\tCHROM\tSTART\tSTOP\tSTRAND\t");
-//		fprintf(fhstats,"COORDID\tCHROM\tSTART\tSTOP\tSTRAND\tAVG\tSTDEV\n");
+		fprintf(fh,"COORDID\tCHROM\tSTART\tSTOP\tSTRAND");
 		for(int p = 1;p <= (printStop+1);p++){
-			fprintf(fh,"Position%i\t",p);
+			fprintf(fh,"\tPosition%i",p);
 		}
 		fprintf(fh,"\n");
 	}else if (pFlag == 1){
 		fh = fopen(outputFile,"a");
-//		fhstats = fopen(statoutputFile,"a");
 	}
 
 	const char * chromName = getKey(pChrom);
-	fprintf(fh,"%s\t%s\t%i\t%i\t%s\t",pId,chromName,pStart,pStop,pStrand);
-//	fprintf(fhstats,"%s\t%s\t%i\t%i\t%s\t",pId,chromName,pStart,pStop,pStrand);
+	fprintf(fh,"%s\t%s\t%i\t%i\t%s",pId,chromName,pStart,pStop,pStrand);
 	char plus[] = "+";
 	char minus[] = "-";
-//	double sumScores = 0;
-//	double sumScoresX2 = 0;
 	if(strcmp(pStrand,plus) == 0){
 		for(int posP = 0; posP <= printStop;posP++){
-			fprintf(fh,"%i\t",pProfile[posP]);
-//			sumScores += pProfile[posP];
-//			sumScoresX2 += pow((pProfile[posP]),2);
+			fprintf(fh,"\t%i",pProfile[posP]);
 		}
 	}else if (strcmp(pStrand,minus) == 0){
 		for(int posP = printStop; posP >= 0;posP--){
-			fprintf(fh,"%i\t",pProfile[posP]);
-//			sumScores += pProfile[posP];
-//			sumScoresX2 += pow((pProfile[posP]),2);
+			fprintf(fh,"\t%i",pProfile[posP]);
 		}
 	}
-//	double avgScore = sumScores/printStop;
-//	double stdevScore = sqrt((sumScoresX2 -((sumScores)*(sumScores)/printStop))/(printStop-1));
-//	fprintf(fhstats,"%f\t%f\n", avgScore, stdevScore);
-//	fprintf(fh,"%f\n", avgScore);
 	fprintf(fh,"\n");
 	fclose (fh);
-//	fclose (fhstats);
 	return 0;
 }
 
@@ -288,14 +257,17 @@ int analysis::importCoords(const char * signalFile){
 	 }
 
 	while(!feof(fh)){
-		fscanf(fh,"%s%s%lu%lu%s",id,cChrom,&iStart,&iEnd,strand);
+		int readResult = fscanf(fh,"%s%s%lu%lu%s",id,cChrom,&iStart,&iEnd,strand);
+		if(lineCount < 5){
+			cout << "readResult is " << readResult << "\n";
+		}
 		
-		//cout << "Got coord " << id << " chrom " << cChrom << " start " << iStart << " stop " << iEnd << " strand " << strand << " line count is " << lineCount << endl;
-		
-		unsigned short int chromInt = getHashValue(cChrom);
-		coord c(id,chromInt,iStart,iEnd,strand);
-		lineCount++;
-		back = coord_slist.insert_after(back,c);
+//		if(readResult==1){
+			unsigned short int chromInt = getHashValue(cChrom);
+			coord c(id,chromInt,iStart,iEnd,strand);
+			lineCount++;
+			back = coord_slist.insert_after(back,c);
+//		}
 	}
 	fclose(fh);
 	cout << lineCount << " or " << coord_slist.size() << " coordinates imported\n";
