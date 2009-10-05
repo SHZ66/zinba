@@ -50,6 +50,13 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
                 }
 	    }
 	}else if(method=='mixture'){
+            files = unlist(strsplit(file,";"))
+            for(i in 1:length(files)){
+                print(paste("Processing ",files[i]))
+                data=read.table(files[i], header=TRUE)
+                mf <- model.frame(formula=formula, data=data)
+                X <- model.matrix(attr(mf, "terms"), data=mf)
+                
 		loglikfun=function(parms){
 			mu1=exp(X%*%parms[1:kx])
 			mu2=exp(X%*%parms[(kx+1):(kx+kz)])
@@ -70,9 +77,8 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 		Y1 <- Y > 0
 
 		linkstr <- 'logit'
-		linkobj <- make.link(linkstr)
-		linkinv <- linkobj$linkinv
-
+                linkobj <- make.link(linkstr)
+                linkinv <- linkobj$linkinv
 
 		#starting params for ze0 component
 		model_zero <- suppressWarnings(glm.fit(Z, as.integer(Y0),family = binomial(link = linkstr)))
@@ -151,14 +157,19 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 		line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
         ### PRINT SIGNIFICANT WINDOWS
 		print(c(line1, line2,line3))
-		write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
+                if(file.exists(winout)){
+                    write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+                }else{
+                    write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
+                }
 
-	### FORMAT PEAK COORDINATE DATA
+    ### FORMAT PEAK COORDINATE DATA
                 if(getPeakRefine == 1){
                     peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$end,sep=":")
                     coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),"+")
-                    write.table(coordinates,coordout,quote=F,sep="\t",row.names=F,col.names=F)
+                    write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
                 }
+            }
 	}
         if(getPeakRefine == 1){
             basecountimport(inputfile=bpCountfile,coordfile=coordout,outputfile=bpOutputfile)
