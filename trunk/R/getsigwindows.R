@@ -1,4 +1,4 @@
-getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakprop=.15,winout,coordout,offset=0,tol=10^-5,method='pscl',getPeakRefine=1,bpCountfile,bpOutputfile,peakOut,chromosome=NULL){
+getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakprop=.15,winout,coordout,offset=0,tol=10^-5,method='pscl',getPeakRefine=1,chromosome=NULL){
 	time.start <- Sys.time()
 	library(qvalue)
         library(pscl)
@@ -168,10 +168,6 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
                 }
             }
 	}
-        if(getPeakRefine == 1){
-            basecountimport(inputfile=bpCountfile,coordfile=coordout,outputfile=bpOutputfile)
-            peakbound(bpprofile=bpOutputfile,output=peakOut)
-        }
 	time.end <- Sys.time()
 	print(difftime(time.end,time.start))
 }
