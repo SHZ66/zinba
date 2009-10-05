@@ -44,7 +44,7 @@ print(paste("output is ",output))
 	    	return(c(peakstart, peakend, max(x[501:1000]), which.max(x[501:1000])+500))
     	}
     }
-    peakCoords=apply(bpVector,1,peakbound)
+    peakCoords=apply(bpVector,1,peakbound2)
     refPeaks1=cbind(bpProfiles[,1:5],t(peakCoords))
     refPeaks=refPeaks1[-which(refPeaks1[,6]=='NA'),]
     write.table(refPeaks,output,quote=F,sep="\t",row.names=F,col.names=F, append=TRUE)
