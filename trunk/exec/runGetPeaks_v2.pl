@@ -26,7 +26,7 @@ my $result = GetOptions(
 	"print-log=i" => \$printLog
 );
 
-my $pm = new Parallel::ForkManager($concurr_process);
+my $pm = new ForkManager_pg($concurr_process);
 
 my ($formula,$chrm,$data,$inputFile,$form,$offset,$out,$outFile);
 my ($coordout,$winout,$peakout,$stdlog,$errlog,$bpout,$filesOffsets);
