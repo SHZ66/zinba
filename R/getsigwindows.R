@@ -1,4 +1,4 @@
-getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakprop=.15, winout,coordout,offset=0, tol=10^-5, method='pscl', chromosome=NULL){
+getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakprop=.15,winout,coordout,offset=0,tol=10^-5,method='pscl',getPeakRefine=1,bpCountfile,bpOutputfile,peakOut,chromosome=NULL){
 	time.start <- Sys.time()
 	library(qvalue)
         library(pscl)
@@ -8,43 +8,47 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 #	mf <- model.frame(formula=formula, data=data)
 #	X <- model.matrix(attr(mf, "terms"), data=mf)
 	if(method=='pscl'){
-		files = unlist(strsplit(file,";"))
-		for(i in 1:length(files)){
-                    print(paste("Processing ",files[i]))
-                    data=read.table(files[i], header=TRUE)
-                    mf <- model.frame(formula=formula, data=data)
-                    X <- model.matrix(attr(mf, "terms"), data=mf)
-                    if(i == 1){
-                            a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE)
-                    }else{
-                            a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE,start=param)
-                    }
-                    leverage=hat(X, intercept=FALSE)
-                    fdrlevel=threshold
-                    standardized=residuals(a)/sqrt(1-leverage)
-                    pval=1-pnorm(as.matrix(standardized))
-                    fdr=qvalue(pval)
-                    numpeaks=length(which(fdr[[3]]<fdrlevel)) 
-                    minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
-                    sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
-                    colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
-                    param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
+            files = unlist(strsplit(file,";"))
+            for(i in 1:length(files)){
+                print(paste("Processing ",files[i]))
+                data=read.table(files[i], header=TRUE)
+                mf <- model.frame(formula=formula, data=data)
+                X <- model.matrix(attr(mf, "terms"), data=mf)
+                if(i == 1){
+                        a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE)
+                }else{
+                        a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE,start=param)
+                }
+                leverage=hat(X, intercept=FALSE)
+                fdrlevel=threshold
+                standardized=residuals(a)/sqrt(1-leverage)
+                pval=1-pnorm(as.matrix(standardized))
+                fdr=qvalue(pval)
+                numpeaks=length(which(fdr[[3]]<fdrlevel)) 
+                minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
+                sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
+                colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
+                param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
 
-                    line1='|Selection Summary|'
-                    line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
-                    line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
+                line1='|Selection Summary|'
+                line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
+                line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
+
+    ### PRINT SIGNIFICANT WINDOWS
+                print(c(line1, line2,line3))
+                if(file.exists(winout)){
+                    write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+                }else{
+                    write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
+                }
 
     ### FORMAT PEAK COORDINATE DATA
+                if(getPeakRefine == 1){
                     peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$end,sep=":")
                     coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),"+")
                     write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
-                    print(c(line1, line2,line3))
-                    if(file.exists(winout)){
-                        write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
-                    }else{
-                        write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
-                    }
-		}
+                }
+	    }
 	}else if(method=='mixture'){
 		loglikfun=function(parms){
 			mu1=exp(X%*%parms[1:kx])
@@ -145,14 +149,21 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 		line1='|Selection Summary|'
 		line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
 		line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
-
-	### FORMAT PEAK COORDINATE DATA
-		peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$end,sep=":")
-		coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),"+")
-		write.table(coordinates,coordout,quote=F,sep="\t",row.names=F,col.names=F)
+        ### PRINT SIGNIFICANT WINDOWS
 		print(c(line1, line2,line3))
 		write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
+
+	### FORMAT PEAK COORDINATE DATA
+                if(getPeakRefine == 1){
+                    peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$end,sep=":")
+                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),"+")
+                    write.table(coordinates,coordout,quote=F,sep="\t",row.names=F,col.names=F)
+                }
 	}
+        if(getPeakRefine == 1){
+            basecountimport(inputfile=bpCountfile,coordfile=coordout,outputfile=bpOutputfile)
+            peakbound(bpprofile=bpOutputfile,output=peakOut)
+        }
 	time.end <- Sys.time()
 	print(difftime(time.end,time.start))
 }
