@@ -64,8 +64,8 @@ if ($getRefinePeaks == 1){
     }else{
         system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout");\npeakbound(bpprofile="$bpout",output="$peakout");\n' | R --vanilla --slave >> $stdlog 2>> $errlog`);
     }
-    #unlink($bpout);
-    #unlink($coordout);
+    unlink($bpout);
+    unlink($coordout);
 }
 
 sub run_zinba{
@@ -76,8 +76,6 @@ sub run_zinba{
     }else{
         system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",formula=$formula,threshold=$threshold,winout="$winout",coordout="$coordout",offset=$off,getPeakRefine=$getRefinePeaks,method="$method");\n' | R --vanilla --slave >> $stdLog 2>> $errLog`);
     }
-    unlink($bpout);
-    unlink($coordout);
     return(0);
 }
 
