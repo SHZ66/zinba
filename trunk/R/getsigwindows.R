@@ -4,9 +4,6 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
         library(pscl)
         options(scipen=999)
 	###### USER INPUT############################
-#	data=read.table(file, header=TRUE)
-#	mf <- model.frame(formula=formula, data=data)
-#	X <- model.matrix(attr(mf, "terms"), data=mf)
 	if(method=='pscl'){
             files = unlist(strsplit(file,";"))
             for(i in 1:length(files)){
