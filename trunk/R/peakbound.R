@@ -15,20 +15,20 @@ peakbound=function(bpprofile,output,winoffset){
     	#left bound
     	#find max of center window
     	max=which.max(x[(winoffset+1):(length(x)-winoffset)])+winoffset
-    	hold=matrix(0, 1,length(x)-2*winoffset)
-    	for(bound in (length(x)-2*winoffset):50){
+	windowlength=length(x)-2*winoffset
+	hold=matrix(0, 1,windowlength)
+    	for(bound in windowlength:50){
         	X=(max-bound):max
         	Y=x[(max(max-bound,1)):max]
         	B=sum((X-mean(X))*Y)/sum((X-mean(X))^2)
         	hold[bound]=(B^2)*sum((X-mean(X))^2)/sum((Y-mean(Y))^2)
     	}
-
     	fit=which.max(hold)+1
     	peakstart=max-fit
     	##############################
     	#right bound
-    	hold=matrix(0, 1,length(x)-2*winoffset)
-    	for(bound in 50:(length(x)-2*winoffset)){
+    	hold=matrix(0, 1,windowlength)
+    	for(bound in 50:windowlength){
         	X=max:(max+bound)
         	Y=x[(max:(max+bound))]
         	B=sum((X-mean(X))*Y)/sum((X-mean(X))^2)
