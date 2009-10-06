@@ -1,4 +1,9 @@
-peakbound=function(bpprofile,output){
+peakbound=function(bpprofile,output,winoffset){
+
+#######################
+# USE winoffset for offset size
+#######################
+
     bpProfiles=read.table(bpprofile,header=TRUE,sep="\t")
     bpVector=bpProfiles[,6:ncol(bpProfiles)]
     peakbound2=function(x){
