@@ -64,8 +64,7 @@ refPeaks=refPeaks[order(refPeaks[,9]),]
 		#gets rows corresponding to unique max i		
 		maxmatch=which(as.numeric(refPeaks[,9])==maxes[i])
 		if(length(maxmatch)>1){
-		minstart=min(refPeaks[maxmatch,6]) #min of all start for those with same
-max
+		minstart=min(refPeaks[maxmatch,6]) #min of all start for those with same max
 		maxend=max(refPeaks[maxmatch,7]) #max of all end for those with same max
 		#save information for first corresponding row to new matrix
 		refPeaks[maxmatch,6]=minstart
