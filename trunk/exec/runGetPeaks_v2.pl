@@ -13,7 +13,7 @@ my $concurr_process = 1;
 my $winsize = 0;
 my $method = "pscl";
 my $printLog = 0;
-my $win_offset = undef;
+my $win_offset = 0;
 my $getRefinePeaks = 1;
 
 my $result = GetOptions(
@@ -24,12 +24,11 @@ my $result = GetOptions(
 	"method=s" => \$method,
 	"processes=i" => \$concurr_process,
         "refine_peaks=i" => \$getRefinePeaks,
-	"win-offset=s" => \$win_offset,
+	"win-offset=i" => \$win_offset,
 	"print-log=i" => \$printLog
 );
 my $pm = new ForkManager_pg($concurr_process);
 
-$win_offset = $winsize/2 if(!defined($win_offset));
 my ($formula,$chrm,$data,$inputFile,$form,$offset,$out,$outFile);
 my ($coordout,$winout,$peakout,$stdlog,$errlog,$bpout,$filesOffsets);
 open(LIST,$paramFile);

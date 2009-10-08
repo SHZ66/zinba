@@ -7,7 +7,6 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 	if(method=='pscl'){
             files = unlist(strsplit(file,";"))
             for(i in 1:length(files)){
-                print(paste("Processing ",files[i]))
                 data=read.table(files[i], header=TRUE)
                 mf <- model.frame(formula=formula, data=data)
                 X <- model.matrix(attr(mf, "terms"), data=mf)
@@ -32,7 +31,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
                 line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
 
     ### PRINT SIGNIFICANT WINDOWS
-                print(c(line1, line2,line3))
+                print(paste("\nProcessing ",files[i]),c(line1, line2,line3),"\n")
                 if(file.exists(winout)){
                     write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
                 }else{
