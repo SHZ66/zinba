@@ -20,8 +20,8 @@ peakbound2=function(x){
 	for(bound in windowlength:50){
 	X=(max-bound):max
 	Y=x[(max(max-bound,1)):max]
-	B=sum((X-mean(X))*Y)/sum((X-mean(X))2)
-	hold[bound]=(B2)*sum((X-mean(X))2)/sum((Y-mean(Y))2)
+	B=sum((X-mean(X))*Y)/sum((X-mean(X))^2)
+	hold[bound]=(B2)*sum((X-mean(X))^2)/sum((Y-mean(Y))^2)
 	}
 	fit=which.max(hold)+1
 	peakstart=max-fit
@@ -31,8 +31,8 @@ peakbound2=function(x){
 	for(bound in 50:windowlength){
 	X=max:(max+bound)
 	Y=x[(max:(max+bound))]
-	B=sum((X-mean(X))*Y)/sum((X-mean(X))2)
-	hold[bound]=(B2)*sum((X-mean(X))2)/sum((Y-mean(Y))2)
+	B=sum((X-mean(X))*Y)/sum((X-mean(X))^2)
+	hold[bound]=(B2)*sum((X-mean(X))^2)/sum((Y-mean(Y))^2)
 	}
 	fit=which.max(hold)
 	peakend=max+fit
