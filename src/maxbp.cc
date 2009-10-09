@@ -18,14 +18,14 @@ maxbp::maxbp(unsigned short int _chrom, unsigned long int _position, int _score)
 	score = _score;
 }
 
-bool maxbp::operator <(maxbp other) const{
+bool maxbp::operator<(const maxbp& other) const{
 		return position < other.position;
 }
 
-bool maxbp::operator ==(maxbp other) const{
+bool maxbp::operator==(const maxbp& other) const{
 	return position == other.position;
 }
 
-bool maxbp::operator >(maxbp other) const{
+bool maxbp::operator>(const maxbp& other) const{
 	return position > other.position;
 }

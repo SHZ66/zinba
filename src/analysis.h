@@ -20,7 +20,7 @@ class analysis{
 		~analysis(); //Implemented
 		int importCoords(const char *);//Implemented
 		int processCoords(const char *,const char *,string);//Implemented
-		int outputData(const char *,int,const char *,unsigned short int,unsigned long int,unsigned long int,const char *,int,int[],int,unsigned long int);//Implemented
+		int outputData(const char *,int,unsigned short int,unsigned long int,unsigned long int,int,int[]);//Implemented
 
 		struct ltstr{
 			bool operator()(const char* s1, const char* s2) const
