@@ -11,9 +11,9 @@ class maxbp{
 			~maxbp();
 			maxbp(unsigned short int, unsigned long int, int);
 			maxbp(const maxbp&);
-			bool operator <(maxbp) const;
-			bool operator ==(maxbp) const;
-			bool operator >(maxbp) const;
+			bool operator<(const maxbp& other) const;
+			bool operator==(const maxbp& other) const;
+			bool operator>(const maxbp& other) const;
 
 			unsigned short int chrom;//2
 			unsigned long int position;//8
