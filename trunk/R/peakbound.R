@@ -67,7 +67,7 @@ peakbound=function(bpprofile,output,winoffset=0){
 #	}
 #   }
 
-    if(file.exists(winout)){
+    if(file.exists(output)){
         write.table(refPeaks,output,quote=F,sep="\t",row.names=F,col.names=F,append=TRUE)
     }else{
         write.table(refPeaks,output,quote=F,sep="\t",row.names=F)
