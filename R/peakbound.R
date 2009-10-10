@@ -1,6 +1,6 @@
 peakbound=function(bpprofile,output,winoffset=0){
     bpProfiles=read.table(bpprofile,header=TRUE,sep="\t")
-    bpVector=bpProfiles[,6:ncol(bpProfiles)]
+    bpVector=as.matrix(bpProfiles[,6:ncol(bpProfiles)])
     peakbound2=function(x){
 	##assuming 500 bp window and flanking 500 bp windows
 	##TO DO: 
