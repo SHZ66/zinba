@@ -66,7 +66,13 @@ peakbound=function(bpprofile,output,winoffset=0){
 #	    #replace start and stop bounds of row with new merged start and stop
 #	}
 #   }
-    write.table(refPeaks,output,quote=F,sep="\t",row.names=F,col.names=F,append=TRUE)
+
+    if(file.exists(winout)){
+        write.table(refPeaks,output,quote=F,sep="\t",row.names=F,col.names=F,append=TRUE)
+    }else{
+        write.table(refPeaks,output,quote=F,sep="\t",row.names=F)
+    }
+#    write.table(refPeaks,output,quote=F,sep="\t",row.names=F,col.names=F,append=TRUE)
 }
 
 

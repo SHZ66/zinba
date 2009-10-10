@@ -30,7 +30,7 @@ my $result = GetOptions(
 my $pm = new ForkManager_pg($concurr_process);
 
 my ($formula,$chrm,$data,$inputFile,$form,$offset,$out,$outFile);
-my ($coordout,$winout,$peakout,$stdlog,$errlog,$bpout,$filesOffsets);
+my ($coordout,$bpout,$winout,$peakout,$stdlog,$errlog,%couts,%bpouts,$filesOffsets);
 open(LIST,$paramFile);
 while(<LIST>){
     chomp;
@@ -38,14 +38,16 @@ while(<LIST>){
 	($form,$formula) = split(/\t/, $_);
     }elsif($_ =~ 'OUTPUT'){
 	($out,$outFile) = split(/\t/,$_);
-	$coordout = $outFile . "_PEAK_COORDS.temp";
+	$coordout = $outFile;# . "_PEAK_COORDS.temp";
 	$winout = $outFile . ".wins";
 	$peakout = $outFile . ".peaks";
 	$stdlog = $outFile . "_std.log";
 	$errlog = $outFile . "_err.log";
-	$bpout = $outFile . "_BPcount";
+	$bpout = $outFile; # . "_BPcount";
     }elsif($_ =~ 'DATA'){
 	($data,$inputFile,$chrm,$offset) = split(/\t/,$_);
+	$bpouts{$chrm} = $bpout . "_" . $chrm . "_BPcount";
+	$couts{$chrm} = $coordout . "_" . $chrm . "_PEAK_COORDS.temp";
 	push(@{$filesOffsets->{$chrm}}, $inputFile);
     }
 }close LIST;
@@ -54,7 +56,7 @@ foreach my $chrm (keys %{$filesOffsets}){
     print STDERR "Processing $chrm\n";
     my $offsetFiles = join(";",@{$filesOffsets->{$chrm}});
     my $pid = $pm->start and next;
-    &run_zinba($offsetFiles,$coordout,$winout,$formula,$threshold,$winsize,$win_offset,$method,$stdlog,$errlog,$printLog,$getRefinePeaks,$bpCountFile,$bpout,$peakout,$chrm);
+    &run_zinba($offsetFiles,$couts{$chrm},$winout,$formula,$threshold,$winsize,$win_offset,$method,$stdlog,$errlog,$printLog,$getRefinePeaks,$bpCountFile,$bpouts{$chrm},$peakout,$chrm);
     $pm->finish;
 }
 $pm->wait_all_children;
