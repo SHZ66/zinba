@@ -98,7 +98,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 				for(maxbpIter = list_maxbp.begin();maxbpIter!=list_maxbp.end();++maxbpIter){
 						profile = new int[(profile_extend * 2)];
 						int pIndex = 0;
-						for(int s = (maxbpIter->position - profile_extend); s < (maxbpIter->position + profile_extend); s++){
+						for(int s = (maxbpIter->position - profile_extend); s <= (maxbpIter->position + profile_extend); s++){
 							profile[pIndex] = basepair[s];
 							pIndex++;
 						}
@@ -210,7 +210,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 		for(maxbpIter = list_maxbp.begin();maxbpIter!=list_maxbp.end();++maxbpIter){
 			profile = new int[(profile_extend * 2)];
 			int pIndex = 0;
-			for(int s = (maxbpIter->position - profile_extend); s < (maxbpIter->position + profile_extend); s++){
+			for(int s = (maxbpIter->position - profile_extend); s <= (maxbpIter->position + profile_extend); s++){
 				profile[pIndex] = basepair[s];
 				pIndex++;
 			}
