@@ -9,10 +9,10 @@ peakbound=function(bpprofile,output,winoffset=0){
 	##############################
 	#left bound
 	#find max of center window
-	max=which.max(x[(winoffset+1):(length(x)-winoffset)])+winoffset
-	windowlength=length(x)-2*winoffset
-	hold=matrix(0, 1,windowlength)
-	for(bound in windowlength:50){
+	searchlength=(length(x)-1)/2
+	max=searchlength+1
+	hold=matrix(0, 1,searchlength)
+	for(bound in searchlength:50){
 	    X=(max-bound):max
 	    Y=x[(max(max-bound,1)):max]
 	    B=sum((X-mean(X))*Y)/sum((X-mean(X))^2)
@@ -22,25 +22,22 @@ peakbound=function(bpprofile,output,winoffset=0){
 	peakstart=max-fit
 	##############################
 	#right bound
-	hold=matrix(0, 1,windowlength)
-	for(bound in 50:windowlength){
+	hold=matrix(0, 1,searchlength)
+	for(bound in 50:searchlength){
 	    X=max:(max+bound)
-	    Y=x[max:(max(max+bound,windowlength))]
+	    Y=x[max:(max(max+bound,searchlength))]
 	    B=sum((X-mean(X))*Y)/sum((X-mean(X))^2)
 	    hold[bound]=(B^2)*sum((X-mean(X))^2)/sum((Y-mean(Y))^2)
 	}
 	fit=which.max(hold)
 	peakend=max+fit
 	##############################
-#	if(max==(winoffset+1) || max==(length(x)-winoffset)){
-#	    return(c('NA', 'NA','NA', 'NA'))	
-#	}else{
-	    return(c(peakstart, peakend,max(x[(winoffset+1):(length(x)-winoffset)]),which.max(x[(winoffset+1):(length(x)-winoffset)])+winoffset))
-#	}
+
+        return(c(peakstart, peakend,max(x),which.max(x)))
     }
     peakCoords=apply(bpVector,1,peakbound2)
     refPeaks=cbind(bpProfiles[,1:5],t(peakCoords))
-    refPeaks=refPeaks[order(refPeaks[,8]),]
+    refPeaks[,c(6,7,9)]=refPeaks[,c(6,7,9)]+refPeaks[,3]-1
 
 #   refPeaks1=cbind(bpProfiles[,1:5],t(peakCoords))
 #   removeNAs=which(refPeaks1[,6]=='NA')
