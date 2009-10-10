@@ -9,14 +9,14 @@ class maxbp{
 	public:
 			maxbp();
 			~maxbp();
-			maxbp(unsigned short int, unsigned long int, int);
+			maxbp(unsigned short int, long int, int);
 			maxbp(const maxbp&);
 			bool operator<(const maxbp& other) const;
 			bool operator==(const maxbp& other) const;
 			bool operator>(const maxbp& other) const;
 
 			unsigned short int chrom;//2
-			unsigned long int position;//8
+			long int position;//8
 			int score;
 	
 	private:

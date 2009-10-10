@@ -96,20 +96,29 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 				}
 				
 				for(maxbpIter = list_maxbp.begin();maxbpIter!=list_maxbp.end();++maxbpIter){
-						profile = new int[(profile_extend * 2)];
-						int pIndex = 0;
-						for(int s = (maxbpIter->position - profile_extend); s <= (maxbpIter->position + profile_extend); s++){
-							profile[pIndex] = basepair[s];
-							pIndex++;
-						}
+					profile = new int[(profile_extend * 2)];
+					int pIndex = 0;
+					long int startPos = 1;
+					long int stopPos = startPos + (profile_extend * 2);
+					if(  maxbpIter->position > profile_extend ){
+						startPos = (maxbpIter->position - profile_extend);
+						stopPos = (maxbpIter->position + profile_extend);
+					}else{
+						cout << "\n\tSetting coordinates to 1-501\n"; 
+					}
 
-						if(outputData( outputFile,printFlag,maxbpIter->chrom,(maxbpIter->position - profile_extend),(maxbpIter->position + profile_extend - 1),pIndex,profile) != 0){
-							cout << "Error printing output to file, exiting" << endl;
-							return 1;
-						}
-						delete [] profile;
-						profile = NULL;
-						printFlag = 1;
+					for(int s = startPos; s <= stopPos; s++){
+						profile[pIndex] = basepair[s];
+						pIndex++;
+					}
+					
+					if(outputData( outputFile,printFlag,maxbpIter->chrom,startPos,stopPos,pIndex,profile) != 0){
+						cout << "Error printing output to file, exiting" << endl;
+						return 1;
+					}
+					delete [] profile;
+					profile = NULL;
+					printFlag = 1;
 				}
 				cout << "Finished\n";
 				
@@ -210,12 +219,18 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 		for(maxbpIter = list_maxbp.begin();maxbpIter!=list_maxbp.end();++maxbpIter){
 			profile = new int[(profile_extend * 2)];
 			int pIndex = 0;
-			for(int s = (maxbpIter->position - profile_extend); s <= (maxbpIter->position + profile_extend); s++){
+			long int startPos = 1;
+			long int stopPos = startPos + (profile_extend * 2);
+			if(maxbpIter->position > profile_extend){
+				startPos = (maxbpIter->position - profile_extend);
+				stopPos = (maxbpIter->position + profile_extend);
+			}
+			for(int s = startPos; s <= stopPos; s++){
 				profile[pIndex] = basepair[s];
 				pIndex++;
 			}
 			
-			if(outputData( outputFile,printFlag,maxbpIter->chrom,(maxbpIter->position - profile_extend),(maxbpIter->position + profile_extend - 1),pIndex,profile) != 0){
+			if(outputData( outputFile,printFlag,maxbpIter->chrom,startPos,stopPos,pIndex,profile) != 0){
 				cout << "Error printing output to file, exiting" << endl;
 				return 1;
 			}
@@ -231,7 +246,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 	return 0;
 }
 
-int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,int printStop,int pProfile[]){
+int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,long int pStart,long int pStop,int printStop,int pProfile[]){
 	FILE * fh;
 	if(pFlag == 0){
 		fh = fopen(outputFile,"w"); 
