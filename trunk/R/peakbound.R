@@ -38,6 +38,7 @@ peakbound=function(bpprofile,output,winoffset=0){
     peakCoords=apply(bpVector,1,peakbound2)
     refPeaks=cbind(bpProfiles[,1:5],t(peakCoords))
     refPeaks[,c(6,7,9)]=refPeaks[,c(6,7,9)]+refPeaks[,3]-1
+    colnames(refPeaks)[c(dim(refPeaks)[2]-3,dim(refPeaks)[2]-2,dim(refPeaks)[2]-1, dim(refPeaks)[2])]=c('peak_start','peak_stop','max_score','max_position')
 
 #   refPeaks1=cbind(bpProfiles[,1:5],t(peakCoords))
 #   removeNAs=which(refPeaks1[,6]=='NA')
