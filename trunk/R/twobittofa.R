@@ -1,4 +1,4 @@
-twobittofa=function(inName, outName){
-	.C("twoBitToFa.c",as.character(inName), as.character(outName),PACKAGE="zinba")
+twobittofa=function(chrm,start,end,twoBitFile,gcSeq){
+	.C("twoBitToFa",as.character(chrm),start,end,as.character(twoBitFile),as.character(gcSeq),PACKAGE="zinba")
 }
 	
