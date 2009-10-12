@@ -76,36 +76,37 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 		linkstr <- 'logit'
                 linkobj <- make.link(linkstr)
                 linkinv <- linkobj$linkinv
-
-		#starting params for ze0 component
-		model_zero <- suppressWarnings(glm.fit(Z, as.integer(Y0),family = binomial(link = linkstr)))
-		prop0=sum( model_zero$fitted)/n
-
-		#starting params for count componenets
-		prop2=priorpeakprop
-		prop1=1-prop0-prop2
-		odY = order(Y)
-		n1  = round(length(Y) * (1 - prop2))
-		priorCOUNTweight=rep(1, length(Y))      
-		priorCOUNTweight[odY[1:n1]]=0
-
-		model_count1 <- suppressWarnings(glm.fit(X, Y, family = poisson(), weights = (1-priorCOUNTweight)))
-		model_count2 <- suppressWarnings(glm.fit(X, Y, family = poisson(), weights = (priorCOUNTweight)))
-
-		#start parameter vector
-		start <- list(count1 = model_count1$coefficients, count2 = model_count2$coefficients,zero = model_zero$coefficients)
-		start$theta1 <- 1
-		start$theta2 <- 1
-
-		#starting prior probs
-		mui1  <- model_count1$fitted
-		mui2  <- model_count2$fitted
-		probi0 <- model_zero$fitted
-
-		probi0=probi0/(probi0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
-		probi0[Y1]=0
-		probi1  <- prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
-		probi2  <- prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+		if(i == 1){
+			#starting params for ze0 component
+			model_zero <- suppressWarnings(glm.fit(Z, as.integer(Y0),family = binomial(link = linkstr)))
+			prop0=sum( model_zero$fitted)/n
+	
+			#starting params for count componenets
+			prop2=priorpeakprop
+			prop1=1-prop0-prop2
+			odY = order(Y)
+			n1  = round(length(Y) * (1 - prop2))
+			priorCOUNTweight=rep(1, length(Y))      
+			priorCOUNTweight[odY[1:n1]]=0
+	
+			model_count1 <- suppressWarnings(glm.fit(X, Y, family = poisson(), weights = (1-priorCOUNTweight)))
+			model_count2 <- suppressWarnings(glm.fit(X, Y, family = poisson(), weights = (priorCOUNTweight)))
+	
+			#start parameter vector
+			start <- list(count1 = model_count1$coefficients, count2 = model_count2$coefficients,zero = model_zero$coefficients)
+			start$theta1 <- 1
+			start$theta2 <- 1
+	
+			#starting prior probs
+			mui1  <- model_count1$fitted
+			mui2  <- model_count2$fitted
+			probi0 <- model_zero$fitted
+	
+			probi0=probi0/(probi0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+			probi0[Y1]=0
+			probi1  <- prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+			probi2  <- prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+		}		
 		ll_new <- loglikfun(c(start$count1, start$count2, start$zero, log(start$theta1), log(start$theta2), prop1, prop2))
 
 		ll_old <- 2 * ll_new      
