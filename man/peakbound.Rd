@@ -3,11 +3,12 @@
           \alias{peakbound}
           \title{Return Exact Peak Bounds}
           \description{
-            Imports basecounts from significant windows using generated coordinate file from getsigwindows(), each string of basecounts much be length 1500 (for now)
+            Uses basecounts generated from basecountimport() to determine exact boundaries of peaks from basecounts imported from significant windows. 
           }
-          \usage{peakbound(pathtocoordfile}
+          \usage{peakbound(bpprofile,output}
           \arguments{
-            \item{pathtocoordfile}{path to coordinate file from getsigwindows()}
+            \item{bpprofile}{path to basecount file from basecountimport()}
+            \item{output}{file that outputs start and stop positions with refined peaks, in addition to the location of the maximum of the peak and the basecount value at the maximum}
           }
           \seealso{
             \code{\link{save}}.
