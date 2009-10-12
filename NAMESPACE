@@ -10,6 +10,8 @@ export(run.zinba)
 export(estimatecnv)
 export(simulatecounts)
 export(getmixturewindows)
+export(twobittofa)
+export(twobitinfo)
 # ------------------------------------------
 # S3method declarations.  
 # ------------------------------------------

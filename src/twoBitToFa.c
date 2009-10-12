@@ -6,6 +6,7 @@
 #include "dnaseq.h"
 #include "fa.h"
 #include "twoBit.h"
+#include <R.h>
 #include "bPlusTree.h"
 
 static char const rcsid[] = "$Id: twoBitToFa.c,v 1.12 2009/01/09 10:14:33 kent Exp $";
@@ -37,6 +38,7 @@ errAbort(
   );
 }
 */
+
 char *clSeq = NULL;	/* Command line sequence. */
 int clStart = 0;	/* Start from command line. */
 int clEnd = 0;		/* End from command line. */
@@ -44,7 +46,7 @@ char *clSeqList = NULL; /* file containing list of seq names */
 bool noMask = FALSE;  /* convert seq to upper case */
 char *clBpt = NULL;	/* External index file. */
 
-static struct optionSpec options[] = {
+/*static struct optionSpec options[] = {
    {"seq", OPTION_STRING},
    {"seqList", OPTION_STRING},
    {"start", OPTION_INT},
@@ -52,7 +54,7 @@ static struct optionSpec options[] = {
    {"noMask", OPTION_BOOLEAN},
    {"bpt", OPTION_STRING},
    {NULL, 0},
-};
+};*/
 
 void outputOne(struct twoBitFile *tbf, char *seqSpec, FILE *f, 
 	int start, int end)
@@ -82,11 +84,21 @@ for (s = tbss; s != NULL; s = s->next)
     outputOne(tbf, s->name, outFile, s->start, s->end);
 }
 
-void twoBitToFa(char **RinName, char **RoutName)
+void twoBitToFa(char **RinSeq,int *Rstart,int *Rstop,char **Rtwobitfile,char **RgcOut)
 /* twoBitToFa - Convert all or part of twoBit file to fasta. */
 {
-char* inName=RinName[0];
-char* outName=RoutName[0] ;
+
+	char *clSeq = RinSeq[0];	/* Command line sequence. */
+	int clStart = *Rstart;	/* Start from command line. */
+	int clEnd = *Rstop;		/* End from command line. */
+	//char *clSeqList = Rtwobitfile[0]; /* file containing list of seq names */
+	noMask = TRUE;  /* convert seq to upper case */
+	char *clBpt = NULL;/* External index file. */
+	char *inName = Rtwobitfile[0];	
+	char *outName = RgcOut[0];
+	
+//char* inName=RinName[0];
+//char* outName=RoutName[0] ;
 struct twoBitFile *tbf;
 FILE *outFile = mustOpen(outName, "w");
 struct twoBitSpec *tbs;
