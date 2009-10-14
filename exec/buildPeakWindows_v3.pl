@@ -275,7 +275,8 @@ if($twoBitFile){
 			my $line = <CLEN>;
 			chomp($line);
 			my ($cInfo,$cLength) = split(/\t/, $line);
-			close CLEN; unlink($cFileLen);
+			close CLEN; #unlink($cFileLen);
+			print STDERR "For $chrm start is $start and stop is $cLength\n";
 			system(qq`echo 'library(zinba);\ntwobittofa(chrm="$chrm",start=$start,end=$cLength,twoBitFile="$twoBitFile",gcSeq="$gcSeq");\n' | R --vanilla --slave`);
 #			`twoBitToFa -noMask -seq=$chrm -start=$start -end=$cLength $twoBitFile $gcSeq 2> /dev/null`;
 			my $pid = $pm->start and next;
@@ -509,5 +510,5 @@ sub get_gcPerc {
 		}
 	}close TEMP;close OUT;
 	close GC;
-	unlink($tempWin);unlink($gcFile);
+	#unlink($tempWin);#unlink($gcFile);
 }
