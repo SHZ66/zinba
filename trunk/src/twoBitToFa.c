@@ -39,12 +39,14 @@ errAbort(
 }
 */
 
-char *clSeq = NULL;	/* Command line sequence. */
-int clStart = 0;	/* Start from command line. */
-int clEnd = 0;		/* End from command line. */
+
+//char *clSeq = NULL;	/* Command line sequence. */
+//int clStart = 0;	/* Start from command line. */
+//int clEnd = 0;		/* End from command line. */
 char *clSeqList = NULL; /* file containing list of seq names */
 bool noMask = FALSE;  /* convert seq to upper case */
-char *clBpt = NULL;	/* External index file. */
+//char *clBpt = NULL;	/* External index file. */
+
 
 /*static struct optionSpec options[] = {
    {"seq", OPTION_STRING},

@@ -31,7 +31,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
                 line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
 
     ### PRINT SIGNIFICANT WINDOWS
-                print(paste("\nProcessing ",files[i]))
+                print(paste("Processing ",files[i]))
                 print(c(line1, line2,line3))
                 if(file.exists(winout)){
                     write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
