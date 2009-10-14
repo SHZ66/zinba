@@ -26,12 +26,12 @@ errAbort(
   );
 }
 */
-static struct optionSpec options[] = {
+/*static struct optionSpec options[] = {
    {"nBed", OPTION_BOOLEAN},
    {"noNs", OPTION_BOOLEAN},
    {NULL, 0},
 };
-
+*/
 
 void twoBitInfo(char **RinName, char **RoutName)
 /* twoBitInfo - get information about sequences in a .2bit file. */
@@ -53,11 +53,11 @@ if (seqName != NULL)
     int seqCount = chopString(seqName, ",", seqArray, ArraySize(seqArray));
     for (i = 0 ; i < seqCount ; i++)
 	{
-	if (optionExists("nBed"))
+/*	if (optionExists("nBed"))
 	    twoBitOutNBeds(tbf, seqArray[i], outFile);
 	else if(optionExists("noNs"))
 	    fprintf(outFile, "%s\t%d\n", seqArray[i], twoBitSeqSizeNoNs(tbf, seqArray[i]));
-	else
+	else*/
 	    fprintf(outFile, "%s\t%d\n", seqArray[i], twoBitSeqSize(tbf, seqArray[i]));
 	}
 	
@@ -67,11 +67,11 @@ else
     struct twoBitIndex *index;
     for (index = tbf->indexList; index != NULL; index = index->next)
 	{
-	if (optionExists("nBed"))
+/*	if (optionExists("nBed"))
 	    twoBitOutNBeds(tbf, index->name, outFile);
 	else if(optionExists("noNs"))
 	    fprintf(outFile, "%s\t%d\n", index->name, twoBitSeqSizeNoNs(tbf, index->name));
-	else
+	else*/
 	    fprintf(outFile, "%s\t%d\n", index->name, twoBitSeqSize(tbf, index->name));
 	}
     }
