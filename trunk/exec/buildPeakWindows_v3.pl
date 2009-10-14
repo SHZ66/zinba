@@ -268,15 +268,15 @@ if($twoBitFile){
 			print LIST "\#DATA\t$winOut\t$chrm\t$offsets[$o]\n";
 
 			my $cFileLen = $chrm . "_" . $offset . ".txt";
-			my $twobitinfo_in = "$twoBitFile:$chrm";
-			system(qq`echo 'library(zinba);\ntwobitinfo(infile="$twobitinfo_in",outfile=$cFileLen);\n' | R --vanilla --slave >> /dev/null 2>> /dev/null`);			
+			my $twobitinfo_in = $twoBitFile . ":" . $chrm;
+			system(qq`echo 'library(zinba);\ntwobitinfo(infile="$twobitinfo_in",outfile="$cFileLen");\n' | R --vanilla --slave`);
 #			`twoBitInfo /gbdb/hg18/hg18.2bit:$chrm $cFileLen`;
 			open(CLEN,$cFileLen);
 			my $line = <CLEN>;
 			chomp($line);
 			my ($cInfo,$cLength) = split(/\t/, $line);
 			close CLEN; unlink($cFileLen);
-			system(qq`echo 'library(zinba);\ntwobittofa(chrm="$chrm",start=$start,end=$cLength,twoBitFile="$twoBitFile",gcSeq="$gcSeq");\n' | R --vanilla --slave >> /dev/null 2>> /dev/null`);
+			system(qq`echo 'library(zinba);\ntwobittofa(chrm="$chrm",start=$start,end=$cLength,twoBitFile="$twoBitFile",gcSeq="$gcSeq");\n' | R --vanilla --slave`);
 #			`twoBitToFa -noMask -seq=$chrm -start=$start -end=$cLength $twoBitFile $gcSeq 2> /dev/null`;
 			my $pid = $pm->start and next;
 			&get_gcPerc($gcSeq,$tempFile,$winOut,$window_size);
@@ -471,6 +471,7 @@ sub get_gcPerc {
 			while($gcFlag == 0){
 				my $seq = <GC>;
 				chomp($seq);
+				$seq = uc($seq);
 				$readLen += length($seq);
 				if($readLen == $winSize || eof(GC)){
 					$ncount += ($seq =~ tr/N//);
