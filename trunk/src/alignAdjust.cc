@@ -21,19 +21,20 @@ using namespace std;
 extern "C" {
 void alignAdjust(char **Rinputfile, int *RaThresh, int *RadjustSize){
  
-	char* inputFile =Rinputfile[0];
-	int* coordFile = RaThresh[0];
-	int* outputFile = RadjustSize[0];
+	const char* inputFile = Rinputfile[0];
+	int aThresh = RaThresh[0];
+	int adjustSize = RadjustSize[0];
 
 /*	if(argc < 4){
 		print_ops();
 		exit(1);
-	}*/
+	}
 	
 	const char * inputFile = argv[1];
 	int aThresh = atoi(argv[2]);
 	int adjustSize = atoi(argv[3]);
-	
+*/
+ 
 //	cout << "\n\nInput file is " << inputFile << "\naThresh is " << aThresh << "\nadjustSize is " << adjustSize << "\n";
 	
 	string aFile;
