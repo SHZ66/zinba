@@ -76,13 +76,14 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 		linkstr <- 'logit'
                 linkobj <- make.link(linkstr)
                 linkinv <- linkobj$linkinv
-		if(i == 1){
 			#starting params for ze0 component
 			model_zero <- suppressWarnings(glm.fit(Z, as.integer(Y0),family = binomial(link = linkstr)))
 			prop0=sum( model_zero$fitted)/n
 	
 			#starting params for count componenets
-			prop2=priorpeakprop
+			if(i == 1){			
+				prop2=priorpeakprop
+			}
 			prop1=1-prop0-prop2
 			odY = order(Y)
 			n1  = round(length(Y) * (1 - prop2))
