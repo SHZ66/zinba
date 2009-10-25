@@ -2,6 +2,7 @@ useDynLib(zinba)
 # ------------------------------------------
 # Export directives.  
 # ------------------------------------------
+export(alignAdjust)
 export(peakbound)
 export(basecountimport)
 export(getsigwindows)
@@ -9,9 +10,9 @@ export(buildwindowdata)
 export(run.zinba)
 export(estimatecnv)
 export(simulatecounts)
-export(getmixturewindows)
 export(twobittofa)
 export(twobitinfo)
+export(zeroinfl)
 # ------------------------------------------
 # S3method declarations.  
 # ------------------------------------------
