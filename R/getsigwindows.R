@@ -1,7 +1,8 @@
 getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakprop=.15,winout,coordout,offset=0,tol=10^-5,getPeakRefine=1,method='pscl'){
 	time.start <- Sys.time()
 	library(qvalue)
-        library(pscl)
+        #library(pscl)
+	library(MASS)
         options(scipen=999)
 	###### USER INPUT############################
 	if(method=='pscl'){

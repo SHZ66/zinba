@@ -8,89 +8,98 @@
 
 #define min(a,b)  ((a) < (b) ? (a) : (b))
 
-void peakboundc(int **Rbasecount,int *Rlbasecount, int **Rmaxvec, int *Rlmaxvec, int *Rsearchlength, double maxvecbounds[])
+void peakboundc(int basecount[],int *Rlbasecount, int maxvec[], int *Rlmaxvec, int *Rsearchlength, int maxvecbounds[])
 {
 
-int* basecount = Rbasecount[0];
-int lbasecount = *Rlbasecount;
-int* maxvec= Rmaxvec[0];
-int lmaxvec = *Rlmaxvec;
-int searchlength=*Rsearchlength;
-int max, peakstart, peakend, fit, bound,val,h, i, n, sumxy,sumx, sumx2, sumy, sumy2, tmp;
 
-/*
-for(i=0; i<lmaxvec; i++){
-	//adjust for C start index at 0
-	max=maxvec[i]-1;
-	double hold[min(searchlength, max+1)];
-	if(min(searchlength, max+1)<50){
+int lbasecount = *Rlbasecount;
+int lmaxvec = *Rlmaxvec;
+int max;
+int searchlength=*Rsearchlength;
+int  peakstart=0;
+int  peakend=0;
+int  fit=0;
+int  bound,h, i, j, n;
+double val,sumxy,sumx, sumx2, sumy, sumy2;
+
+for(j=0; j<lmaxvec; j++){
+	max=maxvec[j];
+	double hold[lbasecount];
+	for(i=0; i<lbasecount; i++){
+		hold[i]=0;
+	}
+	if(min(searchlength, max)<50){
 		peakstart=1;
 	}else{		
-		for(bound=min(searchlength, max-1); bound>=50; bound--){
+		for(bound=50; bound<=min(searchlength, max); bound++){
 			sumxy=0;
 			sumx=0;
 			sumy=0;
 			sumx2=0;
 			sumy2=0;
-			n=bound+1;
-			for(h=max-bound; h<=max;h++){ 
-				sumxy=sumxy+h*basecount[h];
-				sumx=sumx+h;
+			n=bound;
+			for(h=max-bound; h<=max-1;h++){ 
+				sumxy=sumxy+(h+1)*basecount[h];
+				sumx=sumx+h+1;
 				sumy=sumy+basecount[h];
-				sumx2=sumx2+pow(h,2);
-				sumy2=sumy2+pow(basecount[h],2);					
+				sumx2=sumx2+(h+1)*(h+1);
+				sumy2=sumy2+basecount[h]*basecount[h];						
 			}
-			hold[bound]=pow(sumxy-sumy*sumx/n,2)/((sumy2+sumy*sumy/n+sumy*sumy/(n*n))*(sumx2+sumx*sumx/n+sumx*sumx/(n*n)));	
+			hold[max-bound]=pow(sumxy-sumy*sumx/n,2)/((sumy2-sumy*sumy/n)*(sumx2-sumx*sumx/n))	;
 		}
 		//find max R2 position
 		val=0;
 		fit=0;
-		for(h=0; h<min(searchlength, max+1); h++){
-        		if(hold[h] > val){
-            		val = hold[min(searchlength, max+1)];
-			fit=h;
+		for(i=0; i<lbasecount; i++){
+        		if(hold[i] > val){
+            		val = hold[i];
+			fit=i;
         		}
+			hold[i]=0;
     		}
-		peakstart=max-fit;
+		peakstart=fit+1;
 	}
 	//right bound
-	double hold2[min(searchlength, lbasecount-max+1)];
-
-	if(min(searchlength, lbasecount-max+1)<50){
+	if(min(searchlength, lbasecount-max)<50){
 		peakend=lbasecount;
-	}else{
-		for(bound=50; bound<=min(500, searchlength-max); bound++){
+	}else{		
+
+		for(bound=50; bound<=min(searchlength, lbasecount-max); bound++){
 			sumxy=0;
-			sumx=0;
+			sumx=0;			
 			sumy=0;
 			sumx2=0;
 			sumy2=0;
-			n=bound+1;
-			for(h=max; h<=max+bound;h++){ 
-				sumxy=sumxy+h*basecount[h];
-				sumx=sumx+h;
+			n=bound;
+			for(h=max-1; h<max+bound-1;h++){ 
+				sumxy=sumxy+(h+1)*basecount[h];
+				sumx=sumx+h+1;
 				sumy=sumy+basecount[h];
-				sumx2=sumx2+pow(h,2);
-				sumy2=sumy2+pow(basecount[h],2);					
+				sumx2=sumx2+(h+1)*(h+1);
+				sumy2=sumy2+basecount[h]*basecount[h];
+					
 			}
-			hold2[bound]=pow(sumxy-sumy*sumx/n,2)/((sumy2+sumy*sumy/n+sumy*sumy/(n*n))*(sumx2+sumx*sumx/n+sumx*sumx/(n*n)));	
+			hold[max-1+bound]=pow(sumxy-sumy*sumx/n,2)/((sumy2-sumy*sumy/n)*(sumx2-sumx*sumx/n));
+
+			
+			
 		}
 		//find max R2 position
 		val=0;
 		fit=0;
-		for(h=0; h<min(searchlength, lbasecount-max+1); h++){
-        		if(hold2[h] > val){
-            		val = hold2[h];
-			fit=h;
+		for(i=0; i<lbasecount; i++){
+        		if(hold[i] > val){
+            		val = hold[i];
+			fit=i;
         		}
+		//	hold[i]=0;
     		}
-		peakend=max+fit;
+		peakend=fit;
 	}
-//save boundaries, adjust back to R index start at 1
-maxvecbounds[2*i]=peakstart+1;
-maxvecbounds[2*i+1]=peakend+1;
-	
-} 
-*/
-maxvecbounds[0]=basecount[0]
+//save boundaries, adjust back to R index start at 1 
+maxvecbounds[2*j]=peakstart;
+maxvecbounds[2*j+1]=peakend;
+}	
+
+
 }
