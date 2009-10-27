@@ -54,7 +54,18 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
                 data=read.table(files[i], header=TRUE)
                 mf <- model.frame(formula=formula, data=data)
                 X <- model.matrix(attr(mf, "terms"), data=mf)
-                
+		
+		logsumexp=function(v){
+			if(any(is.infinite(v))){
+				stop("infinite value in v\n")
+			}
+			if(length(v)==1){ return(v[1]) }
+			sv  = sort(v, decreasing=TRUE)
+			res = sum(exp(sv[-1] - sv[1]))
+			lse = sv[1] + log(1+res)
+			lse
+		}
+          
 		loglikfun=function(parms){
 			mu1=exp(X%*%parms[1:kx])
 			mu2=exp(X%*%parms[(kx+1):(kx+kz)])
@@ -63,7 +74,13 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 			prob0 <- as.vector(linkinv(Z %*% parms[(kx+kz+1):(kx+kz+kz)]))
 			prop1=parms[kx+kz+kz+3]
 			prop2=parms[kx+kz+kz+4]
-			loglik=sum(log(prob0*Y0+prop1*dnbinom(Y, size = theta1, mu = mu1)+prop2*dnbinom(Y, size = theta2, mu = mu2)))
+			loglik0=log(prob0+prop1*dnbinom(0, size = theta1, mu = mu1)+prop2*dnbinom(0, size = theta2, mu = mu2))
+			loglik1=log(prop1*dnbinom(Y, size = theta1, mu = mu1)+prop2*dnbinom(Y, size = theta2, mu = mu2))
+			NAs=which(loglik1==-Inf | loglik1==-Inf)
+			if(length(NAs>0)){
+				loglik1[NAs]=apply(cbind(log(prop1)+dnbinom(Y[NAs], size = theta1, mu = mu1[NAs],log=TRUE),log(prop2)+dnbinom(Y[NAs], size = theta2, mu = mu2[NAs], log=TRUE)), 1, logsumexp)
+			}
+			loglik=sum(loglik0*Y0+loglik1*Y1)
 			loglik
 		}
 		Y <- model.response(mf)
@@ -107,7 +124,12 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 			probi0=probi0/(probi0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
 			probi0[Y1]=0
 			probi1  <- prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
-			probi2  <- prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))		
+			probi2  <- prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))	
+			NAs=which(probi1=='NaN'| probi2=='NaN')			
+			if(length(NAs>0)){
+				probi1[NAs]=0
+				probi2[NAs]=1
+			}	
 		ll_new <- loglikfun(c(start$count1, start$count2, start$zero, log(start$theta1), log(start$theta2), prop1, prop2))
 
 		ll_old <- 2 * ll_new      
@@ -120,7 +142,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 		ll[1]=ll_new
 		i=2
 		while(abs((ll_old - ll_new)/ll_old) > tol) {
-#			print(ll_new)
+#		        print(ll_new)
 			ll_old <- ll[max(1, i-10)]
 			 prop1=sum(probi1)/n
 			 prop2=sum(probi2)/n
@@ -139,6 +161,11 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 			probi0[Y1]=0
 			probi1  <- prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
 			probi2  <- prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+			NAs=which(probi1=='NaN'| probi2=='NaN')			
+			if(length(NAs>0)){
+				probi1[NAs]=0
+				probi2[NAs]=1
+			}
 
 			ll_new <- loglikfun(c(start$count1, start$count2, start$zero, log(start$theta1), log(start$theta2), prop1, prop2))
 
