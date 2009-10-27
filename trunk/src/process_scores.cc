@@ -24,13 +24,13 @@ int process_scores::adjustCoords(const char * alignFile,const char * outputFile,
 	
 	unsigned int map_count;
 	unsigned long int countBases = 0;
-	int * align_count = NULL;
+	unsigned short int * align_count = NULL;
 	int cSize = 250000000;
-	align_count = new int[cSize];
+	align_count = new unsigned short int[cSize];
 	align_count[cSize] = 0;
 	
 	string line;
-	int * profile = NULL;
+	unsigned short int * profile = NULL;
 
 	cout << "Loading align count data......";
 	ifstream seqfile(alignFile);
@@ -45,7 +45,7 @@ int process_scores::adjustCoords(const char * alignFile,const char * outputFile,
 	}
 
 	seqfile.close();
-	profile = new int[countBases];
+	profile = new unsigned short int[countBases];
 	profile[countBases] = 0;
 	
 	cout << "\nCalculating adjustments......";

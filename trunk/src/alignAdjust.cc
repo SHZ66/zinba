@@ -37,8 +37,18 @@ void alignAdjust(char **Rinputfile, int *RaThresh, int *RadjustSize){
  
 //	cout << "\n\nInput file is " << inputFile << "\naThresh is " << aThresh << "\nadjustSize is " << adjustSize << "\n";
 	
-	string aFile;
-	string outFile;
+	FILE * listFile;
+	listFile = fopen(inputFile,"r");
+	char aFile[256];
+	char outFile[256];
+	while(!feof(listFile)){
+		fscanf(listFile,"%s%s",aFile,outFile);
+		process_scores newProcess;
+		newProcess.adjustCoords(aFile,outFile,aThresh,adjustSize);
+	}
+	fclose(listFile);
+	
+/*	
 	ifstream listfile(inputFile);	
 	while(getline(listfile,aFile)){
 //		cout << "\n\nGetting data from " << aFile.c_str() << "\n";
@@ -51,6 +61,7 @@ void alignAdjust(char **Rinputfile, int *RaThresh, int *RadjustSize){
 	}
 //	cout << "\nFINISHED all files, exiting\n\n\n";
 	listfile.close();
+*/
 //	return 0;
 }
 }
