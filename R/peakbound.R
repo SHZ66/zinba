@@ -1,5 +1,5 @@
 peakbound=function(bpprofile,output,winoffset=0){
-	    localMaximum=function(x, winSize = 50) {
+	    localMaximum=function(x, winSize = 100) {
 		    #from MassSpecWavelet Package in BioConductor, written by Pan Du and Simon Lin, modified by Naim Rashid
 		    len <- length(x)
 		    rNum <- ceiling(len/winSize)
@@ -38,25 +38,23 @@ peakbound=function(bpprofile,output,winoffset=0){
 	    searchlength=500
 	    peakbound2=function(xx){	
 		    x=as.numeric(xx[6:length(xx)])
-		    #maxvec=localMaximum(x)
-		    maxvec=which.max(x)
+		    maxvec=localMaximum(x, 100)
+		    #maxvec=which.max(x)
 		    xcoords=matrix(0,length(maxvec),9)
-		    start=as.numeric(xx[3])-1
-		    bounds=matrix(.C('peakboundc', as.vector(x, mode='integer'), as.integer(length(x)), as.vector(maxvec, mode='integer'), as.integer(length(maxvec)), as.integer(500),  vector("integer",2*length(maxvec)), PACKAGE="basecount")[[6]],length(maxvec),2, byrow=T)+start
-		    #xcoords=cbind(matrix(rep(as.matrix(xx[1:5]),length(maxvec)),length(maxvec),5, byrow=T),bounds, x[maxvec], maxvec+start)
-		    #  colnames(xcoords)=c(colnames(xx[1:5]), c('peak_start','peak_stop','max_score','max_position'))
-	   	    #xcoords
-		    c(as.matrix(xx[1:5]),bounds[1], bounds[2], x[maxvec], maxvec+start)
-		  
+		    bounds=matrix(.C('peakboundc', as.vector(x, mode='integer'), as.integer(length(x)), as.vector(maxvec, mode='integer'), as.integer(length(maxvec)), as.integer(500),  vector("integer",2*length(maxvec)), PACKAGE="zinba")[[6]],length(maxvec),2, byrow=T)
+		    xcoords=cbind(matrix(rep(as.matrix(xx[1:5]),length(maxvec)),length(maxvec),5, byrow=T),bounds[,1], bounds[,2],x[maxvec], maxvec)
+	   	    xcoords
+		    #c(as.matrix(xx[1:5]),bounds[1], bounds[2], x[maxvec], maxvec) 
 		}
-    refPeaks=as.data.frame(t(apply(bpProfiles, 1, peakbound2)))
-	    colnames(refPeaks)=c(colnames(bpProfiles[,1:5]), c('peak_start','peak_stop','max_score','max_position'))
-    #refPeaks=as.data.frame(do.call('rbind', apply(bpProfiles, 1, peakbound2)))
-    #refPeaks[,c(6,7,9)]=refPeaks[,c(6,7,9)]+refPeaks[,3]-1
+    refPeaks=do.call('rbind', apply(bpProfiles, 1, peakbound2))
+    refPeaks[,c(6,7,9)]=as.numeric(refPeaks[,c(6,7,9)])+as.numeric(refPeaks[,3])-1
+    colnames(refPeaks)=c(colnames(bpProfiles[,1:5]), c('peak_start','peak_stop','max_score','max_position'))
+    refPeaks=as.data.frame(refPeaks)
     if(file.exists(output)){
         write.table(refPeaks,output,quote=F,sep="\t",row.names=F,col.names=F,append=TRUE)
     }else{
         write.table(refPeaks,output,quote=F,sep="\t",row.names=F)
     }
 }
+
 
