@@ -9,7 +9,7 @@ class coord {
 	public:
 			coord();
 			~coord();
-			coord(char[],unsigned short int, unsigned long int, unsigned long int,char[]);
+			coord(char[],unsigned short int, unsigned long int, unsigned long int,unsigned short int,char[]);
 			coord(const coord&);
 			bool operator <(coord) const;
 

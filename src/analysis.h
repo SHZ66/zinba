@@ -5,6 +5,7 @@
 #include <vector>
 #include "coord.h"
 #include <map>
+#include <list>
 #include <ext/slist>
 
 namespace sgi = ::__gnu_cxx;
@@ -19,7 +20,7 @@ class analysis{
 		~analysis(); //Implemented
 		int importCoords(const char *);//Implemented
 		int processCoords(const char *,const char *,string);//Implemented
-		int outputData(const char *,int,unsigned short int,long int,long int,int,int[]);//Implemented
+		int outputData(const char *,int,unsigned short int,long int,long int,int,short unsigned int[]);//Implemented
 
 		struct ltstr{
 			bool operator()(const char* s1, const char* s2) const
@@ -30,7 +31,7 @@ class analysis{
 
 	private:
 		
-		slist<coord> coord_slist;//Implemented
+		list<coord> coord_slist;//Implemented
 	
 		unsigned short int chromCounter;//Implemented
 		unsigned short int getHashValue(char *);//Implemented
