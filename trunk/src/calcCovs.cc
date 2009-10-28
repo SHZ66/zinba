@@ -149,9 +149,6 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		if(cOffsetSize > 0){
 			numOffsets = int(cWinSize/cOffsetSize);
 		}
-
-cout << "\tChrom length is " << chr_size[currchr] << "bp" << endl;
-		
 		for(int o = 0; o < numOffsets; o++){			
 			unsigned long int cWinStart = (cOffsetSize * o) + 1;
 			unsigned long int cWinStop = cWinStart + cWinSize - 1;			
@@ -178,7 +175,6 @@ cout << "\tChrom length is " << chr_size[currchr] << "bp" << endl;
 				cWinStop += cWinSize;
 			}
 		}
-		cout << "\tThere are " << cnv_wins.size() << " cnv windows" << endl;
 		cout << "\t\tRefining boundaries...." << endl;
 		cnv_wins.sort();
 		int numCnvWins = cnv_wins.size();
