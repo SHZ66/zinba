@@ -32,17 +32,16 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 	string line;
 	string field;
 //////////////////////////////
-	int search_shift = 50;
-	int profile_extend = 250;
+	int profile_extend = 500;
 //////////////////////////////
 	int printFlag = 0;
 	int getChrmData = 0;
 	unsigned short int collectData = 0;
 	slist<coord>::iterator i = coord_slist.begin();
-	int * basepair = NULL;
-	int * profile = NULL;
+	unsigned short int * basepair = NULL;
+	unsigned short int * profile = NULL;
 	int cSize = 250000000;
-	basepair = new int[cSize];
+	basepair = new unsigned short int[cSize];
 	basepair[cSize] = 0;
 
 	char *chChr = (char *) malloc(1024);
@@ -60,65 +59,25 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 		}else if (line[0] == 'f'){
 			if(collectData == 1 && getChrmData == 1){
 				cout << "Finished, loaded " << countBases << "\nGetting data for coordinates and printing output...";
-
-				list<maxbp> list_maxbp;
-				list<maxbp>::iterator maxbpIter;
 				for(i = coord_slist.begin();i!=coord_slist.end();++i){
-					maxScore = 0;
-					maxPos = 0;
 					if(i->chrom == chromInt){
-						for(int s = i->start; s <= i->end; s++){
-							if(maxScore < basepair[s]){
-								maxScore = basepair[s];
-								maxPos = s;
-							}
+						profile = new unsigned short int[(profile_extend * 2)];
+						int pIndex = 0;
+						long int startPos = i->start-profile_extend;
+						long int stopPos = i->end+profile_extend;
+						for(int s = startPos; s <= stopPos; s++){
+							profile[pIndex] = basepair[s];
+							pIndex++;
 						}
-//						coord_slist.erase(i);
-						if(maxPos != i->start && maxPos != i->end){
-							maxbp m(chromInt,maxPos,maxScore);
-							if(list_maxbp.empty()){
-								list_maxbp.push_front(m);
-							}else{
-								maxbpIter = list_maxbp.end();
-								maxbpIter--;
-								if(maxPos <= (maxbpIter->position+search_shift) && maxPos >= (maxbpIter->position-search_shift)){
-									if(maxScore > maxbpIter->score){
-										list_maxbp.erase(maxbpIter);
-										list_maxbp.push_back(m);
-									}
-								}else if (maxPos > (maxbpIter->position+search_shift)){
-									list_maxbp.push_back(m);
-								}
-								
-							}
+						if(outputData( outputFile,printFlag,i->chrom,startPos,stopPos,pIndex,profile) != 0){
+							cout << "Error printing output to file, exiting" << endl;
+							return 1;
 						}
+						delete [] profile;
+						profile = NULL;
+						printFlag = 1;
+						coord_slist.erase(i++);
 					}
-				}
-				
-				for(maxbpIter = list_maxbp.begin();maxbpIter!=list_maxbp.end();++maxbpIter){
-					profile = new int[(profile_extend * 2)];
-					int pIndex = 0;
-					long int startPos = 1;
-					long int stopPos = startPos + (profile_extend * 2);
-					if(  maxbpIter->position > profile_extend ){
-						startPos = (maxbpIter->position - profile_extend);
-						stopPos = (maxbpIter->position + profile_extend);
-					}else{
-						cout << "\n\tSetting coordinates to 1-501\n"; 
-					}
-
-					for(int s = startPos; s <= stopPos; s++){
-						profile[pIndex] = basepair[s];
-						pIndex++;
-					}
-					
-					if(outputData( outputFile,printFlag,maxbpIter->chrom,startPos,stopPos,pIndex,profile) != 0){
-						cout << "Error printing output to file, exiting" << endl;
-						return 1;
-					}
-					delete [] profile;
-					profile = NULL;
-					printFlag = 1;
 				}
 				cout << "Finished\n";
 				
@@ -182,61 +141,25 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 
 	if(getChrmData == 1){
 		cout << "Finished, loaded " << countBases << "\nGetting data for coordinates and printing output...";
-
-		list<maxbp> list_maxbp;
-		list<maxbp>::iterator maxbpIter;
 		for(i = coord_slist.begin();i!=coord_slist.end();++i){
-			maxScore = 0;
-			maxPos = 0;
 			if(i->chrom == chromInt){
-				for(int s = i->start; s <= i->end; s++){
-					if(maxScore < basepair[s]){
-						maxScore = basepair[s];
-						maxPos = s;
-					}
+				profile = new int[(profile_extend * 2)];
+				int pIndex = 0;
+				long int startPos = i->start-profile_extend;
+				long int stopPos = i->end+profile_extend;
+				for(int s = startPos; s <= stopPos; s++){
+					profile[pIndex] = basepair[s];
+					pIndex++;
 				}
-//				coord_slist.erase(i);
-				if(maxPos != i->start && maxPos != i->end){
-					maxbp m(chromInt,maxPos,maxScore);
-					if(list_maxbp.empty()){
-						list_maxbp.push_front(m);
-					}else{
-						maxbpIter = list_maxbp.end();
-						maxbpIter--;
-						if(maxPos <= (maxbpIter->position+search_shift) && maxPos >= (maxbpIter->position-search_shift)){
-							if(maxScore > maxbpIter->score){
-								list_maxbp.erase(maxbpIter);
-								list_maxbp.push_back(m);
-							}
-						}else if (maxPos > (maxbpIter->position+search_shift)){
-							list_maxbp.push_back(m);
-						}
-					}
+				coord_slist.erase(i++);
+				if(outputData( outputFile,printFlag,i->chrom,startPos,stopPos,pIndex,profile) != 0){
+					cout << "Error printing output to file, exiting" << endl;
+					return 1;
 				}
+				delete [] profile;
+				profile = NULL;
+				printFlag = 1;
 			}
-		}
-		
-		for(maxbpIter = list_maxbp.begin();maxbpIter!=list_maxbp.end();++maxbpIter){
-			profile = new int[(profile_extend * 2)];
-			int pIndex = 0;
-			long int startPos = 1;
-			long int stopPos = startPos + (profile_extend * 2);
-			if(maxbpIter->position > profile_extend){
-				startPos = (maxbpIter->position - profile_extend);
-				stopPos = (maxbpIter->position + profile_extend);
-			}
-			for(int s = startPos; s <= stopPos; s++){
-				profile[pIndex] = basepair[s];
-				pIndex++;
-			}
-			
-			if(outputData( outputFile,printFlag,maxbpIter->chrom,startPos,stopPos,pIndex,profile) != 0){
-				cout << "Error printing output to file, exiting" << endl;
-				return 1;
-			}
-			delete [] profile;
-			profile = NULL;
-			printFlag = 1;
 		}
 	}
 	delete [] basepair;
@@ -314,6 +237,7 @@ int analysis::importCoords(const char * signalFile){
 	char strand[1];
 	unsigned long int iStart;
 	unsigned long int iEnd;
+	unsigned short int qFlag;
 	slist<coord>::iterator back =  coord_slist.previous(coord_slist.end());
 	char line[1024];
 
@@ -341,10 +265,10 @@ int analysis::importCoords(const char * signalFile){
 	 }
 
 	while(!feof(fh)){
-		int readResult = fscanf(fh,"%s%s%lu%lu%s",id,cChrom,&iStart,&iEnd,strand);
-		if(readResult == 5){
+		int readResult = fscanf(fh,"%s%s%lu%lu%hu%s",id,cChrom,&iStart,&iEnd,&qFlag,strand);
+		if(readResult == 6){
 			unsigned short int chromInt = getHashValue(cChrom);
-			coord c(id,chromInt,iStart,iEnd,strand);
+			coord c(id,chromInt,iStart,iEnd,qFlag,strand);
 			lineCount++;
 			back = coord_slist.insert_after(back,c);
 		}
@@ -352,5 +276,25 @@ int analysis::importCoords(const char * signalFile){
 	fclose(fh);
 	cout << lineCount << " coordinates imported\n";
 	coord_slist.sort();
+	back = coord_slist.begin();
+	coord lastCoord = *back;
+	while(back != coord_slist.end()){
+		if(back->start == (lastCoord.stop+1)){
+			long unsigned int lcStop = back->stop;
+			coord_slist.erase(back--);
+			back->stop = lcStop;
+		}
+		lastCoord = *back;		
+		back++;
+	}
+	
+	back = coord_slist.begin();	
+	while(back != coord_slist.end()){
+		if(back->qFlag == 0){
+			coord_slist.erase(back++);
+		}else{
+			back++;
+		}
+	}
 	return 0;
 }

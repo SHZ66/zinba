@@ -16,6 +16,9 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
                 }else{
                         a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE,start=param)
                 }
+		
+		quantile(data$exp_count, 0.25)
+		
                 leverage=hat(X, intercept=FALSE)
                 fdrlevel=threshold
                 standardized=residuals(a)/sqrt(1-leverage)

@@ -16,16 +16,18 @@ coord::coord(const coord& c){
 	chrom = c.chrom;
 	start = c.start;
 	end = c.end;
+	qFlag = c.qFlag;
 	strand = new char[1];
 	strcpy(strand,c.strand);
 }
 
-coord::coord(char * _ident, unsigned short int _chrom, unsigned long int _start, unsigned long int _end, char * _strand){
+coord::coord(char * _ident, unsigned short int _chrom, unsigned long int _start, unsigned long int _end, unsigned short int _qFlag,char * _strand){
 	ident = new char[128];
 	strcpy(ident,_ident);
 	chrom = _chrom;
 	start = _start;
 	end = _end;
+	qFlag = _qFlag;
 	strand = new char[1];
 	strcpy(strand,_strand);
 }
