@@ -172,6 +172,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				cWinStop += cWinSize;
 			}
 		}
+		cout << "\tThere are " << cnv_wins.size() << " cnv windows" << endl;
 		cout << "\t\tRefining boundaries...." << endl;
 		cnv_wins.sort();
 		int numCnvWins = cnv_wins.size();
