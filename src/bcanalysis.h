@@ -12,7 +12,7 @@ namespace sgi = ::__gnu_cxx;
 using namespace sgi;
 using namespace std;
 
-class analysis{
+class bcanalysis{
 	
 	public:
 	
