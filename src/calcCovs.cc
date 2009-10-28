@@ -149,6 +149,9 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		if(cOffsetSize > 0){
 			numOffsets = int(cWinSize/cOffsetSize);
 		}
+
+cout << "\tChrom length is " << chr_size[currchr] << "bp" << endl;
+		
 		for(int o = 0; o < numOffsets; o++){			
 			unsigned long int cWinStart = (cOffsetSize * o) + 1;
 			unsigned long int cWinStop = cWinStart + cWinSize - 1;			
