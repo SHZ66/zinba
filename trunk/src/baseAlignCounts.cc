@@ -34,19 +34,19 @@ void baseAlignCounts(char **RinputFile,char **RoutputFile, int *RextendLength){
 	string outputFile = RoutputFile[0];
 	int extendLength = RextendLength[0];
 	
-		bc analysis newAnalysis;// = new analysis;
+		bcanalysis newAnalysis;// = new analysis;
 		Rprintf("\nImporting reads from file %s ....\n",inputFile.c_str());
 		int ret=newAnalysis.importRawSignal(inputFile.c_str());
 
 		if(ret == 1){
-			Rprintf("ERROR opening file %s \n",expSeqFile.c_str());
+			Rprintf("ERROR opening file %s \n",inputFile.c_str());
 			exit(1);
 		}
 
 		Rprintf("Calculating counts at each base\nPrinting output to %s\n",outputFile.c_str());
 		ret = newAnalysis.processSignals(outputFile.c_str(),extendLength);
 		Rprintf("-------- BASE ALIGN COUNTS COMPLETE --------\n");
-	}
-	return 0;
+//	}
+//	return 0;
 }
 }

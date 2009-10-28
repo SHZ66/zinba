@@ -72,7 +72,7 @@ int bcanalysis::processSignals(const char* outputFile,int extend){
 	return 0;
 }
 
-int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,unsigned short int pFLAG,int basepair[]){
+int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,unsigned short int pFLAG,unsigned short int basepair[]){
 	FILE * fh;
 	if(pFLAG == 0){
 		fh = fopen(outputFile,"w");
@@ -80,10 +80,10 @@ int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,u
 	}else{
 		fh = fopen(outputFile,"a");
 	}
-	const char * chrom = getKey(newChr);
+	const char * chrom = getKey(currChr);
 	fprintf(fh,"fixedStep chrom=%s start=1 step=1\n",chrom);
 
-	for(int posP = 1; posP <= printStop;posP++){
+	for(int posP = 1; posP < 250000000;posP++){
 		fprintf(fh,"%hu\n",basepair[posP]);
 	}
 	fclose (fh);
