@@ -17,6 +17,7 @@ class coord {
 			unsigned short int chrom;//2
 			unsigned long int start;//8
 			unsigned long int end;//8
+			unsigned short int qFlag;
 			char * strand;
 	
 	private:
