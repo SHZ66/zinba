@@ -37,7 +37,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 	int printFlag = 0;
 	int getChrmData = 0;
 	unsigned short int collectData = 0;
-	slist<coord>::iterator i = coord_slist.begin();
+	list<coord>::iterator i = coord_slist.begin();
 	unsigned short int * basepair = NULL;
 	unsigned short int * profile = NULL;
 	int cSize = 250000000;
@@ -143,7 +143,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 		cout << "Finished, loaded " << countBases << "\nGetting data for coordinates and printing output...";
 		for(i = coord_slist.begin();i!=coord_slist.end();++i){
 			if(i->chrom == chromInt){
-				profile = new int[(profile_extend * 2)];
+				profile = new unsigned short int[(profile_extend * 2)];
 				int pIndex = 0;
 				long int startPos = i->start-profile_extend;
 				long int stopPos = i->end+profile_extend;
@@ -169,7 +169,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 	return 0;
 }
 
-int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,long int pStart,long int pStop,int printStop,int pProfile[]){
+int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,long int pStart,long int pStop,int printStop,short unsigned int pProfile[]){
 	FILE * fh;
 	if(pFlag == 0){
 		fh = fopen(outputFile,"w"); 
@@ -238,7 +238,7 @@ int analysis::importCoords(const char * signalFile){
 	unsigned long int iStart;
 	unsigned long int iEnd;
 	unsigned short int qFlag;
-	slist<coord>::iterator back =  coord_slist.previous(coord_slist.end());
+	list<coord>::iterator back =  coord_slist.begin();
 	char line[1024];
 
 	if(!feof(fh)){
@@ -270,7 +270,7 @@ int analysis::importCoords(const char * signalFile){
 			unsigned short int chromInt = getHashValue(cChrom);
 			coord c(id,chromInt,iStart,iEnd,qFlag,strand);
 			lineCount++;
-			back = coord_slist.insert_after(back,c);
+			coord_slist.push_back(c);
 		}
 	}
 	fclose(fh);
@@ -279,10 +279,10 @@ int analysis::importCoords(const char * signalFile){
 	back = coord_slist.begin();
 	coord lastCoord = *back;
 	while(back != coord_slist.end()){
-		if(back->start == (lastCoord.stop+1)){
-			long unsigned int lcStop = back->stop;
+		if(back->start == (lastCoord.end+1)){
+			long unsigned int lcStop = back->end;
 			coord_slist.erase(back--);
-			back->stop = lcStop;
+			back->end = lcStop;
 		}
 		lastCoord = *back;		
 		back++;
