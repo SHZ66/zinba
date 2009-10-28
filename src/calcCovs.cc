@@ -167,7 +167,10 @@ cout << "\tChrom length is " << chr_size[currchr] << "bp" << endl;
 					}
 				}
 				if((nCount/cWinSize) < 0.1){
-					double cScore = cnvCount/alignCount;
+					double cScore = 0;
+					if(alignCount > 0){
+						cScore = cnvCount/alignCount;
+					}
 					cnvWins cnv(currchr,cWinStart,cWinStop,cScore,0,0,0);
 					cnv_wins.push_back(cnv);
 				}
