@@ -58,7 +58,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 	char cChrom[128];
 	unsigned long int cStart;
 	while(!feof(tempTB)){
-		fscanf(tempTB,"%s%lu",cChrom,&cStart);
+		int ret = fscanf(tempTB,"%s%lu",cChrom,&cStart);
 		unsigned short int chromInt = getHashValue(cChrom);
 		chr_size[chromInt] = cStart;
 	}
@@ -100,7 +100,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		unsigned short int aScore;
 		unsigned long int pos = 1;
 		while(!feof(tempTB)){
-			fscanf(tempTB,"%hu",&aScore);
+			int ret = fscanf(tempTB,"%hu",&aScore);
 			alignability[pos] = aScore;
 			pos++;
 		}
@@ -456,7 +456,7 @@ int calcCovs::importRawSignal(const char * signalFile,int dataType){
 	slist<aRead>::iterator iback = input_slist.previous(input_slist.end());
 	
 	while(!feof(fh)){
-		fscanf(fh,"%s%lu",cChrom,&iStart);
+		int ret = fscanf(fh,"%s%lu",cChrom,&iStart);
 		unsigned short int chromInt = getHashValue(cChrom);
 		aRead sig(chromInt,iStart);
 		lineCount++;
