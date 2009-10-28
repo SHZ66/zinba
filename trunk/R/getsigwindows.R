@@ -17,14 +17,13 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
                         a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE,start=param)
                 }
 		
-		#quantile(data$exp_count, 0.25)
-		
+		q25=quantile(data$exp_count, 0.25)
                 leverage=hat(X, intercept=FALSE)
                 fdrlevel=threshold
                 standardized=residuals(a)/sqrt(1-leverage)
                 pval=1-pnorm(as.matrix(standardized))
                 fdr=qvalue(pval)
-                numpeaks=length(which(fdr[[3]]<fdrlevel)) 
+                numpeaks=length(which(fdr[[3]]<fdrlevel))
                 minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
                 sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
                 colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
@@ -46,7 +45,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
     ### FORMAT PEAK COORDINATE DATA
                 if(getPeakRefine == 1){
                     peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$end,sep=":")
-                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),"+")
+                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),((sigpeaks$exp_count>q25)^2),"+")
                     write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
                 }
 	    }
@@ -55,6 +54,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
             for(i in 1:length(files)){
                 print(paste("Processing ",files[i]))
                 data=read.table(files[i], header=TRUE)
+		q25=quantile(data$exp_count, 0.25)
                 mf <- model.frame(formula=formula, data=data)
                 X <- model.matrix(attr(mf, "terms"), data=mf)
 		
@@ -177,7 +177,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 		}
 		numpeaks=length(which(probi2>peakconfidence))	
 
-		minresid='NA'		
+		minresid='NA'
 		sigpeaks=cbind(data[which(probi2>peakconfidence),],probi2[probi2>peakconfidence])
 		colnames(sigpeaks)[dim(sigpeaks)[2]]='peakprob'
 
@@ -195,7 +195,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
     ### FORMAT PEAK COORDINATE DATA
                 if(getPeakRefine == 1){
                     peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$end,sep=":")
-                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),"+")
+                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),((sigpeaks$exp_count>q25)^2),"+")
                     write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
                 }
             }
