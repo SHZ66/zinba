@@ -6,6 +6,7 @@
 #include "aRead.h"
 #include "dataWins.h"
 #include "cnvWins.h"
+#include <cmath>
 //#include "base.h"
 #include <map>
 #include <list>
