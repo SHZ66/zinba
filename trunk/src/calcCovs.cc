@@ -369,7 +369,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 					}else if(gcContent[b] == 2){
 						nCount++;
 					}
-					if(strcmp(inputFile,inVal)==0)
+					if(strcmp(inputFile,inVal)!=0)
 						inCount += ibasepair[b];
 				}
 				if((nCount/zWinSize) < 0.1){
