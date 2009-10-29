@@ -319,8 +319,8 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		cnv_wins.sort();
 
 		const char* inVal = "none";
-		if(strcmp(inputFile,inVal)==0){
-			cout << "\tLoading reads from input file........." << endl;
+		if(strcmp(inputFile,inVal)!=0){
+			cout << "\tLoading reads from input file " << inputFile << "........." << endl;
 			int rVal = importRawSignal(inputFile,1);
 			ibasepair = new unsigned short int[chr_size[currchr]+1];
 			ibasepair[chr_size[currchr]+1] = 0;
