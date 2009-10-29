@@ -259,7 +259,7 @@ int analysis::importCoords(const char * signalFile){
   			i = tabCounter.find("\t", i+1);
   		}
   		
-  		if(countTabs!=4){
+  		if(countTabs!=5){
   			return 2;
   		}
 	 }
