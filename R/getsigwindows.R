@@ -4,6 +4,8 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
         #library(pscl)
 	library(MASS)
         options(scipen=999)
+        
+        print(paste("Using",method,"method for detection",sep=" "))        
 	###### USER INPUT############################
 	if(method=='pscl'){
             files = unlist(strsplit(file,";"))
@@ -44,8 +46,8 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 
     ### FORMAT PEAK COORDINATE DATA
                 if(getPeakRefine == 1){
-                    peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$end,sep=":")
-                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),((sigpeaks$exp_count>q25)^2),"+")
+                    peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$stop,sep=":")
+                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$stop+offset),((sigpeaks$exp_count>q25)^2),"+")
                     write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
                 }
 	    }
@@ -194,8 +196,8 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 
     ### FORMAT PEAK COORDINATE DATA
                 if(getPeakRefine == 1){
-                    peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$end,sep=":")
-                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$end+offset),((sigpeaks$exp_count>q25)^2),"+")
+                    peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$stop,sep=":")
+                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$stop+offset),((sigpeaks$exp_count>q25)^2),"+")
                     write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
                 }
             }
