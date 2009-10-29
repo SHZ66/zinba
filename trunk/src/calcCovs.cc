@@ -83,8 +83,12 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		cout << "\tMapping reads to chromosome......" << endl;
 		while(i != signal_slist.end()){			
 			if(i->chrom==currchr){
-				basepair[i->start]++;
-				signal_slist.erase(i++);
+				if(i->start < chr_size[currchr]){
+					basepair[i->start]++;
+					signal_slist.erase(i++);
+				}else{
+					cout << "WARNING: Read maps off end of chromosome: " << i->start << endl;
+				}
 			}else{
 				i++;
 			}
