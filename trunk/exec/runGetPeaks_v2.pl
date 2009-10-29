@@ -55,6 +55,7 @@ while(<LIST>){
 foreach my $chrm (keys %{$filesOffsets}){
     print STDERR "Processing $chrm\n";
     my $offsetFiles = join(";",@{$filesOffsets->{$chrm}});
+    print STDERR "\t", join("\n\t",@{$filesOffsets->{$chrm}}), "\n";
     my $pid = $pm->start and next;
     &run_zinba($offsetFiles,$couts{$chrm},$winout,$formula,$threshold,$winsize,$win_offset,$method,$stdlog,$errlog,$printLog,$getRefinePeaks,$bpCountFile,$bpouts{$chrm},$peakout,$chrm);
     $pm->finish;
