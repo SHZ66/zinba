@@ -71,6 +71,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 	unsigned short int * ibasepair = NULL;
 	unsigned short int * gcContent = NULL;	
 	unsigned short int * alignability = NULL;
+	int readInput = 0;
 	
 	while(!signal_slist.empty()){
 		i = signal_slist.begin();
@@ -320,14 +321,17 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 
 		const char* inVal = "none";
 		if(strcmp(inputFile,inVal)!=0){
-			cout << "\tLoading reads from input file " << inputFile << "........." << endl;
-			int rVal = importRawSignal(inputFile,1);
+			if(readInput == 0){
+				cout << "\tLoading reads from input file " << inputFile << "........." << endl;
+				int rVal = importRawSignal(inputFile,1);
+				readInput = 1;
+			}
 			ibasepair = new unsigned short int[chr_size[currchr]+1];
 			ibasepair[chr_size[currchr]+1] = 0;
 			slist<aRead>::iterator in = input_slist.begin();
 			while(in != input_slist.end()){			
 				if(in->chrom==currchr){
-					basepair[in->start]++;
+					ibasepair[in->start]++;
 					input_slist.erase(in++);
 				}else{
 					in++;
