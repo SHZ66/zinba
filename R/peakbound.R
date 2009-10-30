@@ -1,5 +1,6 @@
-peakbound=function(bpprofile,output,winoffset=0){
-	    localMaximum=function(x, winSize = 100) {
+##with new parameters
+peakbound=function(bpprofile,output,winSize=200, quantile=.75){
+	    localMaximum=function(x, winSize, quantile) {
 		    #from MassSpecWavelet Package in BioConductor, written by Pan Du and Simon Lin, modified by Naim Rashid
 		    len <- length(x)
 		    rNum <- ceiling(len/winSize)
@@ -27,7 +28,7 @@ peakbound=function(bpprofile,output,winoffset=0){
 		        localMax[selMaxInd2[temp > 0]] <- 0
 		    }
 	    	#delete maxes lower than median
-	    	localMax[which(x<median(x))]=0
+	    	localMax[which(x<quantile(x,quantile))]=0
 	    	#ensure global max is always tagged
 	    	localMax[which.max(x)]=1
 	    	return(which(localMax>0))
@@ -38,7 +39,7 @@ peakbound=function(bpprofile,output,winoffset=0){
 	    searchlength=500
 	    peakbound2=function(xx){	
 		    x=as.numeric(xx[6:length(xx)])
-		    maxvec=localMaximum(x, 100)
+		    maxvec=localMaximum(x, winSize=winSize, quantile=quantile)
 		    #maxvec=which.max(x)
 		    xcoords=matrix(0,length(maxvec),9)
 		    bounds=matrix(.C('peakboundc', as.vector(x, mode='integer'), as.integer(length(x)), as.vector(maxvec, mode='integer'), as.integer(length(maxvec)), as.integer(500),  vector("integer",2*length(maxvec)), PACKAGE="zinba")[[6]],length(maxvec),2, byrow=T)
