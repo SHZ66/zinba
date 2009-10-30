@@ -15,7 +15,7 @@ dataWins::dataWins(const dataWins& s){
 	cnvScore = s.cnvScore;
 }
 
-dataWins::dataWins(unsigned short int _chrom, unsigned long int _start, unsigned long int _stop,int _eCount, int _iCount, double _gcPerc, double _alignPerc, double _cnvScore){
+dataWins::dataWins(unsigned short int _chrom, unsigned long int _start, unsigned long int _stop,int _eCount, double _iCount, double _gcPerc, double _alignPerc, double _cnvScore){
 	chrom = _chrom;
 	start = _start;
 	stop = _stop;

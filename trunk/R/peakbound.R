@@ -34,7 +34,7 @@ peakbound=function(bpprofile,output,winoffset=0){
             }
 
 
-	    bpProfiles=read.table(bpprofile,header=TRUE,sep="\t")
+	    bpProfiles=read.table(bpprofile,header=TRUE,fill=T,sep="\t")
 	    searchlength=500
 	    peakbound2=function(xx){	
 		    x=as.numeric(xx[6:length(xx)])

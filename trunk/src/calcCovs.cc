@@ -364,7 +364,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				double alignCount = 0;
 				double gcCount = 0;
 				double nCount = 0;
-				int inCount = 0;
+				double inCount = 0;
 				for(int b = zWinStart; b <= zWinStop; b++){
 					peakCount += basepair[b];
 					alignCount += alignability[b];
@@ -388,7 +388,11 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 						cnvEnd++;
 					}
 					
-					double cnvLogScore = log(((cnvSum/cnvCount)*(zWinSize*2))+1);
+					double cnvLogScore = 0;
+					if(cnvSum > 0)
+						cnvLogScore = log((cnvSum/cnvCount)*(zWinSize*2));
+					if(inCount > 0)
+						inCount = log(inCount);
 					double gcPerc = gcCount/zWinSize;
 					double aPerc = alignCount/(zWinSize*2);
 					dataWins zwin(currchr,zWinStart,zWinStop,peakCount,inCount,gcPerc,aPerc,cnvLogScore);
@@ -421,7 +425,7 @@ int calcCovs::outputData(const char * outputFile, unsigned short int currChr){
 	const char * chrom = getKey(currChr);
 	slist<dataWins>::iterator c = peak_wins.begin();
 	while(c != peak_wins.end()){
-		fprintf(fh,"%s\t%lu\t%lu\t%i\t%i\t%f\t%f\t%f\n",chrom,c->start,c->stop,c->eCount,c->iCount,c->gcPerc,c->alignPerc,c->cnvScore);
+		fprintf(fh,"%s\t%lu\t%lu\t%i\t%f\t%f\t%f\t%f\n",chrom,c->start,c->stop,c->eCount,c->iCount,c->gcPerc,c->alignPerc,c->cnvScore);
 		peak_wins.erase(c++);
 	}
 	fclose (fh);
