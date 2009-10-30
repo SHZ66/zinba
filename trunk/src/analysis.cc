@@ -47,9 +47,6 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 	char *chChr = (char *) malloc(1024);
 	unsigned long int sizeProfile = 0;
 	unsigned long int countBases = cSize;
-	int maxScore = 0;
-	unsigned long int maxPos = 0;
-	
 	unsigned long int startOffset = 0;
 	ifstream seqfile(inputFile);
 
@@ -61,9 +58,9 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 				cout << "Finished, loaded " << countBases << "\nGetting data for coordinates and printing output...";
 				for(i = coord_slist.begin();i!=coord_slist.end();++i){
 					if(i->chrom == chromInt){
-						profile = new unsigned short int[(profile_extend * 2)];
+						profile = new unsigned short int[(profile_extend * 2)+1];
 						int pIndex = 0;
-						long int startPos = i->start-profile_extend;
+						long int startPos = i->start-profile_extend+1;
 						long int stopPos = i->end+profile_extend;
 						for(int s = startPos; s <= stopPos; s++){
 							profile[pIndex] = basepair[s];
@@ -111,11 +108,8 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 					}
 					
 					if(getChrmData == 1){
-						cout << "\nLoading data for " << chChr << "\nInitializing array...";
-						for(int p = startOffset;p <= countBases;p++){
-							basepair[p] = 0;
-						}
-						cout << "Finished\n";
+						cout << "\nLoading data for " << chChr << endl;
+						basepair[cSize] = 0;
 						countBases = 0;
 					}
 				}else if (field[0] == 's' && field[2] == 'a' && getChrmData == 1){
@@ -143,10 +137,13 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 		cout << "Finished, loaded " << countBases << "\nGetting data for coordinates and printing output...";
 		for(i = coord_slist.begin();i!=coord_slist.end();++i){
 			if(i->chrom == chromInt){
-				profile = new unsigned short int[(profile_extend * 2)];
 				int pIndex = 0;
-				long int startPos = i->start-profile_extend;
+				long int startPos = i->start-profile_extend+1;
 				long int stopPos = i->end+profile_extend;
+				profile = new unsigned short int[(stopPos-startPos)+2];
+				profile[(stopPos-startPos)+1] = 0;				
+cout << "Start is " << startPos << " and stop is " << stopPos << endl;
+				
 				for(int s = startPos; s <= stopPos; s++){
 					profile[pIndex] = basepair[s];
 					pIndex++;
@@ -169,7 +166,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 	return 0;
 }
 
-int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,long int pStart,long int pStop,int printStop,short unsigned int pProfile[]){
+int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,long int pStart,long int pStop,int printStop,unsigned short int pProfile[]){
 	FILE * fh;
 	if(pFlag == 0){
 		fh = fopen(outputFile,"w"); 

@@ -24,15 +24,43 @@ bcanalysis::~bcanalysis(){
 	}
 }
 
-int bcanalysis::processSignals(const char* outputFile,int extend){
+int bcanalysis::processSignals(const char* outputFile,const char *twoBitFile,int extend){
+	
+	FILE * tempTB;
+	const char * tInfo = "tempInfo.txt"; 
+	const char * tChrSize = "tempChromSize.txt";
+	tempTB = fopen(tInfo,"w");
+	fprintf(tempTB,"library(zinba);\ntwobitinfo(infile=\"%s\",outfile=\"%s\");\n",twoBitFile,tChrSize);
+	fclose (tempTB);
+	
+	cout << "\nGetting chromosome lengths from .2bit file: " << twoBitFile << endl;
+	int s = system("R CMD BATCH tempInfo.txt /dev/null");
+	if(s == 0){
+		remove(tInfo);
+	}else{
+		cout << "twoBitInfo failed\n";
+		exit(1);
+	}
+	
+	tempTB = fopen(tChrSize,"r");
+	char tbChrom[128];
+	unsigned long int tbStart;
+	while(!feof(tempTB)){
+		int ret = fscanf(tempTB,"%s%lu",tbChrom,&tbStart);
+		unsigned short int chromIntTB = getHashValue(tbChrom);
+		chr_size[chromIntTB] = tbStart;
+	}
+	fclose(tempTB);
+	remove(tChrSize);
+	
 	slist<aRead>::iterator i = signal_slist.begin();
 	unsigned short int currchr = i->chrom;
 	const char * chromReport;
 	chromReport = getKey(currchr);
 	cout << "\tProcessing " << chromReport << ".........." << endl;
 	unsigned short int * basepair = NULL;
-	basepair = new unsigned short int[250000000];
-	basepair[250000000] = 0;
+	basepair = new unsigned short int[chr_size[currchr]+1];
+	basepair[chr_size[currchr]+1] = 0;
 	unsigned short int printFLAG = 0;
 	
 	while(!signal_slist.empty()){
@@ -42,19 +70,21 @@ int bcanalysis::processSignals(const char* outputFile,int extend){
 				exit(1);
 			}
 			printFLAG = 1;
-			basepair[250000000] = 0;			
+			delete [] basepair;
 			i = signal_slist.begin();
 			currchr = i->chrom;
 			chromReport = getKey(currchr);
+			basepair = new unsigned short int[chr_size[currchr]+1];
+			basepair[chr_size[currchr]+1] = 0;
 			cout << "\tProcessing " << chromReport << ".........." << endl;
 		}
 
 		if(i->chrom==currchr){
 			unsigned long int aStart = 1;
-			unsigned long int aStop = 250000000;
+			unsigned long int aStop = chr_size[currchr];
 			if(i->start > extend)
 				aStart = i->start - extend;
-			if((i->start+extend) < 250000000)
+			if((i->start+extend) < chr_size[currchr])
 				aStop = i->start + extend;
 			for(unsigned long int pos = aStart; pos <= aStop;pos++){
 				basepair[pos]++;
@@ -83,7 +113,7 @@ int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,u
 	const char * chrom = getKey(currChr);
 	fprintf(fh,"fixedStep chrom=%s start=1 step=1\n",chrom);
 
-	for(int posP = 1; posP < 250000000;posP++){
+	for(int posP = 1; posP <= chr_size[currChr];posP++){
 		fprintf(fh,"%hu\n",basepair[posP]);
 	}
 	fclose (fh);

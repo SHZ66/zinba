@@ -29,9 +29,10 @@ int main(int argc=0, char **argv=NULL){
 		int extendLength = argv[3];
 */
 extern "C"{
-void baseAlignCounts(char **RinputFile,char **RoutputFile, int *RextendLength){
+void baseAlignCounts(char **RinputFile,char **RoutputFile, char **Rtwobitfile,int *RextendLength){
 	string inputFile = RinputFile[0];
 	string outputFile = RoutputFile[0];
+	string twobitfile = Rtwobitfile[0];
 	int extendLength = RextendLength[0];
 	
 		bcanalysis newAnalysis;// = new analysis;
@@ -44,7 +45,7 @@ void baseAlignCounts(char **RinputFile,char **RoutputFile, int *RextendLength){
 		}
 
 		Rprintf("Calculating counts at each base\nPrinting output to %s\n",outputFile.c_str());
-		ret = newAnalysis.processSignals(outputFile.c_str(),extendLength);
+		ret = newAnalysis.processSignals(outputFile.c_str(),twobitfile.c_str(),extendLength);
 		Rprintf("-------- BASE ALIGN COUNTS COMPLETE --------\n");
 //	}
 //	return 0;

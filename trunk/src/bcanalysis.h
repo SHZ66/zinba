@@ -20,7 +20,7 @@ class bcanalysis{
 		~bcanalysis(); //Implemented
 		
 		int importRawSignal(const char *);//Implemented
-		int processSignals(const char *,int);//Implemented
+		int processSignals(const char *,const char *,int);//Implemented
 		int outputData(const char *, unsigned short int,unsigned short int,unsigned short int[]);//Implemented
 		
 		struct ltstr{
@@ -45,6 +45,8 @@ class bcanalysis{
 		const char * getKey(unsigned short int);//Implemented
 		map<const char*, int, ltstr> chroms;//Implemented
 		map<int, const char*> intsToChrom;//Implemented
+	
+		map<unsigned short int,unsigned long int> chr_size;
 };
 
 #endif /*BCANALYSIS_H_*/
