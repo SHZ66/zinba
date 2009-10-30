@@ -141,9 +141,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 				long int startPos = i->start-profile_extend+1;
 				long int stopPos = i->end+profile_extend;
 				profile = new unsigned short int[(stopPos-startPos)+2];
-				profile[(stopPos-startPos)+1] = 0;				
-cout << "Start is " << startPos << " and stop is " << stopPos << endl;
-				
+				profile[(stopPos-startPos)+1] = 0;
 				for(int s = startPos; s <= stopPos; s++){
 					profile[pIndex] = basepair[s];
 					pIndex++;
