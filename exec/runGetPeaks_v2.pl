@@ -85,8 +85,8 @@ sub run_zinba{
         system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",formula=$formula,threshold=$threshold,winout="$winout",coordout="$coordout",offset=$winOffset,getPeakRefine=$getRefinePeaks,method="$method");\n' | R --vanilla --slave >> $stdLog 2>> $errLog`);
 	if ($getRefinePeaks == 1){
             system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout",chromosome="$chrm");\npeakbound(bpprofile="$bpout",output="$peakout",winoffset=$winOffset);\n' | R --vanilla --slave >> $stdlog 2>> $errlog`);
-	    unlink($bpout);
-	    unlink($coordout);
+	    #unlink($bpout);
+	    #unlink($coordout);
 	}
     }
     return(0);
