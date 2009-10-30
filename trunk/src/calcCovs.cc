@@ -27,16 +27,7 @@ calcCovs::~calcCovs(){
 	}
 }
 
-int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir, string twoBitFile, const char* paramFile,const char * inputFile){
-	ifstream param(paramFile);
-	string line;
-	string outfile;
-	while(getline(param,line)){
-		if(line[1] == 'O'){
-			outfile = line.substr(8);
-		}
-	}
-	param.close();
+int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir, string twoBitFile, const char* paramFile,const char * inputFile,string outfile){
 			
 	FILE * tempTB;
 	const char * tInfo = "tempInfo.txt"; 

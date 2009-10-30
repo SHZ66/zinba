@@ -56,7 +56,9 @@ void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **R
 		}
 
 		Rprintf("\nBuilding window data\n");
-		ret = newAnalysis.processSignals(zWinSize,zOffsetSize,cWinSize,cOffsetSize,alignDir,twoBitFile,paramFile.c_str(),inSeqFile.c_str());
+		size_t found = expSeqFile.find_last_of(".");
+		string outfile_prefix = expSeqFile.substr(0,found);
+		ret = newAnalysis.processSignals(zWinSize,zOffsetSize,cWinSize,cOffsetSize,alignDir,twoBitFile,paramFile.c_str(),inSeqFile.c_str(),outfile_prefix.c_str());
 		Rprintf("\n\n--------BUILD WINDOWS COMPLETE-------\n\n");
 //	}
 //	return 0;
