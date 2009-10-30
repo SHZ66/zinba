@@ -13,7 +13,8 @@ my $concurr_process = 1;
 my $winsize = 0;
 my $method = "pscl";
 my $printLog = 0;
-my $win_offset = 0;
+my $pwin_size = 200;
+my $peakQuant = 0.75;
 my $getRefinePeaks = 1;
 
 my $result = GetOptions(
@@ -24,7 +25,8 @@ my $result = GetOptions(
 	"method=s" => \$method,
 	"processes=i" => \$concurr_process,
         "refine_peaks=i" => \$getRefinePeaks,
-	"win-offset=i" => \$win_offset,
+	"peakwin-size=i" => \$pwin_size,
+        "peak-quant=f" => \$peakQuant, 
 	"print-log=i" => \$printLog
 );
 my $pm = new ForkManager_pg($concurr_process);
@@ -53,11 +55,10 @@ while(<LIST>){
 }close LIST;
 
 foreach my $chrm (keys %{$filesOffsets}){
-    
     my $offsetFiles = join(";",@{$filesOffsets->{$chrm}});
     print STDERR "Processing $chrm\n\t", join("\n\t",@{$filesOffsets->{$chrm}}), "\n";
     my $pid = $pm->start and next;
-    &run_zinba($offsetFiles,$couts{$chrm},$winout,$formula,$threshold,$winsize,$win_offset,$method,$stdlog,$errlog,$printLog,$getRefinePeaks,$bpCountFile,$bpouts{$chrm},$peakout,$chrm);
+    &run_zinba($offsetFiles,$couts{$chrm},$winout,$formula,$threshold,$winsize,$pwin_size,$peakQuant,$method,$stdlog,$errlog,$printLog,$getRefinePeaks,$bpCountFile,$bpouts{$chrm},$peakout,$chrm);
     $pm->finish;
 }
 $pm->wait_all_children;
@@ -73,18 +74,18 @@ $pm->wait_all_children;
 #}
 
 sub run_zinba{
-    my ($inputFile,$coordout,$winout,$formula,$threshold,$winSize,$winOffset,$method,$stdLog,$errLog,$printLog,$getRefinePeaks,$bpCountFile,$bpout,$peakout,$chrm) = @_;
+    my ($inputFile,$coordout,$winout,$formula,$threshold,$winSize,$pwinSize,$pQuant,$method,$stdLog,$errLog,$printLog,$getRefinePeaks,$bpCountFile,$bpout,$peakout,$chrm) = @_;
     if ($printLog == 0){
-        system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",formula=$formula,threshold=$threshold,winout="$winout",coordout="$coordout",offset=$winOffset,getPeakRefine=$getRefinePeaks,method="$method");\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
+        system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",formula=$formula,threshold=$threshold,winout="$winout",coordout="$coordout",getPeakRefine=$getRefinePeaks,method="$method");\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
 	if ($getRefinePeaks == 1){
-            system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout",chromosome="$chrm");\npeakbound(bpprofile="$bpout",output="$peakout");\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
+            system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout",chromosome="$chrm");\npeakbound(bpprofile="$bpout",output="$peakout",winSize=$pwinSize,quantile=$pQuant);\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
 	    unlink($bpout);
 	    unlink($coordout);
 	}
     }else{
-        system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",formula=$formula,threshold=$threshold,winout="$winout",coordout="$coordout",offset=$winOffset,getPeakRefine=$getRefinePeaks,method="$method");\n' | R --vanilla --slave >> $stdLog 2>> $errLog`);
+        system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",formula=$formula,threshold=$threshold,winout="$winout",coordout="$coordout",getPeakRefine=$getRefinePeaks,method="$method");\n' | R --vanilla --slave >> $stdLog 2>> $errLog`);
 	if ($getRefinePeaks == 1){
-            system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout",chromosome="$chrm");\npeakbound(bpprofile="$bpout",output="$peakout",winSize=1000,quantile=0.99);\n' | R --vanilla --slave >> $stdlog 2>> $errlog`);
+            system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout",chromosome="$chrm");\npeakbound(bpprofile="$bpout",output="$peakout",winSize=$pwinSize,quantile=$pQuant);\n' | R --vanilla --slave >> $stdlog 2>> $errlog`);
 	    unlink($bpout);
 	    unlink($coordout);
 	}
