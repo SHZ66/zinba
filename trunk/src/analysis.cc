@@ -152,13 +152,11 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 					return 1;
 				}
 				delete [] profile;
-				profile = NULL;
 				printFlag = 1;
 			}
 		}
 	}
 	delete [] basepair;
-	basepair = NULL;
 	cout << "Finished\nFinished all coordinates, COMPLETE\n";
 	seqfile.close();
 	return 0;
@@ -273,8 +271,9 @@ int analysis::importCoords(const char * signalFile){
 	coord_slist.sort();
 	back = coord_slist.begin();
 	coord lastCoord = *back;
+	back++;
 	while(back != coord_slist.end()){
-		if(back->start == (lastCoord.end+1)){
+		if(back->start <= (lastCoord.end+1)){
 			long unsigned int lcStop = back->end;
 			coord_slist.erase(back--);
 			back->end = lcStop;

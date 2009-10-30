@@ -34,11 +34,12 @@ peakbound=function(bpprofile,output,winSize=200, quantile=.75){
 	    	return(which(localMax>0))
             }
 
-
-	    bpProfiles=read.table(bpprofile,header=TRUE,fill=T,sep="\t")
+	    bpProfiles=read.table(bpprofile,header=F,skip=1,fill=T,sep="\t")
 	    searchlength=500
 	    peakbound2=function(xx){	
-		    x=as.numeric(xx[6:length(xx)])
+		    xna <- is.na(xx) | is.nan(xx) | is.infinite(xx)
+		    xc <- xx[!xna]
+		    x=as.numeric(xc[6:length(xc)])
 		    maxvec=localMaximum(x, winSize=winSize, quantile=quantile)
 		    #maxvec=which.max(x)
 		    xcoords=matrix(0,length(maxvec),9)
