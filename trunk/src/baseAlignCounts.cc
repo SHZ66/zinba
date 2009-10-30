@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <fstream>
 #include <vector>
 #include "bcanalysis.h"

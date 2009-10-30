@@ -4,6 +4,7 @@
 #include "bcanalysis.h"
 #include <sstream>
 #include <string>
+#include <cstring>
 #include <stdexcept>
 #include <math.h>
 #include <iomanip>
