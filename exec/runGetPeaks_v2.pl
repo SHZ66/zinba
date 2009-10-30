@@ -53,9 +53,9 @@ while(<LIST>){
 }close LIST;
 
 foreach my $chrm (keys %{$filesOffsets}){
-    print STDERR "Processing $chrm\n";
+    
     my $offsetFiles = join(";",@{$filesOffsets->{$chrm}});
-    print STDERR "\t", join("\n\t",@{$filesOffsets->{$chrm}}), "\n";
+    print STDERR "Processing $chrm\n\t", join("\n\t",@{$filesOffsets->{$chrm}}), "\n";
     my $pid = $pm->start and next;
     &run_zinba($offsetFiles,$couts{$chrm},$winout,$formula,$threshold,$winsize,$win_offset,$method,$stdlog,$errlog,$printLog,$getRefinePeaks,$bpCountFile,$bpouts{$chrm},$peakout,$chrm);
     $pm->finish;
@@ -77,14 +77,14 @@ sub run_zinba{
     if ($printLog == 0){
         system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",formula=$formula,threshold=$threshold,winout="$winout",coordout="$coordout",offset=$winOffset,getPeakRefine=$getRefinePeaks,method="$method");\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
 	if ($getRefinePeaks == 1){
-            system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout",chromosome="$chrm");\npeakbound(bpprofile="$bpout",output="$peakout",winoffset=$winOffset);\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
+            system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout",chromosome="$chrm");\npeakbound(bpprofile="$bpout",output="$peakout");\n' | R --vanilla --slave > /dev/null 2> /dev/null`);
 	    unlink($bpout);
 	    unlink($coordout);
 	}
     }else{
         system(qq`echo 'library(zinba);\ngetsigwindows(file="$inputFile",formula=$formula,threshold=$threshold,winout="$winout",coordout="$coordout",offset=$winOffset,getPeakRefine=$getRefinePeaks,method="$method");\n' | R --vanilla --slave >> $stdLog 2>> $errLog`);
 	if ($getRefinePeaks == 1){
-            system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout",chromosome="$chrm");\npeakbound(bpprofile="$bpout",output="$peakout",winoffset=$winOffset);\n' | R --vanilla --slave >> $stdlog 2>> $errlog`);
+            system(qq`echo 'library(zinba);\nbasecountimport(inputfile="$bpCountFile",coordfile="$coordout",outputfile="$bpout",chromosome="$chrm");\npeakbound(bpprofile="$bpout",output="$peakout",winSize=1000,quantile=0.99);\n' | R --vanilla --slave >> $stdlog 2>> $errlog`);
 	    unlink($bpout);
 	    unlink($coordout);
 	}
