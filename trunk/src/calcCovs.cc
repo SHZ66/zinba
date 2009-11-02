@@ -121,6 +121,9 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		ifstream seqfile(tSeq);
 		string line;
 		pos = 1;
+		unsigned long int nStart = 0;
+		unsigned long int nStop = 0;
+		unsigned short int prevEnt = 0;
 		while(getline(seqfile,line)){
 			if(line[0] != '>'){
 				for(int s = 0; s < line.length();s++){
@@ -130,7 +133,12 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 					}else if (line[s] == 'N'){
 						ent = 2;
 					}
+					if(ent == 2 && prevEnt != 2)
+						nStart = pos;
+					else if( (ent != 2 && prevEnt == 2) || (pos+1) == chr_size[currchr])
+						nStop = (pos - 1);
 					gcContent[pos] = ent;
+					prevEnt = ent;
 					pos++;
 				}
 			}
@@ -140,30 +148,57 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 
 		cout << "\tGetting counts for " << cWinSize << "bp windows.........." << endl;
 		int numOffsets = 1;
-		double max=0;
-		double min=99999;
 		if(cOffsetSize > 0){
 			numOffsets = int(cWinSize/cOffsetSize);
 		}
-		for(int o = 0; o < numOffsets; o++){			
+		for(int o = 0; o < numOffsets; o++){
 			unsigned long int cWinStart = (cOffsetSize * o) + 1;
 			unsigned long int cWinStop = cWinStart + cWinSize - 1;			
 			while(cWinStop <= chr_size[currchr]){
 				double cnvCount = 0;
 				int alignCount = 0;
 				double nCount = 0;
+				unsigned long int gapStart = 0;
 				for(int b = cWinStart; b <= cWinStop; b++){
 					cnvCount += basepair[b];
 					alignCount += alignability[b];
 					if(gcContent[b] == 2){
+						if(nCount == 0)
+							gapStart = b;
 						nCount++;
 					}
 				}
-				if((nCount/cWinSize) < 0.1){
-					double cScore = 0;
-					if(alignCount > 0){
-						cScore = cnvCount/alignCount;
+				double cScore = 0;
+				if (nCount > (double)(0.1*zWinSize)){
+					if((gapStart - cWinStart) > cOffsetSize){
+						cnvCount = 0;
+						alignCount = 0;
+						for(int b = cWinStart; b < gapStart; b++){
+							cnvCount += basepair[b];
+							alignCount += alignability[b];
+						}
+						if(alignCount > 0)
+							cScore = cnvCount/alignCount;
+						cnvWins gcnv(currchr,cWinStart,(gapStart-1),cScore,0,0,0);	
+						cnv_wins.push_back(gcnv);
 					}
+					while(gcContent[gapStart] == 2 && gapStart < cWinStop)
+						gapStart++;
+					if((cWinStop - gapStart) > cOffsetSize){
+						cnvCount = 0;
+						alignCount = 0;
+						for(int b = gapStart; b <= cWinStop; b++){
+							cnvCount += basepair[b];
+							alignCount += alignability[b];
+						}
+						if(alignCount > 0)
+							cScore = cnvCount/alignCount;
+						cnvWins gcnv2(currchr,gapStart,cWinStop,cScore,0,0,0);	
+						cnv_wins.push_back(gcnv2);
+					}					
+				}else{
+					if(alignCount > 0)
+						cScore = cnvCount/alignCount;
 					cnvWins cnv(currchr,cWinStart,cWinStop,cScore,0,0,0);
 					cnv_wins.push_back(cnv);
 				}
@@ -171,6 +206,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				cWinStop += cWinSize;
 			}
 		}
+			
 		cout << "\t\tRefining boundaries...." << endl;
 		cnv_wins.sort();
 		int numCnvWins = cnv_wins.size();
@@ -246,29 +282,51 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			double lowPval = 1;
 			double maxRatio = 0;
 			long unsigned int transPoint = 0;
+			int hitGap = 0;
 			while((leftWinStop+1) <= sb->stop){
 				int leftWinCount = 0;
 				int rightWinCount = 0;
+				unsigned long int gapStart = 0;
 				for(int s = leftWinStart; s <= leftWinStop; s++){
 					leftWinCount += basepair[s];
 					rightWinCount += basepair[(s+cWinSize+1)];
-				}
-				unsigned int maxCount = leftWinCount;
-				if(rightWinCount > leftWinCount)
-					maxCount = rightWinCount;
-				unsigned int sumCount = leftWinCount + rightWinCount;
-				double ratioDiff = (double) maxCount/sumCount;
-				double bPval = binomialcdistribution(maxCount,sumCount,0.5);
-				if(bPval <= lowPval)
-					if(ratioDiff > maxRatio){
-						lowPval = bPval;
-						maxRatio = ratioDiff;
-						transPoint = leftWinStop + 1;
+					if(gcContent[s] == 2){
+						hitGap = 1;
+						gapStart = s;
 					}
-				leftWinStart += zOffsetSize;
-				leftWinStop += zOffsetSize;
+					if(gcContent[s+cWinSize+1] == 2){
+						hitGap = 1;
+						gapStart = s+cWinSize+1;
+					}
+				}
+
+				if(hitGap == 1){
+					transPoint = gapStart;
+					leftWinStop = sb->stop;
+				}else if (hitGap == 0){
+					unsigned int maxCount = leftWinCount;
+					if(rightWinCount > leftWinCount)
+						maxCount = rightWinCount;
+					unsigned int sumCount = leftWinCount + rightWinCount;
+					double ratioDiff = (double) maxCount/sumCount;
+					double bPval = binomialcdistribution(maxCount,sumCount,0.5);
+					if(bPval <= lowPval){
+						if(ratioDiff > maxRatio){
+							lowPval = bPval;
+							maxRatio = ratioDiff;
+							transPoint = leftWinStop + 1;
+						}
+					}
+					leftWinStart += zOffsetSize;
+					leftWinStop += zOffsetSize;
+				}
 			}
 			transPts.push_back(transPoint);
+			if(hitGap == 1){
+				while(gcContent[transPoint] == 2 && transPoint <= chr_size[currchr])
+					transPoint++;
+				transPts.push_back((transPoint-1));
+			}
 			sigBoundary.erase(sb++);
 		}
 		transPts.sort();
@@ -283,6 +341,8 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				c++;
 		}
 		tp = transPts.begin();
+		list<long unsigned int>::iterator nexttp = transPts.begin();
+		nexttp++;
 		while(tp != transPts.end()){
 			double cnvCount = 0;
 			int alignCount = 0;
@@ -295,18 +355,32 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			double cScore = cnvCount/alignCount;
 			cnvWins cnv(currchr,tpStart,tpStop,cScore,0,0,0);
 			cnv_wins.push_back(cnv);
-			cnvCount = 0;
-			alignCount = 0;
-			tpStart = *tp;
-			tpStop = (*tp+cWinSize);
-			for(int b = tpStart; b < tpStop; b++){
-				cnvCount += basepair[b];
-				alignCount += alignability[b];
+			if(gcContent[*tp] == 2 && gcContent[*nexttp] == 2){
+				   tpStart = *nexttp+1;
+				   tpStop = (*nexttp+cWinSize);
+			}else{
+				tpStart = *tp;
+				tpStop = (*tp+cWinSize);				
 			}
-			cScore = cnvCount/alignCount;
-			cnvWins cnv_two(currchr,tpStart,tpStop,cScore,0,0,0);
-			cnv_wins.push_back(cnv_two);
+			if(tpStop <= chr_size[currchr]){
+				cnvCount = 0;
+				alignCount = 0;
+				for(int b = tpStart; b < tpStop; b++){
+					cnvCount += basepair[b];
+					alignCount += alignability[b];
+				}
+				cScore = cnvCount/alignCount;
+				cnvWins cnv_two(currchr,tpStart,tpStop,cScore,0,0,0);
+				cnv_wins.push_back(cnv_two);
+				if(gcContent[*tp] == 2 && gcContent[*nexttp] == 2){
+					tp++;
+					nexttp++;
+				}
+			}else{
+				tp++;
+			}
 			tp++;
+			nexttp++;
 		}
 		cnv_wins.sort();
 
@@ -328,7 +402,6 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 					in++;
 				}
 			}
-			
 		}
 		
 		cout << "\tGetting counts for zinba windows.........." << endl;

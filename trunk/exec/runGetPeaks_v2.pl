@@ -33,6 +33,10 @@ my $pm = new ForkManager_pg($concurr_process);
 
 my ($formula,$chrm,$data,$inputFile,$form,$offset,$out,$outFile);
 my ($coordout,$bpout,$winout,$peakout,$stdlog,$errlog,%couts,%bpouts,$filesOffsets);
+
+#get multiple sets of parameters from param file, format could be:
+#  #PARAMETER formula=exp_count~input output=EXP_INPUT_T001 threshold=0.01
+
 open(LIST,$paramFile);
 while(<LIST>){
     chomp;
@@ -55,6 +59,7 @@ while(<LIST>){
 }close LIST;
 
 foreach my $chrm (keys %{$filesOffsets}){
+#loop through each parameter set    
     my $offsetFiles = join(";",@{$filesOffsets->{$chrm}});
     print STDERR "Processing $chrm\n\t", join("\n\t",@{$filesOffsets->{$chrm}}), "\n";
     my $pid = $pm->start and next;
