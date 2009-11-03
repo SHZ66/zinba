@@ -21,7 +21,7 @@ extern "C" {
 		int ret=newAnalysis.importCoords(coordFile.c_str());
 
 		if(ret == 1){
-			Rprintf("ERROR opening file: %s\n",inputFile.c_str());
+			Rprintf("ERROR opening file: %s\n",coordFile.c_str());
 		}else if(ret == 2){
 			Rprintf("FILE FORMATTING ERROR- wrong number of columns, exiting");
 		}else{

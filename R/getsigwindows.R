@@ -1,11 +1,12 @@
-getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakprop=.15,winout,coordout,offset=0,tol=10^-5,getPeakRefine=1,method='pscl'){
+getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakprop=.15,winout,coordout,tol=10^-5,getPeakRefine=1,method='pscl'){
 	time.start <- Sys.time()
 	library(qvalue)
         #library(pscl)
 	library(MASS)
         options(scipen=999)
         
-        print(paste("Using",method,"method for detection",sep=" "))        
+        print(paste("Using",method,"method for detection",sep=" "))
+        print(paste("winout is",winout,"coordout is",coordout,sep=" "))
 	###### USER INPUT############################
 	if(method=='pscl'){
             files = unlist(strsplit(file,";"))
@@ -47,7 +48,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
     ### FORMAT PEAK COORDINATE DATA
                 if(getPeakRefine == 1){
                     peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$stop,sep=":")
-                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$stop+offset),((sigpeaks$exp_count>q25)^2),"+")
+                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),sigpeaks$start,sigpeaks$stop,((sigpeaks$exp_count>q25)^2),"+")
                     write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
                 }
 	    }
@@ -197,7 +198,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
     ### FORMAT PEAK COORDINATE DATA
                 if(getPeakRefine == 1){
                     peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$stop,sep=":")
-                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),(sigpeaks$start-offset),(sigpeaks$stop+offset),((sigpeaks$exp_count>q25)^2),"+")
+                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),sigpeaks$start,sigpeaks$stop,((sigpeaks$exp_count>q25)^2),"+")
                     write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
                 }
             }
