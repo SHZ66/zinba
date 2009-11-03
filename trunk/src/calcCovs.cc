@@ -133,12 +133,12 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 					}else if (line[s] == 'N'){
 						ent = 2;
 					}
-					if(ent == 2 && prevEnt != 2)
+/*					if(ent == 2 && prevEnt != 2)
 						nStart = pos;
 					else if( (ent != 2 && prevEnt == 2) || (pos+1) == chr_size[currchr])
-						nStop = (pos - 1);
+						nStop = (pos - 1);*/
 					gcContent[pos] = ent;
-					prevEnt = ent;
+//					prevEnt = ent;
 					pos++;
 				}
 			}
@@ -275,15 +275,17 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		cout << "\t\t\tRefining " << sigBoundary.size() << " boundaries" << endl;		
 		sb = sigBoundary.begin();
 		list<long unsigned int> transPts;
+		long unsigned int refOffset = numOffsets * cOffsetSize;
 		while(sb != sigBoundary.end()){
-			long unsigned int refOffset = numOffsets * cOffsetSize;
-			long unsigned int leftWinStart = sb->start - refOffset;
+			long unsigned int leftWinStart = 1;
+			if(sb->start > refOffset)
+				leftWinStart = sb->start - refOffset;
 			long unsigned int leftWinStop = leftWinStart + cWinSize;
 			double lowPval = 1;
 			double maxRatio = 0;
 			long unsigned int transPoint = 0;
 			int hitGap = 0;
-			while((leftWinStop+1) <= sb->stop){
+			while((leftWinStop+1) <= sb->stop && (leftWinStop+cWinSize+1) <= chr_size[currchr]){
 				int leftWinCount = 0;
 				int rightWinCount = 0;
 				unsigned long int gapStart = 0;
@@ -291,15 +293,16 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 					leftWinCount += basepair[s];
 					rightWinCount += basepair[(s+cWinSize+1)];
 					if(gcContent[s] == 2){
+						if(hitGap == 0)
+							gapStart = s;
 						hitGap = 1;
-						gapStart = s;
 					}
 					if(gcContent[s+cWinSize+1] == 2){
+						if(hitGap == 0)
+							gapStart = s+cWinSize+1;
 						hitGap = 1;
-						gapStart = s+cWinSize+1;
 					}
 				}
-
 				if(hitGap == 1){
 					transPoint = gapStart;
 					leftWinStop = sb->stop;
@@ -356,8 +359,8 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			cnvWins cnv(currchr,tpStart,tpStop,cScore,0,0,0);
 			cnv_wins.push_back(cnv);
 			if(gcContent[*tp] == 2 && gcContent[*nexttp] == 2){
-				   tpStart = *nexttp+1;
-				   tpStop = (*nexttp+cWinSize);
+				tpStart = *nexttp+1;
+				tpStop = (*nexttp+cWinSize);
 			}else{
 				tpStart = *tp;
 				tpStop = (*tp+cWinSize);				
