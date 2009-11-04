@@ -2,7 +2,6 @@
 #define ANALYSIS_H_
 
 #include <string>
-#include <vector>
 #include "coord.h"
 #include <map>
 #include <list>

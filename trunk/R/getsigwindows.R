@@ -5,8 +5,8 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 	library(MASS)
         options(scipen=999)
         
-        print(paste("Using",method,"method for detection",sep=" "))
-        print(paste("winout is",winout,"coordout is",coordout,sep=" "))
+        #print(paste("Using",method,"method for detection",sep=" "))
+        #print(paste("winout is",winout,"coordout is",coordout,sep=" "))
 	###### USER INPUT############################
 	if(method=='pscl'){
             files = unlist(strsplit(file,";"))
@@ -32,13 +32,14 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
                 colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
                 param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
 
+                lineBLANK=''
+                line0=paste('For ',as.character(files[i]),sep='')
                 line1='|Selection Summary|'
                 line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
                 line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
 
     ### PRINT SIGNIFICANT WINDOWS
-                print(paste("Processing ",files[i]))
-                print(c(line1, line2,line3))
+                print(c(lineBLANK,line0,line1,line2,line3,lineBLANK))
                 if(file.exists(winout)){
                     write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
                 }else{

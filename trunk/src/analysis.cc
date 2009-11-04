@@ -9,9 +9,9 @@
 #include <iomanip>
 #include <stdlib.h>
 #include <list>
-#include <vector>
 #include <cstdlib>
 #include <ctime>
+#include <R.h>
 
 using namespace std;
 
@@ -42,14 +42,12 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 	unsigned short int * profile = NULL;
 	int cSize = 250000000;
 	basepair = new unsigned short int[cSize];
-
-//	char *chChr = (char *) malloc(1024);
-	char * chChr = new char[128];
-	
-	unsigned long int sizeProfile = 0;
 	unsigned long int countBases = cSize;
 	unsigned long int startOffset = 0;
 	ifstream seqfile(inputFile);
+	
+	//char * chChr = (char *) malloc(1024);
+	char * chChr = new char[128];
 
 	while (getline(seqfile, line)){
 		if(line[0] == 't'){
@@ -86,9 +84,10 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 				cout << "Finished" << endl;
 
 				if(coord_slist.empty()){
-					cout << "\nFinished all coordinates, COMPLETE\n";
 					delete [] basepair;
+					basepair = NULL;
 					seqfile.close();
+					cout << "\nFinished all coordinates, COMPLETE" << endl;
 					return 0;
 				}
 			}
@@ -100,6 +99,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 					for ( int it= 6; it < field.length(); it++ ){
 						chrom += field.at(it);
 					}
+
 					strcpy(chChr,chrom.c_str());
 					chromInt = getHashValue(chChr);
 					
@@ -169,6 +169,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 		}
 	}
 	delete [] basepair;
+	basepair = NULL;
 	seqfile.close();
 	cout << "Finished\nFinished all coordinates, COMPLETE\n" << endl;
 	return 0;
@@ -278,16 +279,17 @@ int analysis::importCoords(const char * signalFile){
 		}
 	}
 	fclose(fh);
-	cout << lineCount << " coordinates imported\n";
+//	cout << lineCount << " coordinates imported\n";
 	coord_slist.sort();
 	back = coord_slist.begin();
 	coord lastCoord = *back;
 	back++;
 	while(back != coord_slist.end()){
-		if(back->start <= (lastCoord.end+1)){
+		if(back->chrom == lastCoord.chrom && back->start <= (lastCoord.end+1)){
 			long unsigned int lcStop = back->end;
 			coord_slist.erase(back--);
 			back->end = lcStop;
+			back->qFlag = 1;
 		}
 		lastCoord = *back;		
 		back++;
@@ -301,6 +303,6 @@ int analysis::importCoords(const char * signalFile){
 			back++;
 		}
 	}
-	cout << "Collapsed to " << coord_slist.size() << " regions" << endl;
+//	cout << "Collapsed to " << coord_slist.size() << " regions" << endl;
 	return 0;
 }
