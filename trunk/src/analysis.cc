@@ -4,14 +4,13 @@
 #include "analysis.h"
 #include <sstream>
 #include <string>
+#include <cstring>
 #include <stdexcept>
 #include <math.h>
 #include <iomanip>
-#include <stdlib.h>
-#include <list>
+#include <vector>
 #include <cstdlib>
 #include <ctime>
-#include <R.h>
 
 using namespace std;
 
@@ -26,8 +25,38 @@ analysis::~analysis(){
 	}
 }
 
-int analysis::processCoords(const char* inputFile,const char* outputFile,string chrmSearch){
+int analysis::processCoords(const char* inputFile,const char* outputFile,const char* twoBitFile,const char* chrmSearch){
 
+	FILE * tempTB;
+	const char * tInfo = "tempInfo.txt"; 
+	const char * tChrSize = "tempChromSize.txt";
+	tempTB = fopen(tInfo,"w");
+	fprintf(tempTB,"library(zinba);\ntwobitinfo(infile=\"%s\",outfile=\"%s\");\n",twoBitFile,tChrSize);
+	fclose (tempTB);
+	
+//	cout << "\nGetting chromosome lengths from .2bit file: " << twoBitFile << endl;
+	int s = system("R CMD BATCH tempInfo.txt /dev/null");
+	if(s == 0){
+		remove(tInfo);
+	}else{
+		cout << "twoBitInfo failed\n";
+		exit(1);
+	}
+	
+	tempTB = fopen(tChrSize,"r");
+	char tbChrom[128];
+	unsigned long int tbStart;
+	while(!feof(tempTB)){
+		int ret = fscanf(tempTB,"%s%lu",tbChrom,&tbStart);
+		if(ret == 2){
+			string sChr(tbChrom);
+			unsigned short int chromIntTB = getHashValue(sChr.c_str());
+			chr_size[chromIntTB] = tbStart;
+		}
+	}
+	fclose(tempTB);
+	remove(tChrSize);
+	
 	unsigned short int chromInt;
 	string line;
 	string field;
@@ -40,29 +69,23 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 	list<coord>::iterator i = coord_slist.begin();
 	unsigned short int * basepair = NULL;
 	unsigned short int * profile = NULL;
-	int cSize = 250000000;
-	basepair = new unsigned short int[cSize];
-	unsigned long int countBases = cSize;
+	unsigned long int countBases = 250000000;
 	unsigned long int startOffset = 0;
+	cout << "Getting basecount data from " << inputFile << endl;
 	ifstream seqfile(inputFile);
 	
-	//char * chChr = (char *) malloc(1024);
-	char * chChr = new char[128];
-
 	while (getline(seqfile, line)){
-		if(line[0] == 't'){
-			cout << "\nIgnoring track definition line" << endl;
-		}else if (line[0] == 'f'){
+		if (line[0] == 'f'){
 			if(collectData == 1 && getChrmData == 1){
-				cout << "Finished, loaded " << countBases << " bp\nGetting data for coordinates and printing output...";
 				i = coord_slist.begin();
 				while(i!=coord_slist.end()){
 					if(i->chrom == chromInt){
 						int pIndex = 0;
-						long int startPos = 1;
-						if(i->start > profile_extend)
+						unsigned long int startPos = 1;
+						if(i->start > profile_extend){
 							startPos = i->start-profile_extend;
-						long int stopPos = i->end+profile_extend;
+						}
+						unsigned long int stopPos = i->end+profile_extend;
 						profile = new unsigned short int[(stopPos-startPos)+1];
 						profile[(stopPos-startPos)+1] = 0;
 						for(int s = startPos; s <= stopPos; s++){
@@ -81,13 +104,11 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 						i++;
 					}
 				}
-				cout << "Finished" << endl;
-
+				delete [] basepair;
+				basepair = NULL;
+				
 				if(coord_slist.empty()){
-					delete [] basepair;
-					basepair = NULL;
 					seqfile.close();
-					cout << "\nFinished all coordinates, COMPLETE" << endl;
 					return 0;
 				}
 			}
@@ -99,23 +120,21 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 					for ( int it= 6; it < field.length(); it++ ){
 						chrom += field.at(it);
 					}
-
-					strcpy(chChr,chrom.c_str());
-					chromInt = getHashValue(chChr);
-					
+					chromInt = getHashValue(chrom.c_str());					
 					string allChrm = "all";
-					if(strcmp(chrmSearch.c_str(),allChrm.c_str()) == 0){
+					if(strcmp(chrmSearch,allChrm.c_str()) == 0){
 						getChrmData = 1;
-					}else if (strcmp(chrmSearch.c_str(),chrom.c_str()) == 0){
+					}else if (strcmp(chrmSearch,chrom.c_str()) == 0){
 						getChrmData = 1;
 					}else{
 						getChrmData = 0;
-						cout << "\tSkipping " << chrom.c_str() << endl;
+						cout << "Skipping " << chrom.c_str() << endl;
 					}
 					
 					if(getChrmData == 1){
-						cout << "\nLoading data for " << chrom.c_str() << endl;
-						basepair[cSize] = 0;
+						cout << "Loading data for " << chrom.c_str() << endl;
+						basepair = new unsigned short int[chr_size[chromInt]+1];
+						basepair[chr_size[chromInt]+1] = 0;
 						countBases = 0;
 					}
 				}else if (field[0] == 's' && field[2] == 'a' && getChrmData == 1){
@@ -125,30 +144,27 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 					}
 					startOffset = atoi(startVal.c_str());
 					countBases = startOffset - 1;
-					cout << "Setting start position to " << startOffset << endl;
-					cout << "Getting base counts...";
 				}
 			}
-		}else if(getChrmData == 1){
+		}else if(getChrmData == 1 && line[0] != 't'){
 				collectData = 1;
 				countBases++;
 				basepair[countBases] = atoi(line.c_str());
-				if(countBases > cSize){
+				if(countBases > chr_size[chromInt]){
 					cout << "Print some error, adding more data than basepairs in chrom\n";
 				}
 		}
 	}
 
 	if(getChrmData == 1){
-		cout << "Finished, loaded " << countBases << " bp\nGetting data for coordinates and printing output...";
 		i = coord_slist.begin();
 		while(i!=coord_slist.end()){
 			if(i->chrom == chromInt){
 				int pIndex = 0;
-				long int startPos = 1;
+				unsigned long int startPos = 1;
 				if(i->start > profile_extend)
 					startPos = i->start-profile_extend;
-				long int stopPos = i->end+profile_extend;
+				unsigned long int stopPos = i->end+profile_extend;
 				profile = new unsigned short int[(stopPos-startPos)+1];
 				profile[(stopPos-startPos)+1] = 0;
 				for(int s = startPos; s <= stopPos; s++){
@@ -168,14 +184,13 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,string 
 			}
 		}
 	}
+	seqfile.close();
 	delete [] basepair;
 	basepair = NULL;
-	seqfile.close();
-	cout << "Finished\nFinished all coordinates, COMPLETE\n" << endl;
 	return 0;
 }
 
-int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,long int pStart,long int pStop,int printStop,unsigned short int pProfile[]){
+int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,int printStop,unsigned short int pProfile[]){
 	FILE * fh;
 	if(pFlag == 0){
 		fh = fopen(outputFile,"w"); 
@@ -194,8 +209,8 @@ int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pC
 	char stop[10];
 	sprintf( start,"%d", pStart);
 	sprintf( stop,"%d", pStop);
-	strcpy(winID,chromName);strcat(winID,":");strcat(winID,start);strcat(winID,":");strcat(winID,stop);
-	fprintf(fh,"%s\t%s\t%i\t%i\t%s",winID,chromName,pStart,pStop,strand);
+	strcpy(winID,chromName);strcat(winID,":");strcat(winID,start);strcat(winID,"-");strcat(winID,stop);
+	fprintf(fh,"%s\t%s\t%lu\t%lu\t%s",winID,chromName,pStart,pStop,strand);
 	for(int posP = 0; posP < printStop;posP++){
 		fprintf(fh,"\t%i",pProfile[posP]);
 	}
@@ -204,7 +219,7 @@ int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pC
 	return 0;
 }
 
-unsigned short int analysis::getHashValue(char *currChrom){
+unsigned short int analysis::getHashValue(const char *currChrom){
 	map<const char*, int>::iterator i;
 	i = chroms.find(currChrom);
 	if(i == chroms.end()){
@@ -244,42 +259,18 @@ int analysis::importCoords(const char * signalFile){
 	unsigned long int iEnd;
 	unsigned short int qFlag;
 	list<coord>::iterator back =  coord_slist.begin();
-	char line[1024];
-
-	if(!feof(fh)){
-		fpos_t position;
-		fgetpos (fh, &position);		
-		fgets(line,1024,fh);
-		while(strncmp(line, "#", 1)==0){
-			fgetpos (fh, &position);
-			fgets(line, 1024, fh);
-		}
-		fsetpos (fh, &position);
-
-		unsigned short int countTabs = 0;
-  		string tabCounter = line;
-  		string::size_type i = tabCounter.find("\t", 0);
-  		while(i!=string::npos){
-  			countTabs++;
-  			i = tabCounter.find("\t", i+1);
-  		}
-  		
-  		if(countTabs!=5){
-  			return 2;
-  		}
-	 }
-
 	while(!feof(fh)){
 		int readResult = fscanf(fh,"%s%s%lu%lu%hu%s",id,cChrom,&iStart,&iEnd,&qFlag,strand);
 		if(readResult == 6){
-			unsigned short int chromInt = getHashValue(cChrom);
-			coord c(id,chromInt,iStart,iEnd,qFlag,strand);
+			string chromIn(cChrom);
+			unsigned short int chromInt = getHashValue(chromIn.c_str());
+			coord c(chromInt,iStart,iEnd,qFlag);
 			lineCount++;
 			coord_slist.push_back(c);
 		}
 	}
 	fclose(fh);
-//	cout << lineCount << " coordinates imported\n";
+//	cout << lineCount << " coordinates imported" << endl;
 	coord_slist.sort();
 	back = coord_slist.begin();
 	coord lastCoord = *back;
@@ -303,6 +294,6 @@ int analysis::importCoords(const char * signalFile){
 			back++;
 		}
 	}
-//	cout << "Collapsed to " << coord_slist.size() << " regions" << endl;
+	cout << "\nCollapsed windows down to " << coord_slist.size() << " non-overlapping regions" << endl;
 	return 0;
 }

@@ -2,10 +2,15 @@
 #define ANALYSIS_H_
 
 #include <string>
+#include <cstring>
+#include <vector>
 #include "coord.h"
 #include <map>
 #include <list>
+#include <ext/slist>
 
+namespace sgi = ::__gnu_cxx;
+using namespace sgi;
 using namespace std;
 
 class analysis{
@@ -15,8 +20,8 @@ class analysis{
 		analysis(); //Implemented
 		~analysis(); //Implemented
 		int importCoords(const char *);//Implemented
-		int processCoords(const char *,const char *,string);//Implemented
-		int outputData(const char *,int,unsigned short int,long int,long int,int,unsigned short int[]);//Implemented
+		int processCoords(const char *,const char *,const char *,const char *);//Implemented
+		int outputData(const char *,int,unsigned short int,unsigned long int,unsigned long int,int,unsigned short int[]);//Implemented
 
 		struct ltstr{
 			bool operator()(const char* s1, const char* s2) const
@@ -30,10 +35,12 @@ class analysis{
 		list<coord> coord_slist;//Implemented
 	
 		unsigned short int chromCounter;//Implemented
-		unsigned short int getHashValue(char *);//Implemented
+		unsigned short int getHashValue(const char *);//Implemented
 		const char * getKey(unsigned short int);//Implemented
 		map<const char*, int, ltstr> chroms;//Implemented
 		map<int, const char*> intsToChrom;//Implemented
+	
+		map<unsigned short int,unsigned long int> chr_size;
 
 };
 
