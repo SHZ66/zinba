@@ -13,7 +13,7 @@ run.zinba=function(paramFile=NULL,seq=NULL,align=NULL,input=NULL,twoBit=NULL,win
                 print(paste("Getting significant windows"))
                 print(paste("Using parameter file",paramFile,sep=" "))
                 print(paste("Running",numProc,"parallel jobs",sep=" "))
-	        CMD=paste(Fn.Path,"--param-file", paramFile,"--threshold",threshold,"--win-size",winSize,"--basecount_file",basecountfile,"--method",method,"--processes",numProc,"--refine_peaks",refinepeaks,"--peakwin-size",pWinSize,"--peak-quant",pquant,sep=" ")
+	        CMD=paste(Fn.Path,"--param-file", paramFile,"--threshold",threshold,"--win-size",winSize,"--basecount_file",basecountfile,"--twobitFile",twoBit,"--method",method,"--processes",numProc,"--refine_peaks",refinepeaks,"--peakwin-size",pWinSize,"--peak-quant",pquant,sep=" ")
 		if(printLog==1){
 			CMD=paste(CMD,"--print-log 1",sep=" ")
 		}
