@@ -1,38 +1,38 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <fstream>
+#include <vector>
 #include "analysis.h"
+#include <ext/slist>
 #include <R.h>
 #include <Rmath.h>
 #define MAX_LEN 1025
 
+namespace sgi = ::__gnu_cxx;
+using namespace sgi;
 using namespace std;
 
 extern "C" {
-	void getSeqCountProfile(char **Rinputfile, char **Rcoordfile, char **Routputfile, char **Rchromosome){
-		string inputFile = Rinputfile[0];
-		string coordFile = Rcoordfile[0];
-		string outputFile = Routputfile[0];
-		string chromosome = Rchromosome[0];
+void getSeqCountProfile(char **Rinputfile, char **Rcoordfile, char **Routputfile, char **Rtwobitfile,char **Rchromosome){
+		const char*  inputFile = Rinputfile[0];
+		const char* coordFile = Rcoordfile[0];
+		const char* outputFile = Routputfile[0];
+		const char* twobitfile = Rtwobitfile[0];
+		const char* chromosome = Rchromosome[0];
 		
 		analysis newAnalysis;// = new analysis;
-		Rprintf("\nGetting basecount data for for %s\n",chromosome.c_str());
-		int ret=newAnalysis.importCoords(coordFile.c_str());
+		int ret=newAnalysis.importCoords(coordFile);
 
 		if(ret == 1){
-			Rprintf("ERROR opening file: %s\n",coordFile.c_str());
-		}else if(ret == 2){
-			Rprintf("FILE FORMATTING ERROR- wrong number of columns, exiting");
+			Rprintf("ERROR opening file: %s\n",coordFile);
 		}else{
-//			Rprintf("FINISHED importing coordinates");
-//			Rprintf("\nGetting profiles for coordinates %s\n",inputFile.c_str());
-//			Rprintf("Printing output to %s \n",outputFile.c_str());
-			
-			int retP = newAnalysis.processCoords(inputFile.c_str(),outputFile.c_str(),chromosome.c_str());
+			Rprintf("Getting basecount data for %s\n",chromosome);
+			int retP = newAnalysis.processCoords(inputFile,outputFile,twobitfile,chromosome);
 			if(retP == 1){
 				Rprintf("\nError occurred in processing\n");
 			}
 			Rprintf("\ngetSeqCountProfile COMPLETE\n");
 		}
-	}
+}
 }

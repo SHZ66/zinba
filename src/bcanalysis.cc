@@ -100,6 +100,7 @@ int bcanalysis::processSignals(const char* outputFile,const char *twoBitFile,int
 		cout << "Error printing output to file, exiting" << endl;
 		exit(1);
 	}
+	delete [] basepair;
 	return 0;
 }
 
@@ -152,12 +153,10 @@ int bcanalysis::importRawSignal(const char * signalFile){
 	fh = fopen(signalFile,"r");
 	if(fh == NULL){return 1;}
 	
-	char input[1024];
 	unsigned long int lineCount = 0;
 	char cChrom[128];
 	unsigned long int iStart;
 	slist<aRead>::iterator back =  signal_slist.previous(signal_slist.end());
-	char line[1024];
 
 	while(!feof(fh)){
 		fscanf(fh,"%s%lu",cChrom,&iStart);

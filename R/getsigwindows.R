@@ -56,7 +56,6 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 	}else if(method=='mixture'){
             files = unlist(strsplit(file,";"))
             for(i in 1:length(files)){
-                print(paste("Processing ",files[i]))
                 data=read.table(files[i], header=TRUE)
 		q25=quantile(data$exp_count, 0.25)
                 mf <- model.frame(formula=formula, data=data)
@@ -185,11 +184,13 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 		sigpeaks=cbind(data[which(probi2>peakconfidence),],probi2[probi2>peakconfidence])
 		colnames(sigpeaks)[dim(sigpeaks)[2]]='peakprob'
 
+                lineBLANK = ''
+                line0 = paste("Processing ",files[i])
 		line1='|Selection Summary|'
 		line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
 		line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
         ### PRINT SIGNIFICANT WINDOWS
-		print(c(line1, line2,line3))
+		print(c(lineBLANK,line0,line1,line2,line3,lineBLANK))
                 if(file.exists(winout)){
                     write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
                 }else{

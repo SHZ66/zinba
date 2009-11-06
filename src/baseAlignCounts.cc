@@ -13,22 +13,6 @@ namespace sgi = ::__gnu_cxx;
 using namespace sgi;
 using namespace std;
 
-/*void print_ops(){
-		cout << "USAGE: baseAlignCounts inputFile.bed outputFile genomeBuild\n";
-		cout << "\tInput file must be formatted -> CHROM START STOP\n";
-		cout << "\t\tLines starting with track are ignored\n";
-}
-
-int main(int argc=0, char **argv=NULL){
-
-	if(argc < 3){
-		print_ops();
-		exit(1);
-	}else{
-		string inputFile = argv[1];
-		string outputFile = argv[2];
-		int extendLength = argv[3];
-*/
 extern "C"{
 void baseAlignCounts(char **RinputFile,char **RoutputFile, char **Rtwobitfile,int *RextendLength){
 	string inputFile = RinputFile[0];
@@ -48,7 +32,6 @@ void baseAlignCounts(char **RinputFile,char **RoutputFile, char **Rtwobitfile,in
 		Rprintf("Calculating counts at each base\nPrinting output to %s\n",outputFile.c_str());
 		ret = newAnalysis.processSignals(outputFile.c_str(),twobitfile.c_str(),extendLength);
 		Rprintf("-------- BASE ALIGN COUNTS COMPLETE --------\n");
-//	}
-//	return 0;
+
 }
 }
