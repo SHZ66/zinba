@@ -1,0 +1,20 @@
+createcoordfile=function(file,threshold=.01,coordout,method='pscl'){
+    data=read.table(file,header=T)
+    numpeaks=NULL
+    sigpeaks=NULL
+    if(method=='pscl'){
+        numpeaks=length(which(data$q-value<threshold))
+        sigpeaks=data[which(data$q-value<threshold),]
+    }else{
+        numpeaks=length(which(data$peakprob<threshold))
+        sigpeaks=data[which(data$peakprob<threshold),]
+    }
+
+    peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$stop,sep=":")
+    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),sigpeaks$start,sigpeaks$stop,sigpeaks$q25,"+")
+    if(file.exists(coordout)){
+        write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
+    }else{
+        write.table(coordinates,coordout,quote=F,sep="\t",row.names=F,col.names=F)
+    }
+}

@@ -5,6 +5,8 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 	library(MASS)
         options(scipen=999)
 	
+print(paste("method is",method))
+	
 	if(method=='pscl'){
             files = unlist(strsplit(file,";"))
             for(i in 1:length(files)){
@@ -25,37 +27,42 @@ summary(a)
                 fdr=qvalue(pval)
                 numpeaks=length(which(fdr[[3]]<fdrlevel))
                 minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
-                sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
-                colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
+		cbind(data, ((data$exp_count>q25)^2), fdr[[3]], standardized)
+		colnames(data)[c(dim(data)[2]-2, dim(data)[2]-1, dim(data)[2])]=c('q25','q-value', 'residual')
+                #sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
+                #colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
                 param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
 
-                line0=paste('For ',as.character(files[i]),sep='')
+                line0=paste('For ',files[i],sep='')
                 line1='|Selection Summary|'
                 line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
                 line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
 
     ### PRINT SIGNIFICANT WINDOWS
-                cat('\n',line0,line1,line2,line3,'\n')
+                print(paste(c(line0,line1,line2,line3)))
                 if(file.exists(winout)){
-                    write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+#                    write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+                    write.table(data,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
                 }else{
-                    write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
+#                    write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
+                    write.table(data,winout,quote=F,sep="\t",row.names=F)
                 }
 
     ### FORMAT PEAK COORDINATE DATA
-                if(getPeakRefine == 1){
-                    peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$stop,sep=":")
-                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),sigpeaks$start,sigpeaks$stop,((sigpeaks$exp_count>q25)^2),"+")
-                    if(file.exists(coordout)){
-                        write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
-                    }else{
-                        write.table(coordinates,coordout,quote=F,sep="\t",row.names=F,col.names=F)
-                    }
-                }
+#                if(getPeakRefine == 1){
+#                    peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$stop,sep=":")
+#                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),sigpeaks$start,sigpeaks$stop,((sigpeaks$exp_count>q25)^2),"+")
+#                    if(file.exists(coordout)){
+#                        write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
+#                    }else{
+#                        write.table(coordinates,coordout,quote=F,sep="\t",row.names=F,col.names=F)
+#                    }
+#                }
 	    }
 	}else if(method=='mixture'){
             files = unlist(strsplit(file,";"))
             for(i in 1:length(files)){
+print(paste("in mixture file is",files[i]))
                 data=read.table(files[i], header=TRUE)
 		q25=quantile(data$exp_count, 0.25)
                 mf <- model.frame(formula=formula, data=data)
@@ -197,7 +204,7 @@ summary(a)
 		line1='|Selection Summary|'
 		line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
         ### PRINT SIGNIFICANT WINDOWS
-	        cat('\n',line0,line1,line2,line3,'\n')
+		print(paste(c(line0,line1,line2)))
                 if(file.exists(winout)){
                     write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
                 }else{
