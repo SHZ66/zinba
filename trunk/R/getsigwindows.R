@@ -115,7 +115,7 @@ print(paste("in mixture file is",files[i]))
 	
 			#starting params for count componenets
 			if(i == 1){			
-				prop2=priorpeakprop
+				prop2=startenrichment(c(.15, .1))
 			}
 			prop1=1-prop0-prop2
 			odY = order(Y)
