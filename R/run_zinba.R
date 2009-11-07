@@ -6,8 +6,6 @@ run.zinba=function(paramFile=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,
         if(buildwin==1){
             buildwindowdata(paramFile=paramFile,seq=seq,align=align,input=input,twoBit=twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset)
 	}
-#	Perl.Path <- file.path(.path.package("zinba"), "exec")
-#	Fn.Path <- file.path(Perl.Path, "runGetPeaks_v2.pl")
 	if(refinepeaks==1 && is.null(basecountfile)){
 		print(paste("Basecount file must be specified, currently",basecountfile,sep=" "))
 	}else if (is.null(paramFile)){
@@ -25,19 +23,10 @@ run.zinba=function(paramFile=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,
             rf <- foreach(i=1:length(params),.options.multicore = mcoptions) %dopar%
                 getsigwindows(file=params[i],formula=formula,threshold=threshold,winout=winout,coordout=coordout,getPeakRefine=refinepeaks,peakconfidence=peakconfidence,priorpeakprop=priorpeakprop,tol=tol,method=method)
             rf
-            #basecountimport(inputfile=basecountfile,coordfile=coordout,outputfile=bpout,twobitfile=twoBit)
-            #peakbound(bpprofile=bpout,output=peakout,winSize=pWinSize,quantile=pquant)
+            basecountimport(inputfile=basecountfile,coordfile=coordout,outputfile=bpout,twobitfile=twoBit)
+            peakbound(bpprofile=bpout,output=peakout,winSize=pWinSize,quantile=pquant)
             #unlink(coordout)
             #unlink(bpout)
-
-#                print(paste("Getting significant windows"))
-#                print(paste("Using parameter file",paramFile,sep=" "))
-#                print(paste("Running",numProc,"parallel jobs",sep=" "))
-#	        CMD=paste(Fn.Path,"--param-file", paramFile,"--threshold",threshold,"--win-size",winSize,"--basecount_file",basecountfile,"--twobitFile",twoBit,"--method",method,"--processes",numProc,"--refine_peaks",refinepeaks,"--peakwin-size",pWinSize,"--peak-quant",pquant,sep=" ")
-#		if(printLog==1){
-#			CMD=paste(CMD,"--print-log 1",sep=" ")
-#		}
-#		system(CMD)
 	}
 	time.end <- Sys.time()
 	print(difftime(time.end,time.start))
