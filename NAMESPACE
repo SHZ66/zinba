@@ -15,6 +15,7 @@ export(simulatecounts)
 export(twobittofa)
 export(twobitinfo)
 export(zeroinfl)
+export(startenrichment)
 # ------------------------------------------
 # S3method declarations.  
 # ------------------------------------------
