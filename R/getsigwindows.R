@@ -29,8 +29,8 @@ summary(a)
                 minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
 		cbind(data, ((data$exp_count>q25)^2), fdr[[3]], standardized)
 		colnames(data)[c(dim(data)[2]-2, dim(data)[2]-1, dim(data)[2])]=c('q25','q-value', 'residual')
-                #sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
-                #colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
+#sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
+#colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
                 param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
 
                 line0=paste('For ',files[i],sep='')
@@ -41,10 +41,10 @@ summary(a)
     ### PRINT SIGNIFICANT WINDOWS
                 print(paste(c(line0,line1,line2,line3)))
                 if(file.exists(winout)){
-#                    write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+#write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
                     write.table(data,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
                 }else{
-#                    write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
+#write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
                     write.table(data,winout,quote=F,sep="\t",row.names=F)
                 }
 
