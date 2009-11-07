@@ -23,7 +23,7 @@ run.zinba=function(paramFile=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,
             rf <- foreach(i=1:length(params),.options.multicore = mcoptions) %dopar%
                 getsigwindows(file=params[i],formula=formula,threshold=threshold,winout=winout,coordout=coordout,getPeakRefine=refinepeaks,peakconfidence=peakconfidence,priorpeakprop=priorpeakprop,tol=tol,method=method)
 
-	    createcoordfile(file=winout,threshold=threshold,coordout=coordout,method=method){
+	    createcoordfile(file=winout,threshold=threshold,coordout=coordout,method=method)
             basecountimport(inputfile=basecountfile,coordfile=coordout,outputfile=bpout,twobitfile=twoBit)
             peakbound(bpprofile=bpout,output=peakout,winSize=pWinSize,quantile=pquant)
             #unlink(coordout)
