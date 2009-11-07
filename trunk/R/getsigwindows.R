@@ -18,7 +18,6 @@ print(paste("method is",method))
                 }else{
                         a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE,start=param)
                 }
-summary(a)
 		q25=quantile(data$exp_count, 0.25)
                 leverage=hat(X, intercept=FALSE)
                 fdrlevel=threshold
@@ -27,10 +26,12 @@ summary(a)
                 fdr=qvalue(pval)
                 numpeaks=length(which(fdr[[3]]<fdrlevel))
                 minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
-		cbind(data, ((data$exp_count>q25)^2), fdr[[3]], standardized)
+		
+		data=cbind(data, ((data$exp_count>q25)^2), fdr[[3]], standardized)
 		colnames(data)[c(dim(data)[2]-2, dim(data)[2]-1, dim(data)[2])]=c('q25','q-value', 'residual')
 #sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
 #colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
+
                 param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
 
                 line0=paste('For ',files[i],sep='')
@@ -197,8 +198,10 @@ print(paste("in mixture file is",files[i]))
 		numpeaks=length(which(probi2>peakconfidence))	
 
 		minresid='NA'
-		sigpeaks=cbind(data[which(probi2>peakconfidence),],probi2[probi2>peakconfidence])
-		colnames(sigpeaks)[dim(sigpeaks)[2]]='peakprob'
+		data=cbind(data,((data$exp_count>q25)^2),probi2)
+		colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
+#		sigpeaks=cbind(data[which(probi2>peakconfidence),],probi2[probi2>peakconfidence])
+#		colnames(sigpeaks)[dim(sigpeaks)[2]]='peakprob'
 
                 line0 = paste("Processing ",files[i])
 		line1='|Selection Summary|'
@@ -206,21 +209,23 @@ print(paste("in mixture file is",files[i]))
         ### PRINT SIGNIFICANT WINDOWS
 		print(paste(c(line0,line1,line2)))
                 if(file.exists(winout)){
-                    write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+                    write.table(data,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+#                    write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
                 }else{
-                    write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
+                    write.table(data,winout,quote=F,sep="\t",row.names=F)
+#                    write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F)
                 }
 
     ### FORMAT PEAK COORDINATE DATA
-                if(getPeakRefine == 1){
-                    peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$stop,sep=":")
-                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),sigpeaks$start,sigpeaks$stop,((sigpeaks$exp_count>q25)^2),"+")
-                    if(file.exists(coordout)){
-                        write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
-                    }else{
-                        write.table(coordinates,coordout,quote=F,sep="\t",row.names=F,col.names=F)
-                    }
-                }
+#                if(getPeakRefine == 1){
+#                    peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$stop,sep=":")
+#                    coordinates=cbind(peakID,as.character(sigpeaks$chromosome),sigpeaks$start,sigpeaks$stop,((sigpeaks$exp_count>q25)^2),"+")
+#                    if(file.exists(coordout)){
+#                        write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
+#                    }else{
+#                        write.table(coordinates,coordout,quote=F,sep="\t",row.names=F,col.names=F)
+#                   }
+#               }
             }
 	}
 	time.end <- Sys.time()
