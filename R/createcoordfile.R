@@ -10,6 +10,7 @@ createcoordfile=function(file,threshold=.01,coordout,method='pscl'){
         sigpeaks=data[which(data$peakprob<threshold),]
     }
 
+    print(paste(as.character(numpeaks),' windows were less than ',as.character(threshold), sep=''))
     peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$stop,sep=":")
     coordinates=cbind(peakID,as.character(sigpeaks$chromosome),sigpeaks$start,sigpeaks$stop,sigpeaks$q25,"+")
     if(file.exists(coordout)){
