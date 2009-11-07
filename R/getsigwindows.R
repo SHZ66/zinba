@@ -4,10 +4,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
         #library(pscl)
 	library(MASS)
         options(scipen=999)
-        
-        #print(paste("Using",method,"method for detection",sep=" "))
-        #print(paste("winout is",winout,"coordout is",coordout,sep=" "))
-	###### USER INPUT############################
+	
 	if(method=='pscl'){
             files = unlist(strsplit(file,";"))
             for(i in 1:length(files)){
@@ -19,7 +16,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
                 }else{
                         a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE,start=param)
                 }
-		
+summary(a)
 		q25=quantile(data$exp_count, 0.25)
                 leverage=hat(X, intercept=FALSE)
                 fdrlevel=threshold
@@ -32,14 +29,13 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
                 colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
                 param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
 
-                lineBLANK=''
                 line0=paste('For ',as.character(files[i]),sep='')
                 line1='|Selection Summary|'
                 line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
                 line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
 
     ### PRINT SIGNIFICANT WINDOWS
-                print(c(lineBLANK,line0,line1,line2,line3,lineBLANK))
+                cat('\n',line0,line1,line2,line3,'\n')
                 if(file.exists(winout)){
                     write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
                 }else{
@@ -50,7 +46,11 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
                 if(getPeakRefine == 1){
                     peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$stop,sep=":")
                     coordinates=cbind(peakID,as.character(sigpeaks$chromosome),sigpeaks$start,sigpeaks$stop,((sigpeaks$exp_count>q25)^2),"+")
-                    write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
+                    if(file.exists(coordout)){
+                        write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
+                    }else{
+                        write.table(coordinates,coordout,quote=F,sep="\t",row.names=F,col.names=F)
+                    }
                 }
 	    }
 	}else if(method=='mixture'){
@@ -210,7 +210,11 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
                 if(getPeakRefine == 1){
                     peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$stop,sep=":")
                     coordinates=cbind(peakID,as.character(sigpeaks$chromosome),sigpeaks$start,sigpeaks$stop,((sigpeaks$exp_count>q25)^2),"+")
-                    write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
+                    if(file.exists(coordout)){
+                        write.table(coordinates,coordout,quote=F,append=TRUE,sep="\t",row.names=F,col.names=F)
+                    }else{
+                        write.table(coordinates,coordout,quote=F,sep="\t",row.names=F,col.names=F)
+                    }
                 }
             }
 	}
