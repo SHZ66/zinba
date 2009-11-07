@@ -193,13 +193,11 @@ summary(a)
 		sigpeaks=cbind(data[which(probi2>peakconfidence),],probi2[probi2>peakconfidence])
 		colnames(sigpeaks)[dim(sigpeaks)[2]]='peakprob'
 
-                lineBLANK = ''
                 line0 = paste("Processing ",files[i])
 		line1='|Selection Summary|'
 		line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
-		line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
         ### PRINT SIGNIFICANT WINDOWS
-		print(c(lineBLANK,line0,line1,line2,line3,lineBLANK))
+	        cat('\n',line0,line1,line2,line3,'\n')
                 if(file.exists(winout)){
                     write.table(sigpeaks,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
                 }else{
