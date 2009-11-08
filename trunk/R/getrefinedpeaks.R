@@ -2,6 +2,6 @@ getrefinedpeaks=function(winout,coordout,basecountfile,bpout,peakout,twoBit,pWin
     createcoordfile(file=winout,threshold=threshold,peakconfidence=peakconfidence,coordout=coordout,method=method)
     basecountimport(inputfile=basecountfile,coordfile=coordout,outputfile=bpout,twobitfile=twoBit)
     peakbound(bpprofile=bpout,output=peakout,winSize=pWinSize,quantile=pquant)
-    #unlink(coordout)
-    #unlink(bpout)
+    unlink(coordout)
+    unlink(bpout)
 }
