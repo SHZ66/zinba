@@ -21,7 +21,7 @@ run.zinba=function(paramFile=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,
             mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
             getDoParWorkers()
             rf <- foreach(i=1:length(params),.options.multicore = mcoptions) %dopar%
-                getsigwindows(file=params[i],formula=formula,threshold=threshold,winout=winout,coordout=coordout,getPeakRefine=refinepeaks,peakconfidence=peakconfidence,priorpeakprop=priorpeakprop,tol=tol,method=method)
+                getsigwindows(file=params[i],formula=formula,threshold=threshold,winout=winout,peakconfidence=peakconfidence,priorpeakprop=priorpeakprop,tol=tol,method=method)
 
 	    if(refinepeaks==1){
 		getrefinedpeaks(winout=winout,coordout=coordout,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,pWinSize=pWinSize,pquant=pquant,threshold=threshold,method=method)
