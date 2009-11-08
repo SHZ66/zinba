@@ -19,7 +19,7 @@ void print_ops(){
 */
 //int main(int argc=0, char **argv=NULL){
 extern "C" {
-void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **RtwoBitFile,int *RzWinSize,int *RzOffsetSize,int *RcWinSize,int *RcOffsetSize){
+void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **RtwoBitFile,int *RzWinSize,int *RzOffsetSize,int *RcWinSize,int *RcOffsetSize,char **Rfilelist){
 
 	string expSeqFile = RexpSeqFile[0];
 	string inSeqFile = RinSeqFile[0];
@@ -29,6 +29,7 @@ void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **R
 	int zOffsetSize = RzOffsetSize[0];
 	int cWinSize = RcWinSize[0];
 	int cOffsetSize = RcOffsetSize[0];
+	string filelist = Rfilelist[0];
 	
 /*	if(argc < 9){
 		print_ops();
@@ -57,7 +58,7 @@ void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **R
 		Rprintf("\nBuilding window data\n");
 		size_t found = expSeqFile.find_last_of(".");
 		string outfile_prefix = expSeqFile.substr(0,found);
-		ret = newAnalysis.processSignals(zWinSize,zOffsetSize,cWinSize,cOffsetSize,alignDir,twoBitFile,inSeqFile.c_str(),outfile_prefix.c_str());
+		ret = newAnalysis.processSignals(zWinSize,zOffsetSize,cWinSize,cOffsetSize,alignDir,twoBitFile,inSeqFile.c_str(),outfile_prefix.c_str(),filelist);
 		Rprintf("\n\n--------BUILD WINDOWS COMPLETE-------\n\n");
 //	}
 //	return 0;
