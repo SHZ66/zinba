@@ -7,9 +7,9 @@ createcoordfile=function(file,threshold=.01,peakconfidence=.8,coordout,method='p
         sigpeaks=data[which(data$qvalue<threshold),]
         print(paste(as.character(numpeaks),' windows were less than ',as.character(threshold), sep=''))
     }else{
-        numpeaks=length(which(data$peakprob<peakconfidence))
-        sigpeaks=data[which(data$peakprob<peakconfidence),]
-        print(paste(as.character(numpeaks),' windows were less than ',as.character(peakconfidence), sep=''))
+        numpeaks=length(which(data$peakprob>peakconfidence))
+        sigpeaks=data[which(data$peakprob>peakconfidence),]
+        print(paste(as.character(numpeaks),' windows were greater than ',as.character(peakconfidence), sep=''))
     }
 
     peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$stop,sep=":")
