@@ -4,7 +4,7 @@ run.zinba=function(paramFile=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,
         library(foreach)
 	time.start <- Sys.time()
         if(buildwin==1){
-            buildwindowdata(paramFile=paramFile,seq=seq,align=align,input=input,twoBit=twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset)
+            buildwindowdata(seq=seq,align=align,input=input,twoBit=twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset)
 	}
 	if(refinepeaks==1 && is.null(basecountfile)){
 		print(paste("Basecount file must be specified, currently",basecountfile,sep=" "))

@@ -133,12 +133,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 					}else if (line[s] == 'N'){
 						ent = 2;
 					}
-/*					if(ent == 2 && prevEnt != 2)
-						nStart = pos;
-					else if( (ent != 2 && prevEnt == 2) || (pos+1) == chr_size[currchr])
-						nStop = (pos - 1);*/
 					gcContent[pos] = ent;
-//					prevEnt = ent;
 					pos++;
 				}
 			}
