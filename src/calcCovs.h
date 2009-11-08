@@ -24,7 +24,7 @@ class calcCovs{
 		~calcCovs(); //Implemented
 		
 		int importRawSignal(const char *,int);//Implemented
-		int processSignals(int,int,int,int,string,string,const char*,string);//Implemented
+		int processSignals(int,int,int,int,string,string,const char*,string,string);//Implemented
 		int outputData(const char *, unsigned short int);//Implemented
 		
 		struct ltstr{

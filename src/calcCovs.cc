@@ -27,7 +27,7 @@ calcCovs::~calcCovs(){
 	}
 }
 
-int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir, string twoBitFile, const char * inputFile,string outfile){
+int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir, string twoBitFile, const char * inputFile,string outfile,string flist){
 			
 	FILE * tempTB;
 	const char * tInfo = "tempInfo.txt"; 
@@ -403,12 +403,12 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		}
 		
 		cout << "\tGetting counts for zinba windows.........." << endl;
-		char flZWinSize[10];
-		char flzOffsetSize[10];
-		sprintf( flZWinSize,"%d", zWinSize);
-		sprintf( flzOffsetSize,"%d", zOffsetSize);
-		string fileList = outfile + "_win" + flZWinSize + "bp_offset" + flzOffsetSize + "bp.list";
-		tempTB = fopen(fileList.c_str(),"a");
+//		char flZWinSize[10];
+//		char flzOffsetSize[10];
+//		sprintf( flZWinSize,"%d", zWinSize);
+//		sprintf( flzOffsetSize,"%d", zOffsetSize);
+//		string fileList = outfile + "_win" + flZWinSize + "bp_offset" + flzOffsetSize + "bp.list";
+		tempTB = fopen(flist.c_str(),"a");
 		numOffsets = 1;
 		if(zOffsetSize > 0){
 			numOffsets = int(zWinSize/zOffsetSize);

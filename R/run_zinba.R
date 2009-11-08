@@ -1,17 +1,17 @@
-run.zinba=function(paramFile=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,input=NULL,twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,numProc=1,buildwin=0,pWinSize=200,pquant=0.75,refinepeaks=1,printLog=0,method='pscl'){
+run.zinba=function(filelist=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,input=NULL,twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,numProc=1,buildwin=0,pWinSize=200,pquant=0.75,refinepeaks=1,printLog=0,method='pscl'){
         library(multicore)
         library(doMC)
         library(foreach)
 	time.start <- Sys.time()
         if(buildwin==1){
-            buildwindowdata(seq=seq,align=align,input=input,twoBit=twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset)
+            buildwindowdata(seq=seq,align=align,input=input,twoBit=twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset,filelist=filelist)
 	}
 	if(refinepeaks==1 && is.null(basecountfile)){
 		print(paste("Basecount file must be specified, currently",basecountfile,sep=" "))
-	}else if (is.null(paramFile)){
-		print(paste("Need parameter file with formula specified ",paramFile,sep=" "))
+	}else if (is.null(filelist)){
+		print(paste("Need list of files ",filelist,sep=" "))
 	}else{
-            params=scan(paramFile,what=character(0))
+            params=scan(filelist,what=character(0))
             winout=paste(outfile,".wins",sep="")
             peakout=paste(outfile,".peaks",sep="")
             coordout=paste(outfile,".coords",sep="")
