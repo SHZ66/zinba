@@ -3,8 +3,8 @@ createcoordfile=function(file,threshold=.01,coordout,method='pscl'){
     numpeaks=NULL
     sigpeaks=NULL
     if(method=='pscl'){
-        numpeaks=length(which(data$q-value<threshold))
-        sigpeaks=data[which(data$q-value<threshold),]
+        numpeaks=length(which(data$qvalue<threshold))
+        sigpeaks=data[which(data$qvalue<threshold),]
     }else{
         numpeaks=length(which(data$peakprob<threshold))
         sigpeaks=data[which(data$peakprob<threshold),]

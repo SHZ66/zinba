@@ -28,7 +28,7 @@ print(paste("method is",method))
                 minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
 		
 		data=cbind(data, ((data$exp_count>q25)^2), fdr[[3]], standardized)
-		colnames(data)[c(dim(data)[2]-2, dim(data)[2]-1, dim(data)[2])]=c('q25','q-value', 'residual')
+		colnames(data)[c(dim(data)[2]-2, dim(data)[2]-1, dim(data)[2])]=c('q25','qvalue', 'residual')
 #sigpeaks=cbind(data[which(fdr[[3]]<fdrlevel),], fdr[[3]][which(fdr[[3]]<fdrlevel)], standardized[which(fdr[[3]]<fdrlevel)])
 #colnames(sigpeaks)[c(dim(sigpeaks)[2]-1, dim(sigpeaks)[2])]=c('q-value', 'residual')
 
