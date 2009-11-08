@@ -2,7 +2,7 @@ startenrichment=function(range, data, formula){
 library(zinba)
  mf <- model.frame(formula=formula, data=data)
  X <- model.matrix(attr(mf, "terms"), data=mf)
-		XNB=X[,-c(1)]
+		XNB=as.data.frame(X[,-c(1)])
 		logsumexp=function(v){
 			if(any(is.infinite(v))){
 				stop("infinite value in v\n")
