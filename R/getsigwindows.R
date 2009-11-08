@@ -4,6 +4,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
         #library(pscl)
 	library(MASS)
         options(scipen=999)
+	library(zinba)
 
 	if(method=='pscl'){
             files = unlist(strsplit(file,";"))
@@ -48,7 +49,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 		q25=quantile(data$exp_count, 0.25)
                 mf <- model.frame(formula=formula, data=data)
                 X <- model.matrix(attr(mf, "terms"), data=mf)
-		XNB=X[,-c(1)]
+		XNB=as.data.frame(X[,-c(1)])
 		logsumexp=function(v){
 			if(any(is.infinite(v))){
 				stop("infinite value in v\n")
