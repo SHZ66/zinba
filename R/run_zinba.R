@@ -24,7 +24,7 @@ run.zinba=function(paramFile=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,
                 getsigwindows(file=params[i],formula=formula,threshold=threshold,winout=winout,coordout=coordout,getPeakRefine=refinepeaks,peakconfidence=peakconfidence,priorpeakprop=priorpeakprop,tol=tol,method=method)
 
 	    if(refinepeaks==1){
-		getrefinedpeaks(winout=winout,coordout=coordout,basecountfile=basecountfile,bpout=bpout,twoBit=twoBit,pWinSize=pWinSize,pquant=pquant,threshold=threshold,method=method)
+		getrefinedpeaks(winout=winout,coordout=coordout,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,pWinSize=pWinSize,pquant=pquant,threshold=threshold,method=method)
 #		createcoordfile(file=winout,threshold=threshold,coordout=coordout,method=method)
 #		basecountimport(inputfile=basecountfile,coordfile=coordout,outputfile=bpout,twobitfile=twoBit)
 #		peakbound(bpprofile=bpout,output=peakout,winSize=pWinSize,quantile=pquant)
