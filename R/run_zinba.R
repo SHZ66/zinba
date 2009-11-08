@@ -1,4 +1,4 @@
-run.zinba=function(paramFile=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,input=NULL,twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,priorpeakprop=.15,tol=10^-5,numProc=1,buildwin=0,pWinSize=200,pquant=0.75,refinepeaks=1,printLog=0,method='pscl'){
+run.zinba=function(paramFile=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,input=NULL,twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,numProc=1,buildwin=0,pWinSize=200,pquant=0.75,refinepeaks=1,printLog=0,method='pscl'){
         library(multicore)
         library(doMC)
         library(foreach)
@@ -21,15 +21,10 @@ run.zinba=function(paramFile=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,
             mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
             getDoParWorkers()
             rf <- foreach(i=1:length(params),.options.multicore = mcoptions) %dopar%
-                getsigwindows(file=params[i],formula=formula,threshold=threshold,winout=winout,peakconfidence=peakconfidence,priorpeakprop=priorpeakprop,tol=tol,method=method)
+                getsigwindows(file=params[i],formula=formula,threshold=threshold,winout=winout,peakconfidence=peakconfidence,tol=tol,method=method)
 
 	    if(refinepeaks==1){
-		getrefinedpeaks(winout=winout,coordout=coordout,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,pWinSize=pWinSize,pquant=pquant,threshold=threshold,method=method)
-#		createcoordfile(file=winout,threshold=threshold,coordout=coordout,method=method)
-#		basecountimport(inputfile=basecountfile,coordfile=coordout,outputfile=bpout,twobitfile=twoBit)
-#		peakbound(bpprofile=bpout,output=peakout,winSize=pWinSize,quantile=pquant)
-#		unlink(coordout)
-#		unlink(bpout)
+		getrefinedpeaks(winout=winout,coordout=coordout,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,pWinSize=pWinSize,pquant=pquant,peakconfidence=peakconfidence,threshold=threshold,method=method)
 	    }
 	}
 	time.end <- Sys.time()
