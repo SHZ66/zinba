@@ -7,9 +7,11 @@ run.zinba=function(filelist=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,i
             buildwindowdata(seq=seq,align=align,input=input,twoBit=twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset,filelist=filelist)
 	}
 	if(refinepeaks==1 && is.null(basecountfile)){
-		print(paste("Basecount file must be specified, currently",basecountfile,sep=" "))
+		stop(paste("Basecount file must be specified, currently",basecountfile,sep=" "))
 	}else if (is.null(filelist)){
-		print(paste("Need list of files ",filelist,sep=" "))
+		stop(paste("Need list of files ",filelist,sep=" "))
+	}else if(method != 'pscl' || method != 'mixture'){
+		stop(paste("Method should be either pscl or mixture, currently",method))
 	}else{
             params=scan(filelist,what=character(0))
             winout=paste(outfile,".wins",sep="")
