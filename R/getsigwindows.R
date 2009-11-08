@@ -92,7 +92,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,priorpeakpro
 		prop0=sum(model_zero$fitted)/n
                 #starting params for count componenets
                 if(i == 1){			
-                        prop2=startenrichment(c(.15, .1))
+                        prop2=startenrichment(c(.15, .1), data, formula)
                 }
                 prop1=1-prop0-prop2
                 odY = order(Y)

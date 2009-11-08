@@ -1,4 +1,47 @@
-startenrichment=function(range){
+startenrichment=function(range, data, formula){
+ mf <- model.frame(formula=formula, data=data)
+  X <- model.matrix(attr(mf, "terms"), data=mf)
+		XNB=X[,-c(1)]
+		logsumexp=function(v){
+			if(any(is.infinite(v))){
+				stop("infinite value in v\n")
+			}
+			if(length(v)==1){ return(v[1]) }
+			sv  = sort(v, decreasing=TRUE)
+			res = sum(exp(sv[-1] - sv[1]))
+			lse = sv[1] + log(1+res)
+			lse
+		}
+          
+		loglikfun=function(parms){
+			mu1=parms$start$count1
+			mu2=parms$start$count2
+			prob0 =parms$start$zero
+			prop1=parms$prop1
+			prop2=parms$prop2
+			theta1=parms$start$theta1
+			theta2=parms$start$theta2
+			loglik0=log(prob0+prop1*dnbinom(0, size = theta1, mu = mu1)+prop2*dnbinom(0, size = theta2, mu = mu2))
+			loglik1=log(prop1*dnbinom(Y, size = theta1, mu = mu1)+prop2*dnbinom(Y, size = theta2, mu = mu2))
+			NAs=which(loglik1==-Inf | loglik1==-Inf)
+			if(length(NAs>0)){
+				loglik1[NAs]=apply(cbind(log(prop1)+dnbinom(Y[NAs], size = theta1, mu = mu1[NAs],log=TRUE),log(prop2)+dnbinom(Y[NAs], size = theta2, mu = mu2[NAs], log=TRUE)), 1, logsumexp)
+			}
+			loglik=sum(loglik0*Y0+loglik1*Y1)
+			loglik
+		}
+		Y <- model.response(mf)
+		Z=X
+		n <- length(Y)
+		kx <- NCOL(X)
+		kz <- NCOL(Z)
+		Y0 <- Y <= 0
+		Y1 <- Y > 0
+		linkstr <- 'logit'
+                linkobj <- make.link(linkstr)
+                linkinv <- linkobj$linkinv
+
+
 probs=seq(range[1], range[2],,5)
 result=rep(0, length(probs))
 a=Sys.time()
