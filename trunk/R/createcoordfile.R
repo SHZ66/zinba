@@ -1,16 +1,17 @@
-createcoordfile=function(file,threshold=.01,coordout,method='pscl'){
+createcoordfile=function(file,threshold=.01,peakconfidence=.8,coordout,method='pscl'){
     data=read.table(file,header=T)
     numpeaks=NULL
     sigpeaks=NULL
     if(method=='pscl'){
         numpeaks=length(which(data$qvalue<threshold))
         sigpeaks=data[which(data$qvalue<threshold),]
+        print(paste(as.character(numpeaks),' windows were less than ',as.character(threshold), sep=''))
     }else{
-        numpeaks=length(which(data$peakprob<threshold))
-        sigpeaks=data[which(data$peakprob<threshold),]
+        numpeaks=length(which(data$peakprob<peakconfidence))
+        sigpeaks=data[which(data$peakprob<peakconfidence),]
+        print(paste(as.character(numpeaks),' windows were less than ',as.character(peakconfidence), sep=''))
     }
 
-    print(paste(as.character(numpeaks),' windows were less than ',as.character(threshold), sep=''))
     peakID=paste(sigpeaks$chromosome,sigpeaks$start,sigpeaks$stop,sep=":")
     coordinates=cbind(peakID,as.character(sigpeaks$chromosome),sigpeaks$start,sigpeaks$stop,sigpeaks$q25,"+")
     if(file.exists(coordout)){
