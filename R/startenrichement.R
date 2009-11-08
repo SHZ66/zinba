@@ -1,6 +1,7 @@
 startenrichment=function(range, data, formula){
+library(zinba)
  mf <- model.frame(formula=formula, data=data)
-  X <- model.matrix(attr(mf, "terms"), data=mf)
+ X <- model.matrix(attr(mf, "terms"), data=mf)
 		XNB=X[,-c(1)]
 		logsumexp=function(v){
 			if(any(is.infinite(v))){
@@ -131,6 +132,5 @@ for(k in 1:length(probs)){
 		}
 result[k]=ll_new
 }
-
 return(probs[which.max(result)])
 }
