@@ -24,18 +24,12 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
                 pval=1-pnorm(as.matrix(standardized))
                 fdr=qvalue(pval)
                 numpeaks=length(which(fdr[[3]]<fdrlevel))
-                minresid=min(standardized[which(fdr[[3]]<fdrlevel)])
 		data=cbind(data, ((data$exp_count>q25)^2), fdr[[3]], standardized)
 		colnames(data)[c(dim(data)[2]-2, dim(data)[2]-1, dim(data)[2])]=c('q25','qvalue', 'residual')
                 param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
 
-                line0=paste('For ',files[i],sep='')
-                line1='|Selection Summary|'
-                line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
-                line3=paste('Minimum Standardized Residual Value of peaks: ', as.character(minresid), sep='')
-
     ### PRINT SIGNIFICANT WINDOWS
-                print(paste(c(line0,line1,line2,line3)))
+                print(paste('For ',files[i],', found ',as.character(numpeaks),' significant wins'sep=''))
                 if(file.exists(winout)){
                     write.table(data,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
                 }else{
@@ -171,10 +165,9 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
 		data=cbind(data,((data$exp_count>q25)^2),probi2)
 		colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
 
-		line1='|Selection Summary|'
 		line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
         ### PRINT SIGNIFICANT WINDOWS
-		print(paste(c(line0,line1,line2)))
+		print(paste(c(line0,line2)))
                 if(file.exists(winout)){
                     write.table(data,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
                 }else{
