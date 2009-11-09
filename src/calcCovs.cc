@@ -80,6 +80,8 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 					signal_slist.erase(i++);
 				}else{
 					cout << "WARNING: Read maps off end of chromosome: " << i->start << endl;
+					basepair[chr_size[currchr]]++;
+					signal_slist.erase(i++);
 				}
 			}else{
 				i++;
@@ -403,11 +405,6 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		}
 		
 		cout << "\tGetting counts for zinba windows.........." << endl;
-//		char flZWinSize[10];
-//		char flzOffsetSize[10];
-//		sprintf( flZWinSize,"%d", zWinSize);
-//		sprintf( flzOffsetSize,"%d", zOffsetSize);
-//		string fileList = outfile + "_win" + flZWinSize + "bp_offset" + flzOffsetSize + "bp.list";
 		tempTB = fopen(flist.c_str(),"a");
 		numOffsets = 1;
 		if(zOffsetSize > 0){
