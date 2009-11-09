@@ -10,7 +10,7 @@ run.zinba=function(filelist=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,i
 		stop(paste("Basecount file must be specified, currently",basecountfile,sep=" "))
 	}else if (is.null(filelist)){
 		stop(paste("Need list of files ",filelist,sep=" "))
-	}else if(method != 'pscl' || method != 'mixture'){
+	}else if(method != 'pscl' && method != 'mixture'){
 		stop(paste("Method should be either pscl or mixture, currently",method))
 	}else{
             params=scan(filelist,what=character(0))
@@ -22,9 +22,10 @@ run.zinba=function(filelist=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,i
             registerDoMC(numProc)
             mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
             getDoParWorkers()
-            rf <- foreach(i=1:length(params),.options.multicore = mcoptions) %dopar%
-                getsigwindows(file=params[i],formula=formula,threshold=threshold,winout=winout,peakconfidence=peakconfidence,tol=tol,method=method)
+            wins <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,.options.multicore = mcoptions) %dopar%
+                getsigwindows(file=params[i],formula=formula,threshold=threshold,winout=winout,peakconfidence=peakconfidence,tol=tol,printfile=0,method=method)
 
+	    write.table(wins,winout,quote=F,sep="\t",row.names=F)
 	    if(refinepeaks==1){
 		getrefinedpeaks(winout=winout,coordout=coordout,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,pWinSize=pWinSize,pquant=pquant,peakconfidence=peakconfidence,threshold=threshold,method=method)
 	    }
