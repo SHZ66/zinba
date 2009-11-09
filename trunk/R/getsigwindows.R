@@ -1,4 +1,4 @@
-getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=10^-5,method='pscl'){
+getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=10^-5,printfile=1,method='pscl'){
 	time.start <- Sys.time()
 	library(qvalue)
         #library(pscl)
@@ -30,11 +30,15 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
 
     ### PRINT SIGNIFICANT WINDOWS
                 print(paste('For ',files[i],', found ',as.character(numpeaks),' significant wins',sep=''))
-                if(file.exists(winout)){
-                    write.table(data,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
-                }else{
-                    write.table(data,winout,quote=F,sep="\t",row.names=F)
-                }
+		if(printfile==1){
+	                if(file.exists(winout)){
+	                    write.table(data,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+	                }else{
+	                    write.table(data,winout,quote=F,sep="\t",row.names=F)
+	                }
+		}else{
+			return(data)
+		}
 	    }
 	}else if(method=='mixture'){
             files = unlist(strsplit(file,";"))
@@ -168,11 +172,15 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
 		line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
         ### PRINT SIGNIFICANT WINDOWS
 		print(paste(c(line0,line2)))
-                if(file.exists(winout)){
-                    write.table(data,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
-                }else{
-                    write.table(data,winout,quote=F,sep="\t",row.names=F)
-                }
+		if(printfile==1){
+			if(file.exists(winout)){
+			    write.table(data,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+			}else{
+			    write.table(data,winout,quote=F,sep="\t",row.names=F)
+			}
+		}else{
+			return(data)
+		}
             }
 	}
 	time.end <- Sys.time()
