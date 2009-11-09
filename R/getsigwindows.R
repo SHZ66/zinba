@@ -6,6 +6,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
         options(scipen=999)
 	library(zinba)
 
+#	wins=NULL
 	if(method=='pscl'){
             files = unlist(strsplit(file,";"))
             for(i in 1:length(files)){
@@ -37,12 +38,20 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
 	                    write.table(data,winout,quote=F,sep="\t",row.names=F)
 	                }
 		}else{
-			return(data)
+			if(i==1){
+				wins=data
+			}else{
+				wins=rbind(wins,data)
+				if(i==length(files)){
+					return(wins)
+				}
+			}
 		}
 	    }
 	}else if(method=='mixture'){
             files = unlist(strsplit(file,";"))
             for(i in 1:length(files)){
+		fnum=i
 	        line0 = paste("Processing ",files[i])
                 data=read.table(files[i], header=TRUE)
 		q25=quantile(data$exp_count, 0.25)
@@ -169,7 +178,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
 		data=cbind(data,((data$exp_count>q25)^2),probi2)
 		colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
 
-		line2=paste('Selected number of peaks: ', as.character(numpeaks), sep='')
+		line2=paste('Selected number of peaks: ', as.character(numpeaks),sep='')
         ### PRINT SIGNIFICANT WINDOWS
 		print(paste(c(line0,line2)))
 		if(printfile==1){
@@ -179,7 +188,14 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
 			    write.table(data,winout,quote=F,sep="\t",row.names=F)
 			}
 		}else{
-			return(data)
+			if(fnum==1){
+				wins=data
+			}else{
+				wins=rbind(wins,data)
+				if(fnum==length(files)){
+					return(wins)
+				}
+			}
 		}
             }
 	}
