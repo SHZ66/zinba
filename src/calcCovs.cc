@@ -483,6 +483,9 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		}
 		fclose(tempTB);
 		cnv_wins.clear();
+		
+cout << "cnv window size is " << cnv_wins.size() << endl;
+		
 		sigBoundary.clear();
 		transPts.clear();
 		delete [] basepair;
