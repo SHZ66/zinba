@@ -242,7 +242,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			c++;
 		}
 		localSum.clear();
-		localSumX2.clear();
+		localSumX2.clear();		
 		double globalVar = (globalSumX2 -((globalSum)*(globalSum)/numCnvWins))/(numCnvWins-1);
 		cout << "\t\t\tGlobal variance is " << globalVar << endl;
 		list<cnvWins> sigBoundary; 
@@ -395,9 +395,15 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			ibasepair[chr_size[currchr]+1] = 0;
 			slist<aRead>::iterator in = input_slist.begin();
 			while(in != input_slist.end()){			
-				if(in->chrom==currchr){
-					ibasepair[in->start]++;
-					input_slist.erase(in++);
+				if(in->chrom==currchr){					
+					if(in->start < chr_size[currchr]){
+						basepair[in->start]++;
+						input_slist.erase(in++);
+					}else{
+						cout << "WARNING: Read maps off end of chromosome: " << in->start << endl;
+						basepair[chr_size[currchr]]++;
+						input_slist.erase(in++);
+					}
 				}else{
 					in++;
 				}
@@ -477,6 +483,8 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		}
 		fclose(tempTB);
 		cnv_wins.clear();
+		sigBoundary.clear();
+		transPts.clear();
 		delete [] basepair;
 		delete [] ibasepair;
 		delete [] gcContent;
