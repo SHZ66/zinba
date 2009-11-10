@@ -10,8 +10,9 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
-#include "chisquaredistr.h"
-#include "binomialdistr.h"
+#include <Rmath.h>
+//#include "chisquaredistr.h"
+//#include "binomialdistr.h"
 
 
 using namespace std;
@@ -250,7 +251,8 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		while(c != cnv_wins.end()){
 			double degfree = (slideWinSize - 1);
 			c->chiSq = (degfree*pow(c->varWin,2))/pow(globalVar,2);
-			c->pval = chisquarecdistribution(degfree,c->chiSq);
+			c->pval = dchisq(c->chiSq, degfree, 0);
+//			c->pval = chisquarecdistribution(degfree,c->chiSq);
 			if(c->pval <= 0.001){
 				sigBoundary.push_back(*c);
 			}
@@ -309,7 +311,10 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 						maxCount = rightWinCount;
 					unsigned int sumCount = leftWinCount + rightWinCount;
 					double ratioDiff = (double) maxCount/sumCount;
-					double bPval = binomialcdistribution(maxCount,sumCount,0.5);
+					double x = (double) maxCount;
+					double n = (double) sumCount;
+					double bPval = dbinom(x,n,0.5,0);
+//					double bPval = binomialcdistribution(maxCount,sumCount,0.5);
 					if(bPval <= lowPval){
 						if(ratioDiff > maxRatio){
 							lowPval = bPval;

@@ -19,6 +19,9 @@ run.zinba=function(filelist=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,i
             coordout=paste(outfile,".coords",sep="")
             bpout=paste(outfile,".bpcount",sep="")
 
+print(paste("first file set is",params[1]))
+
+
             registerDoMC(numProc)
             mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
             getDoParWorkers()
