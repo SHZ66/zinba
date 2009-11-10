@@ -60,6 +60,9 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
                 mf <- model.frame(formula=formula, data=data)
                 X <- model.matrix(attr(mf, "terms"), data=mf)
 		XNB=as.data.frame(X[,-c(1)])
+		
+print(paste("got here OK 1"))
+		
 		logsumexp=function(v){
 			if(any(is.infinite(v))){
 				stop("infinite value in v\n")
@@ -99,19 +102,40 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
                 linkobj <- make.link(linkstr)
                 linkinv <- linkobj$linkinv
 		#starting params for ze0 component
+
+print(paste("got here OK 2"))
+		
 		model_zero <-.C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(X)), y=as.double(Y0), prior=as.double(rep(1,n)), offset=as.double(rep(0,n)), X=as.double(unlist(X)),  stratum=as.integer(rep(1,n)),init=as.integer(0), rank=integer(1), Xb=double(n*ncol(X)), fitted=as.double((rep(1,n) * Y0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
 		prop0=sum(model_zero$fitted)/n
+		
+print(paste("got here OK 3"))
+		
                 #starting params for count componenets
                 if(i == 1){
+		
+print(paste("got here OK 3a"))
+		
                         prop2=startenrichment(c(.15, .1), data, formula)
+			
+print(paste("got here OK 4"))
+			
                 }
                 prop1=1-prop0-prop2
                 odY = order(Y)
                 n1  = round(length(Y) * (1 - prop2))
                 priorCOUNTweight=rep(1-10^-10, length(Y))
                 priorCOUNTweight[odY[1:n1]]=10^-10
-                model_count1 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(1-priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')  
-                model_count2 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')  
+		
+print(paste("got here OK 5"))
+		
+                model_count1 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(1-priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
+		
+print(paste("got here OK 6"))
+		
+                model_count2 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
+		
+print(paste("got here OK 7"))
+		
                 #starting prior probs
                 mui1  <- model_count1$fitted
                 mui2  <- model_count2$fitted
@@ -123,8 +147,17 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
                 start$theta2 <- 1
                 probi0=probi0/(probi0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
                 probi0[Y1]=0
+		
+print(paste("got here OK 8"))
+		
                 probi1  <- prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+		
+print(paste("got here OK 9"))
+		
                 probi2  <- prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+		
+print(paste("got here OK 10"))
+		
                 NAs=which(probi1=='NaN'| probi2=='NaN')			
                 if(length(NAs>0)){
                         probi1[NAs]=0
@@ -141,6 +174,9 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
 		ll=matrix(0, 1, 10000)
 		ll[1]=ll_new
 		i=2
+		
+print(paste("got here OK 11"))
+		
 		while(abs((ll_old - ll_new)/ll_old) > tol) {
 #		    print(ll_new)
                     ll_old <- ll[max(1, i-10)]

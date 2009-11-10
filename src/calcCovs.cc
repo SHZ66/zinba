@@ -238,13 +238,13 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 					sumX2 += *x2;
 					x++;x2++;
 				}
-				c->varWin = (sumX2 -((sum)*(sum)/slideWinSize))/(slideWinSize-1);
+				c->varWin = (sumX2 -((sum * sum)/slideWinSize))/(slideWinSize-1);
 			}
 			c++;
 		}
 		localSum.clear();
 		localSumX2.clear();		
-		double globalVar = (globalSumX2 -((globalSum)*(globalSum)/numCnvWins))/(numCnvWins-1);
+		double globalVar = (globalSumX2 -((globalSum * globalSum)/numCnvWins))/(numCnvWins-1);
 		cout << "\t\t\tGlobal variance is " << globalVar << endl;
 		list<cnvWins> sigBoundary; 
 		c = cnv_wins.begin();
@@ -351,8 +351,12 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		while(tp != transPts.end()){
 			double cnvCount = 0;
 			int alignCount = 0;
-			unsigned long int tpStart = (*tp-cWinSize-1);
-			unsigned long int tpStop = (*tp-1);
+			unsigned long int tpStart = 1;
+			if(*tp > (cWinSize+1))
+				tpStart = (*tp-cWinSize-1);
+			unsigned long int tpStop = chr_size[currchr];
+			if(chr_size[currchr] >= (*tp-1))
+				tpStop = (*tp-1);
 			for(int b = tpStart; b <= tpStop; b++){
 				cnvCount += basepair[b];
 				alignCount += alignability[b];
@@ -377,12 +381,23 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				cScore = cnvCount/alignCount;
 				cnvWins cnv_two(currchr,tpStart,tpStop,cScore,0,0,0);
 				cnv_wins.push_back(cnv_two);
-				if(gcContent[*tp] == 2 && gcContent[*nexttp] == 2){
-					tp++;
-					nexttp++;
-				}
 			}else{
+				if((chr_size[currchr] - tpStart) > cOffsetSize){
+					cnvCount = 0;
+					alignCount = 0;
+					for(int b = tpStart; b < chr_size[currchr]; b++){
+						cnvCount += basepair[b];
+						alignCount += alignability[b];
+					}
+					cScore = cnvCount/alignCount;
+					cnvWins cnv_three(currchr,tpStart,chr_size[currchr],cScore,0,0,0);
+					cnv_wins.push_back(cnv_three);
+				}
 				tp++;
+			}
+			if(gcContent[*tp] == 2 && gcContent[*nexttp] == 2){
+				tp++;
+				nexttp++;
 			}
 			tp++;
 			nexttp++;
