@@ -6,6 +6,9 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
         options(scipen=999)
 	library(zinba)
 
+print(paste("formula is",formula))
+print(paste("method is",method))
+
 #	wins=NULL
 	if(method=='pscl'){
             files = unlist(strsplit(file,";"))
