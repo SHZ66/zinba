@@ -246,7 +246,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		localSumX2.clear();		
 		double globalVar = (globalSumX2 -((globalSum * globalSum)/numCnvWins))/(numCnvWins-1);
 		cout << "\t\t\tGlobal variance is " << globalVar << endl;
-		list<cnvWins> sigBoundary; 
+		list<cnvWins> sigBoundary;
 		c = cnv_wins.begin();
 		while(c != cnv_wins.end()){
 			double degfree = (slideWinSize - 1);
@@ -273,18 +273,33 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		}
 		cout << "\t\t\tRefining " << sigBoundary.size() << " boundaries" << endl;		
 		sb = sigBoundary.begin();
+		
+//while(sb != sigBoundary.end()){
+//	cout << "\t\t\tSIG BOUND is " << sb->start << " " << sb->stop << endl;
+//	sb++;
+//}
+//sb = sigBoundary.begin();
+		
 		list<long unsigned int> transPts;
 		long unsigned int refOffset = numOffsets * cOffsetSize;
 		while(sb != sigBoundary.end()){
-			long unsigned int leftWinStart = 1;
+			
+			long unsigned int leftWinStart = sb->start;
 			if(sb->start > refOffset)
 				leftWinStart = sb->start - refOffset;
-			long unsigned int leftWinStop = leftWinStart + cWinSize;
+
+			long unsigned int leftWinStop = chr_size[currchr];
+			if(chr_size[currchr] > (leftWinStart + cWinSize))
+				if (sb->stop < (leftWinStart + cWinSize))
+					leftWinStop = sb->stop;
+				else
+					leftWinStop = leftWinStart + cWinSize;
+
 			double lowPval = 1;
 			double maxRatio = 0;
-			long unsigned int transPoint = 0;
+			long unsigned int transPoint = sb->stop;
 			int hitGap = 0;
-			while((leftWinStop+1) <= sb->stop && (leftWinStop+cWinSize+1) <= chr_size[currchr]){
+			while(leftWinStop <= sb->stop && (leftWinStop+cWinSize+1) <= chr_size[currchr]){
 				int leftWinCount = 0;
 				int rightWinCount = 0;
 				unsigned long int gapStart = 0;
@@ -294,17 +309,21 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 					if(gcContent[s] == 2){
 						if(hitGap == 0)
 							gapStart = s;
+						else if (s < gapStart)
+							gapStart = s;
 						hitGap = 1;
 					}
 					if(gcContent[s+cWinSize+1] == 2){
 						if(hitGap == 0)
 							gapStart = s+cWinSize+1;
+						else if (s < gapStart)
+							gapStart = s;
 						hitGap = 1;
 					}
 				}
 				if(hitGap == 1){
 					transPoint = gapStart;
-					leftWinStop = sb->stop;
+					leftWinStop = sb->stop + 1;
 				}else if (hitGap == 0){
 					unsigned int maxCount = leftWinCount;
 					if(rightWinCount > leftWinCount)
@@ -349,13 +368,14 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		list<long unsigned int>::iterator nexttp = transPts.begin();
 		nexttp++;
 		while(tp != transPts.end()){
+//			cout << "\t\t\t\tTransition point at " << *tp << endl;
 			double cnvCount = 0;
 			int alignCount = 0;
 			unsigned long int tpStart = 1;
-			if(*tp > (cWinSize+1))
+			if(*tp > (cWinSize+2))
 				tpStart = (*tp-cWinSize-1);
 			unsigned long int tpStop = chr_size[currchr];
-			if(chr_size[currchr] >= (*tp-1))
+			if(chr_size[currchr] >= *tp)
 				tpStop = (*tp-1);
 			for(int b = tpStart; b <= tpStop; b++){
 				cnvCount += basepair[b];
@@ -371,6 +391,9 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				tpStart = *tp;
 				tpStop = (*tp+cWinSize);				
 			}
+			if(tpStop > chr_size[currchr])
+				if( (chr_size[currchr]-tpStart) > cOffsetSize)
+					tpStop = chr_size[currchr];
 			if(tpStop <= chr_size[currchr]){
 				cnvCount = 0;
 				alignCount = 0;
@@ -381,23 +404,10 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				cScore = cnvCount/alignCount;
 				cnvWins cnv_two(currchr,tpStart,tpStop,cScore,0,0,0);
 				cnv_wins.push_back(cnv_two);
-			}else{
-				if((chr_size[currchr] - tpStart) > cOffsetSize){
-					cnvCount = 0;
-					alignCount = 0;
-					for(int b = tpStart; b < chr_size[currchr]; b++){
-						cnvCount += basepair[b];
-						alignCount += alignability[b];
-					}
-					cScore = cnvCount/alignCount;
-					cnvWins cnv_three(currchr,tpStart,chr_size[currchr],cScore,0,0,0);
-					cnv_wins.push_back(cnv_three);
+				if(gcContent[*tp] == 2 && gcContent[*nexttp] == 2){
+					tp++;
+					nexttp++;
 				}
-				tp++;
-			}
-			if(gcContent[*tp] == 2 && gcContent[*nexttp] == 2){
-				tp++;
-				nexttp++;
 			}
 			tp++;
 			nexttp++;
