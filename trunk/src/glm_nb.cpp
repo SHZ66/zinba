@@ -142,7 +142,7 @@ double theta_ml(int N, double n, const double *y, double *mu, const double *prio
 	info=0;
   } 
    if(t0 < 0){t0= 0;}
-   if(it==maxit){ Rprintf("iteration Limit Reached\n");}
+//   if(it==maxit){ Rprintf("iteration Limit Reached\n");}
    return(t0);
 }
 
