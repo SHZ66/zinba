@@ -6,9 +6,6 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
         options(scipen=999)
 	library(zinba)
 
-print(paste("formula is",formula))
-print(paste("method is",method))
-
 #	wins=NULL
 	if(method=='pscl'){
             files = unlist(strsplit(file,";"))
@@ -46,6 +43,8 @@ print(paste("method is",method))
 			}else{
 				wins=rbind(wins,data)
 				if(i==length(files)){
+					time.end <- Sys.time()
+					print(difftime(time.end,time.start))
 					return(wins)
 				}
 			}
@@ -196,12 +195,12 @@ print(paste("method is",method))
 			}else{
 				wins=rbind(wins,data)
 				if(fnum==length(files)){
+					time.end <- Sys.time()
+					print(difftime(time.end,time.start))
 					return(wins)
 				}
 			}
 		}
             }
 	}
-	time.end <- Sys.time()
-	print(difftime(time.end,time.start))
 }
