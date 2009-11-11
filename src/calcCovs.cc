@@ -78,7 +78,7 @@ int normalArr = 0;
 for(int ch = 0; ch <= chr_size[currchr]; ch++){
 	if(basepair[ch] != 0)
 		normalArr = 1;
-	basepair[ch] == 0;
+	basepair[ch] = 0;
 }
 if(normalArr == 1)
 	cout << "non zero in basepair" << endl;
@@ -101,7 +101,7 @@ if(normalArr == 1)
 
 		alignability = new unsigned short int[chr_size[currchr] + 1];
 		alignability[chr_size[currchr]] = 0;
-		
+//memset(array,0, sizeof(array));
 for(int ch = 0; ch <= chr_size[currchr]; ch++)
 	alignability[ch] = 0;
 
