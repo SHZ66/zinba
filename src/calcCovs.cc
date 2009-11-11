@@ -518,9 +518,10 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		fclose(tempTB);
 		cnv_wins.clear();
 		delete [] basepair;
-		delete [] ibasepair;
 		delete [] gcContent;
 		delete [] alignability;
+		if(strcmp(inputFile,inVal)!=0)
+			delete [] ibasepair;
 	}
 	return 0;
 }
