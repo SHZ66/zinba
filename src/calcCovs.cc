@@ -105,11 +105,12 @@ for(int ch = 0; ch <= chr_size[currchr]; ch++){
 			}
 		}
 
-for(int ch = 0; ch <= chr_size[currchr]; ch++){
-	fprintf(tempTB,"%lu\t%hu\n",ch,basepair[ch]);
-}	
-fclose (tempTB);
-		
+if(strcmp(seven,chrom)==0 || strcmp(seventeen,chrom)==0){
+	for(int ch = 0; ch <= chr_size[currchr]; ch++){
+		fprintf(tempTB,"%lu\t%hu\n",ch,basepair[ch]);
+	}
+	fclose (tempTB);
+}
 		alignability = new unsigned short int[chr_size[currchr] + 1];
 		alignability[chr_size[currchr]] = 0;
 		string alignFileS = alignDir + chromReport + ".wig";

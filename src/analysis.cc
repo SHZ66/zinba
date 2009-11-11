@@ -87,7 +87,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 						}
 						unsigned long int stopPos = i->end+profile_extend;
 						profile = new unsigned short int[(stopPos-startPos)+1];
-						profile[(stopPos-startPos)+1] = 0;
+						profile[(stopPos-startPos)] = 0;
 						for(int s = startPos; s <= stopPos; s++){
 							profile[pIndex] = basepair[s];
 							pIndex++;
@@ -134,7 +134,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 					if(getChrmData == 1){
 						cout << "Loading data for " << chrom.c_str() << endl;
 						basepair = new unsigned short int[chr_size[chromInt]+1];
-						basepair[chr_size[chromInt]+1] = 0;
+						basepair[chr_size[chromInt]] = 0;
 						countBases = 0;
 					}
 				}else if (field[0] == 's' && field[2] == 'a' && getChrmData == 1){
@@ -166,7 +166,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 					startPos = i->start-profile_extend;
 				unsigned long int stopPos = i->end+profile_extend;
 				profile = new unsigned short int[(stopPos-startPos)+1];
-				profile[(stopPos-startPos)+1] = 0;
+				profile[(stopPos-startPos)] = 0;
 				for(int s = startPos; s <= stopPos; s++){
 					profile[pIndex] = basepair[s];
 					pIndex++;
