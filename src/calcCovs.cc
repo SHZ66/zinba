@@ -480,7 +480,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 					else if(gcContent[b] == 2)
 						nCount++;
 					
-					if(strcmp(inputFile,inVal)!=0)
+					if(readInput == 1)
 						inCount += ibasepair[b];
 				}
 				if((nCount/zWinSize) < 0.1){
@@ -520,7 +520,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		delete [] basepair;
 		delete [] gcContent;
 		delete [] alignability;
-		if(strcmp(inputFile,inVal)!=0)
+		if(readInput == 1)
 			delete [] ibasepair;
 	}
 	return 0;
