@@ -71,7 +71,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		const char * chromReport = getKey(currchr);
 		cout << "\nProcessing " << chromReport << endl;
 		basepair = new unsigned short int[chr_size[currchr]+1];
-		basepair[chr_size[currchr]+1] = 0;
+		basepair[chr_size[currchr]] = 0;
 
 		cout << "\tMapping reads to chromosome......" << endl;
 		while(i != signal_slist.end()){			
@@ -90,7 +90,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		}
 
 		alignability = new unsigned short int[chr_size[currchr] + 1];
-		alignability[chr_size[currchr]+1] = 0;
+		alignability[chr_size[currchr]] = 0;
 		string alignFileS = alignDir + chromReport + ".wig";
 		char * alignFile = new char[alignFileS.size() + 1];
 		strcpy(alignFile, alignFileS.c_str());
@@ -107,7 +107,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		
 		cout << "\tGetting sequence from .2bit file:\n\t\t" << twoBitFile.c_str() << endl;
 		gcContent = new unsigned short int[chr_size[currchr] + 1];
-		gcContent[chr_size[currchr]+1] = 0;
+		gcContent[chr_size[currchr]] = 0;
 		const char * tInfo = "tempInfo.txt"; 
 		const char * tSeq = "tempSeq.txt";
 		tempTB = fopen(tInfo,"w");
@@ -431,7 +431,7 @@ cout << "global sum " << globalSum << " global sumx2 " << globalSumX2 << " num c
 			}
 			cout << "\tMapping input tags to the genome........." << endl;
 			ibasepair = new unsigned short int[chr_size[currchr]+1];
-			ibasepair[chr_size[currchr]+1] = 0;
+			ibasepair[chr_size[currchr]] = 0;
 			slist<aRead>::iterator in = input_slist.begin();
 			while(in != input_slist.end()){
 				if(in->chrom==currchr){
