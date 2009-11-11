@@ -71,7 +71,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		const char * chromReport = getKey(currchr);
 		cout << "\nProcessing " << chromReport << endl;
 		basepair = new unsigned short int[chr_size[currchr]+1];
-		basepair[chr_size[currchr]] = 0;
+//		basepair[0] = 0;
 
 		
 int normalArr = 0;
@@ -86,12 +86,14 @@ if(normalArr == 1)
 		cout << "\tMapping reads to chromosome......" << endl;
 		while(i != signal_slist.end()){			
 			if(i->chrom==currchr){
-				if(i->start < chr_size[currchr]){
+				if(i->start < chr_size[currchr] && i->start > 0){
 					basepair[i->start]++;
 					signal_slist.erase(i++);
 				}else{
-//					cout << "WARNING: Read maps off end of chromosome: " << i->start << endl;
-					basepair[chr_size[currchr]]++;
+					if(i->start > chr_size[currchr])
+						basepair[chr_size[currchr]]++;
+					else if(i->start < 1)
+						basepair[1]++;
 					signal_slist.erase(i++);
 				}
 			}else{
@@ -100,12 +102,10 @@ if(normalArr == 1)
 		}
 
 		alignability = new unsigned short int[chr_size[currchr] + 1];
-		alignability[chr_size[currchr]] = 0;
-//memset(array,0, sizeof(array));
-for(int ch = 0; ch <= chr_size[currchr]; ch++)
-	alignability[ch] = 0;
-
-		
+//		alignability[chr_size[currchr]] = 0;
+//		memset(array,0, sizeof(array));
+		for(int ch = 0; ch <= chr_size[currchr]; ch++)
+			alignability[ch] = 0;
 		string alignFileS = alignDir + chromReport + ".wig";
 		char * alignFile = new char[alignFileS.size() + 1];
 		strcpy(alignFile, alignFileS.c_str());
@@ -119,17 +119,12 @@ for(int ch = 0; ch <= chr_size[currchr]; ch++)
 			pos++;
 		}
 		fclose(tempTB);
-
-
 		
 		cout << "\tGetting sequence from .2bit file:\n\t\t" << twoBitFile.c_str() << endl;
 		gcContent = new unsigned short int[chr_size[currchr] + 1];
 		gcContent[chr_size[currchr]] = 0;
-
-for(int ch = 0; ch <= chr_size[currchr]; ch++)
-	gcContent[ch] = 0;
-
-		
+		for(int ch = 0; ch <= chr_size[currchr]; ch++)
+			gcContent[ch] = 0;
 		const char * tInfo = "tempInfo.txt"; 
 		const char * tSeq = "tempSeq.txt";
 		tempTB = fopen(tInfo,"w");
@@ -448,19 +443,19 @@ for(int ch = 0; ch <= chr_size[currchr]; ch++)
 			cout << "\tMapping input tags to the genome........." << endl;
 			ibasepair = new unsigned short int[chr_size[currchr]+1];
 			ibasepair[chr_size[currchr]] = 0;
-			
-for(int ch = 0; ch <= chr_size[currchr]; ch++)
-	ibasepair[ch] = 0;
-			
+			for(int ch = 0; ch <= chr_size[currchr]; ch++)
+				ibasepair[ch] = 0;
 			slist<aRead>::iterator in = input_slist.begin();
 			while(in != input_slist.end()){
 				if(in->chrom==currchr){
-					if(in->start <= chr_size[currchr]){
+					if(in->start <= chr_size[currchr] && in->start > 0){
 						ibasepair[in->start]++;
 						input_slist.erase(in++);
 					}else{
-//						cout << "WARNING: Read maps off end of chromosome: " << in->start << endl;
-						ibasepair[chr_size[currchr]]++;
+						if(in->start > chr_size[currchr])
+							ibasepair[chr_size[currchr]]++;
+						else if (in->start <= 0)
+							ibasepair[1]++;
 						input_slist.erase(in++);
 					}
 				}else{
