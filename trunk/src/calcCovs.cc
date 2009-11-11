@@ -72,7 +72,6 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		cout << "\nProcessing " << chromReport << endl;
 		basepair = new unsigned short int[chr_size[currchr]+1];
 //		basepair[0] = 0;
-
 		
 int normalArr = 0;
 for(int ch = 0; ch <= chr_size[currchr]; ch++){
@@ -103,7 +102,6 @@ if(normalArr == 1)
 
 		alignability = new unsigned short int[chr_size[currchr] + 1];
 //		alignability[chr_size[currchr]] = 0;
-//		memset(array,0, sizeof(array));
 		for(int ch = 0; ch <= chr_size[currchr]; ch++)
 			alignability[ch] = 0;
 		string alignFileS = alignDir + chromReport + ".wig";
