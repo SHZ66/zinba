@@ -72,6 +72,22 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		cout << "\nProcessing " << chromReport << endl;
 		basepair = new unsigned short int[chr_size[currchr]+1];
 		basepair[chr_size[currchr]] = 0;
+		
+
+const char * bpOutseven = "chr7_bp.txt"; 
+const char * bpOutseventeen = "chr17_bp.txt"; 
+const char * chrom = getKey(currchr);
+const char* seven = "chr7";
+const char* seventeen = "chr17";
+if(strcmp(seven,chrom)==0)
+	tempTB = fopen(bpOutseven,"w");
+else if (strcmp(seventeen,chrom)==0)
+	tempTB = fopen(bpOutseventeen,"w");
+		
+for(int ch = 0; ch <= chr_size[currchr]; ch++){
+	if(basepair[ch] != 0)
+		cout << "array element " << ch << " not 0" << endl;
+}
 
 		cout << "\tMapping reads to chromosome......" << endl;
 		while(i != signal_slist.end()){			
@@ -89,6 +105,11 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			}
 		}
 
+for(int ch = 0; ch <= chr_size[currchr]; ch++){
+	fprintf(tempTB,"%lu\t%hu\n",ch,basepair[ch]);
+}	
+fclose (tempTB);
+		
 		alignability = new unsigned short int[chr_size[currchr] + 1];
 		alignability[chr_size[currchr]] = 0;
 		string alignFileS = alignDir + chromReport + ".wig";
@@ -104,6 +125,11 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			pos++;
 		}
 		fclose(tempTB);
+
+for(int ch = 0; ch <= chr_size[currchr]; ch++){
+	if(alignability[ch] != 0 && alignability[ch] != 1 && alignability[ch] != 2)
+		cout << "align element " << ch << " weird " << alignability[ch] << endl;
+}
 		
 		cout << "\tGetting sequence from .2bit file:\n\t\t" << twoBitFile.c_str() << endl;
 		gcContent = new unsigned short int[chr_size[currchr] + 1];

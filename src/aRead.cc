@@ -1,8 +1,8 @@
 #include "aRead.h"
 
-aRead::~aRead(){}
-
 aRead::aRead(){}
+
+aRead::~aRead(){}
 
 aRead::aRead(const aRead& s){
 	chrom = s.chrom;
