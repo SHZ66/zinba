@@ -61,7 +61,7 @@ int bcanalysis::processSignals(const char* outputFile,const char *twoBitFile,int
 	cout << "\tProcessing " << chromReport << ".........." << endl;
 	unsigned short int * basepair = NULL;
 	basepair = new unsigned short int[chr_size[currchr]+1];
-	basepair[chr_size[currchr]+1] = 0;
+	basepair[chr_size[currchr]] = 0;
 	unsigned short int printFLAG = 0;
 	
 	while(!signal_slist.empty()){
