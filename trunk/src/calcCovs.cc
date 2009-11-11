@@ -72,7 +72,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		cout << "\nProcessing " << chromReport << endl;
 		basepair = new unsigned short int[chr_size[currchr]+1];
 //		basepair[chr_size[currchr]] = 0;
-		memset(basepair,0,(chr_size[currchr]+1));
+
 		
 int normalArr = 0;
 for(int ch = 0; ch <= chr_size[currchr]; ch++){
