@@ -80,7 +80,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 					basepair[i->start]++;
 					signal_slist.erase(i++);
 				}else{
-					cout << "WARNING: Read maps off end of chromosome: " << i->start << endl;
+//					cout << "WARNING: Read maps off end of chromosome: " << i->start << endl;
 					basepair[chr_size[currchr]]++;
 					signal_slist.erase(i++);
 				}
@@ -147,17 +147,20 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		cout << "\tGetting counts for " << cWinSize << "bp windows.........." << endl;
 		int numOffsets = 1;
 		if(cOffsetSize > 0){
-			numOffsets = int(cWinSize/cOffsetSize);
+			numOffsets = (int) cWinSize/cOffsetSize;
 		}
+		
+cout << "running " << numOffsets << " offsets for cnvs" << endl;
+		
 		for(int o = 0; o < numOffsets; o++){
 			unsigned long int cWinStart = (cOffsetSize * o) + 1;
 			unsigned long int cWinStop = cWinStart + cWinSize - 1;
 			if(cWinStop > chr_size[currchr])
 				cWinStop = chr_size[currchr];
 			while(cWinStop <= chr_size[currchr]){
-				double cnvCount = 0;
+				double cnvCount = 0.0;
 				int alignCount = 0;
-				double nCount = 0;
+				double nCount = 0.0;
 				for(int b = cWinStart; b <= cWinStop; b++){
 					if(gcContent[b] == 2){
 						nCount++;						
@@ -166,10 +169,10 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 						alignCount += alignability[b];
 					}
 				}
-				double cScore = 0;
+				double cScore = 0.0;
 				if(alignCount > 0)
-					cScore = cnvCount/alignCount;
-				double percGap = nCount/cWinSize;
+					cScore = (double) cnvCount/alignCount;
+				double percGap = (double) nCount/cWinSize;
 				cnvWins cnv(cWinStart,cWinStop,cScore,0,0,percGap);
 				cnv_wins.push_back(cnv);
 				cWinStart += cWinSize;
@@ -430,14 +433,14 @@ cout << "global sum " << globalSum << " global sumx2 " << globalSumX2 << " num c
 			ibasepair = new unsigned short int[chr_size[currchr]+1];
 			ibasepair[chr_size[currchr]+1] = 0;
 			slist<aRead>::iterator in = input_slist.begin();
-			while(in != input_slist.end()){			
-				if(in->chrom==currchr){					
+			while(in != input_slist.end()){
+				if(in->chrom==currchr){
 					if(in->start <= chr_size[currchr]){
-						basepair[in->start]++;
+						ibasepair[in->start]++;
 						input_slist.erase(in++);
 					}else{
-						cout << "WARNING: Read maps off end of chromosome: " << in->start << endl;
-						basepair[chr_size[currchr]]++;
+//						cout << "WARNING: Read maps off end of chromosome: " << in->start << endl;
+						ibasepair[chr_size[currchr]]++;
 						input_slist.erase(in++);
 					}
 				}else{
@@ -450,8 +453,11 @@ cout << "global sum " << globalSum << " global sumx2 " << globalSumX2 << " num c
 		tempTB = fopen(flist.c_str(),"a");
 		numOffsets = 1;
 		if(zOffsetSize > 0){
-			numOffsets = int(zWinSize/zOffsetSize);
+			numOffsets = (int) zWinSize/zOffsetSize;
 		}
+		
+cout << "running " << numOffsets << " offsets for zwins" << endl;
+		
 		string outfileDATA;
 		slist<dataWins>::iterator z;
 		for(int o = 0; o < numOffsets; o++){
