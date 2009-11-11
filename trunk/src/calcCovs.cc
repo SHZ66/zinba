@@ -73,22 +73,14 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		basepair = new unsigned short int[chr_size[currchr]+1];
 		basepair[chr_size[currchr]] = 0;
 
-const char * bpOutseven = "chr7_bp.txt"; 
-const char * bpOutseventeen = "chr17_bp.txt"; 
-const char * chrom = getKey(currchr);
-
-cout << "chrom is " << currchr << " size is " << chr_size[currchr] << endl;
-		
-const char* seven = "chr7";
-const char* seventeen = "chr17";
-if(strcmp(seven,chrom)==0)
-	tempTB = fopen(bpOutseven,"w");
-else if (strcmp(seventeen,chrom)==0)
-	tempTB = fopen(bpOutseventeen,"w");
-		
+int normalArr = 0;
 for(int ch = 0; ch <= chr_size[currchr]; ch++){
-	basepair[ch] = 0;
+	if(basepair[ch] != 0)
+		normalArr = 1;
+	basepair[ch] == 0;
 }
+if(normalArr == 1)
+	cout << "non zero in basepair" << endl;
 
 		cout << "\tMapping reads to chromosome......" << endl;
 		while(i != signal_slist.end()){			
@@ -106,12 +98,6 @@ for(int ch = 0; ch <= chr_size[currchr]; ch++){
 			}
 		}
 
-if(strcmp(seven,chrom)==0 || strcmp(seventeen,chrom)==0){
-	for(int ch = 0; ch <= chr_size[currchr]; ch++){
-		fprintf(tempTB,"%lu\t%hu\n",ch,basepair[ch]);
-	}
-	fclose (tempTB);
-}
 		alignability = new unsigned short int[chr_size[currchr] + 1];
 		alignability[chr_size[currchr]] = 0;
 		string alignFileS = alignDir + chromReport + ".wig";
@@ -129,8 +115,7 @@ if(strcmp(seven,chrom)==0 || strcmp(seventeen,chrom)==0){
 		fclose(tempTB);
 
 for(int ch = 0; ch <= chr_size[currchr]; ch++){
-	if(alignability[ch] != 0 && alignability[ch] != 1 && alignability[ch] != 2)
-		cout << "align element " << ch << " weird " << alignability[ch] << endl;
+	alignability[ch] = 0;
 }
 		
 		cout << "\tGetting sequence from .2bit file:\n\t\t" << twoBitFile.c_str() << endl;
@@ -177,9 +162,6 @@ for(int ch = 0; ch <= chr_size[currchr]; ch++){
 		if(cOffsetSize > 0){
 			numOffsets = (int) cWinSize/cOffsetSize;
 		}
-		
-cout << "running " << numOffsets << " offsets for cnvs" << endl;
-		
 		for(int o = 0; o < numOffsets; o++){
 			unsigned long int cWinStart = (cOffsetSize * o) + 1;
 			unsigned long int cWinStop = cWinStart + cWinSize - 1;
@@ -211,17 +193,17 @@ cout << "running " << numOffsets << " offsets for cnvs" << endl;
 		cout << "\t\tRefining boundaries...." << endl;
 		cnv_wins.sort();
 		
-const char * cWinFile = "cnv_wins.txt";
-tempTB = fopen(cWinFile,"w");
-list<cnvWins>::iterator cf = cnv_wins.begin();
-while(cf != cnv_wins.end()){
-	if(cf->pGap < 0.01){
-		long unsigned int cwpos = (long unsigned int) (cf->stop+cf->start)/2;
-		fprintf(tempTB,"%lu\t%f\n",cwpos,cf->cnvScore);
-	}
-	cf++;
-}
-fclose (tempTB);
+//const char * cWinFile = "cnv_wins.txt";
+//tempTB = fopen(cWinFile,"w");
+//list<cnvWins>::iterator cf = cnv_wins.begin();
+//while(cf != cnv_wins.end()){
+//	if(cf->pGap < 0.01){
+//		long unsigned int cwpos = (long unsigned int) (cf->stop+cf->start)/2;
+//		fprintf(tempTB,"%lu\t%f\n",cwpos,cf->cnvScore);
+//	}
+//	cf++;
+//}
+//fclose (tempTB);
 				
 		int numCnvWins = 0;
 		double slideWinSize = numOffsets * 2.0;
@@ -287,9 +269,6 @@ fclose (tempTB);
 		
 		localSum.clear();
 		localSumX2.clear();
-		
-cout << "global sum " << globalSum << " global sumx2 " << globalSumX2 << " num cnv wins " << numCnvWins << endl;
-		
 		double globalVar = (globalSumX2 -((globalSum * globalSum)/numCnvWins))/(numCnvWins-1);
 		double degfree = (slideWinSize - 1);
 		cout << "\t\t\tGlobal variance is " << globalVar << endl;
@@ -483,9 +462,6 @@ cout << "global sum " << globalSum << " global sumx2 " << globalSumX2 << " num c
 		if(zOffsetSize > 0){
 			numOffsets = (int) zWinSize/zOffsetSize;
 		}
-		
-cout << "running " << numOffsets << " offsets for zwins" << endl;
-		
 		string outfileDATA;
 		slist<dataWins>::iterator z;
 		for(int o = 0; o < numOffsets; o++){
