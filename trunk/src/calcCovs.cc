@@ -71,7 +71,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		const char * chromReport = getKey(currchr);
 		cout << "\nProcessing " << chromReport << endl;
 		basepair = new unsigned short int[chr_size[currchr]+1];
-//		basepair[chr_size[currchr]] = 0;
+		basepair[chr_size[currchr]] = 0;
 
 		
 int normalArr = 0;
