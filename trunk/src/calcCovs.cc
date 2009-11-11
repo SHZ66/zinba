@@ -151,55 +151,27 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		}
 		for(int o = 0; o < numOffsets; o++){
 			unsigned long int cWinStart = (cOffsetSize * o) + 1;
-			unsigned long int cWinStop = cWinStart + cWinSize - 1;			
+			unsigned long int cWinStop = cWinStart + cWinSize - 1;
+			if(cWinStop > chr_size[currchr])
+				cWinStop = chr_size[currchr];
 			while(cWinStop <= chr_size[currchr]){
 				double cnvCount = 0;
 				int alignCount = 0;
 				double nCount = 0;
-				unsigned long int gapStart = 0;
 				for(int b = cWinStart; b <= cWinStop; b++){
-					cnvCount += basepair[b];
-					alignCount += alignability[b];
 					if(gcContent[b] == 2){
-						if(nCount == 0)
-							gapStart = b;
-						nCount++;
+						nCount++;						
+					}else{
+						cnvCount += basepair[b];
+						alignCount += alignability[b];
 					}
 				}
 				double cScore = 0;
-				if (nCount > (double)(0.1*zWinSize)){
-					if((gapStart - cWinStart) > cOffsetSize){
-						cnvCount = 0;
-						alignCount = 0;
-						for(int b = cWinStart; b < gapStart; b++){
-							cnvCount += basepair[b];
-							alignCount += alignability[b];
-						}
-						if(alignCount > 0)
-							cScore = cnvCount/alignCount;
-						cnvWins gcnv(currchr,cWinStart,(gapStart-1),cScore,0,0,0);	
-						cnv_wins.push_back(gcnv);
-					}
-					while(gcContent[gapStart] == 2 && gapStart < cWinStop)
-						gapStart++;
-					if((cWinStop - gapStart) > cOffsetSize){
-						cnvCount = 0;
-						alignCount = 0;
-						for(int b = gapStart; b <= cWinStop; b++){
-							cnvCount += basepair[b];
-							alignCount += alignability[b];
-						}
-						if(alignCount > 0)
-							cScore = cnvCount/alignCount;
-						cnvWins gcnv2(currchr,gapStart,cWinStop,cScore,0,0,0);	
-						cnv_wins.push_back(gcnv2);
-					}					
-				}else{
-					if(alignCount > 0)
-						cScore = cnvCount/alignCount;
-					cnvWins cnv(currchr,cWinStart,cWinStop,cScore,0,0,0);
-					cnv_wins.push_back(cnv);
-				}
+				if(alignCount > 0)
+					cScore = cnvCount/alignCount;
+				double percGap = nCount/cWinSize;
+				cnvWins cnv(cWinStart,cWinStop,cScore,0,0,percGap);
+				cnv_wins.push_back(cnv);
 				cWinStart += cWinSize;
 				cWinStop += cWinSize;
 			}
@@ -207,57 +179,113 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			
 		cout << "\t\tRefining boundaries...." << endl;
 		cnv_wins.sort();
-		int numCnvWins = cnv_wins.size();
+		
+//const char * cWinFile = "cnv_wins.txt";
+//tempTB = fopen(cWinFile,"w");
+//list<cnvWins>::iterator cf = cnv_wins.begin();
+//while(cf != cnv_wins.end()){
+//	if(cf->pGap < 0.01){
+//		long unsigned int cwpos = (long unsigned int) (cf->stop+cf->start)/2;
+//		fprintf(tempTB,"%lu\t%f\n",cwpos,cf->cnvScore);
+//	}
+//	cf++;
+//}
+//fclose (tempTB);
+				
+		int numCnvWins = 0;
 		double slideWinSize = numOffsets * 2;
 		double globalSum = 0;
 		double globalSumX2 = 0;
+		double gapThresh = 0;
+		int firstVar = cnv_wins.size();
+		int countWin = 0;
 		list<double> localSum;
 		list<double> localSumX2;
 
+//const char * varFile = "var_wins.txt";
+//tempTB = fopen(varFile,"w");
+		
 		list<cnvWins>::iterator c = cnv_wins.begin();
 		while(c != cnv_wins.end()){
-			globalSum += c->cnvScore;
-			globalSumX2 += pow((c->cnvScore),2);
-			if(localSum.size() < (slideWinSize - 1)){
-				localSum.push_back(c->cnvScore);
-				localSumX2.push_back(pow((c->cnvScore),2));
-			}else{
-				localSum.push_back(c->cnvScore);
-				localSumX2.push_back(pow((c->cnvScore),2));
-				if(localSum.size() == (slideWinSize + 1)){
-					localSum.pop_front();
-					localSumX2.pop_front();
-				}
+			if(c->pGap <= gapThresh){
+				globalSum += c->cnvScore;
+				globalSumX2 += pow((c->cnvScore),2);
+				numCnvWins++;
+				if(localSum.size() < (slideWinSize - 1)){
+					localSum.push_back(c->cnvScore);
+					localSumX2.push_back(pow((c->cnvScore),2));
+				}else{
+					localSum.push_back(c->cnvScore);
+					localSumX2.push_back(pow((c->cnvScore),2));
+					if(localSum.size() == (slideWinSize + 1)){
+						localSum.pop_front();
+						localSumX2.pop_front();
+					}
 
-				list<double>::iterator x = localSum.begin();
-				list<double>::iterator x2 = localSumX2.begin();
-				double sum = 0;
-				double sumX2 = 0;
-				while(x != localSum.end()){
-					sum += *x;
-					sumX2 += *x2;
-					x++;x2++;
+					list<double>::iterator x = localSum.begin();
+					list<double>::iterator x2 = localSumX2.begin();
+					double sum = 0;
+					double sumX2 = 0;
+					while(x != localSum.end()){
+						sum += *x;
+						sumX2 += *x2;
+						x++;x2++;
+					}
+					c->varWin = (sumX2 -((sum * sum)/slideWinSize))/(slideWinSize-1);
+//long unsigned int vpos = (unsigned long int) ((c->start+c->stop)/2)-cWinSize;
+//fprintf(tempTB,"%lu\t%e\n",vpos,c->varWin);
+					if(countWin < firstVar)
+						firstVar = countWin;
 				}
-				c->varWin = (sumX2 -((sum * sum)/slideWinSize))/(slideWinSize-1);
+				c++;
+			}else{
+				if(localSum.size() > 0){
+					localSum.clear();
+					localSumX2.clear();
+				}
+				while(c->pGap != 0 && c!= cnv_wins.end())
+					c++;
 			}
-			c++;
+			countWin++;
 		}
+		
+//fclose (tempTB);
+
+//const char * pvalFile = "pval_wins.txt";
+//tempTB = fopen(pvalFile,"w");
+		
 		localSum.clear();
-		localSumX2.clear();		
+		localSumX2.clear();
 		double globalVar = (globalSumX2 -((globalSum * globalSum)/numCnvWins))/(numCnvWins-1);
+		double degfree = (slideWinSize - 1);
 		cout << "\t\t\tGlobal variance is " << globalVar << endl;
 		list<cnvWins> sigBoundary;
 		c = cnv_wins.begin();
-		while(c != cnv_wins.end()){
-			double degfree = (slideWinSize - 1);
-			c->chiSq = (degfree*pow(c->varWin,2))/pow(globalVar,2);
-			c->pval = dchisq(c->chiSq, degfree, 0);
-//			c->pval = chisquarecdistribution(degfree,c->chiSq);
-			if(c->pval <= 0.001){
-				sigBoundary.push_back(*c);
-			}
+		int cnvpos = 0;
+		while(cnvpos < firstVar){
 			c++;
+			cnvpos++;
 		}
+		while(c != cnv_wins.end()){
+			if(c->pGap <= gapThresh){
+				c->chiSq = (degfree*pow(c->varWin,2))/pow(globalVar,2);
+				double cPval = dchisq(c->chiSq, degfree, 0);
+//				c->pval = chisquarecdistribution(degfree,c->chiSq);
+				
+//long unsigned int vpos = (unsigned long int) ((c->start+c->stop)/2)-cWinSize;
+//fprintf(tempTB,"%lu\t%e\n",vpos,cPval);
+				
+				if(cPval >= 0.000001){
+					sigBoundary.push_back(*c);
+				}
+				c++;
+			}else{
+				c++;
+			}
+		}
+		
+//fclose (tempTB);
+		
 		sigBoundary.sort();
 		list<cnvWins>::iterator sb = sigBoundary.begin();
 		cnvWins lastCNV = *sb;
@@ -281,76 +309,57 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 //sb = sigBoundary.begin();
 		
 		list<long unsigned int> transPts;
-		long unsigned int refOffset = numOffsets * cOffsetSize;
-		while(sb != sigBoundary.end()){
+		long unsigned int refOffset = 2 * cWinSize;
+		long unsigned int leftWinStart = sb->start;
+		if(sb->start > refOffset)
+			leftWinStart = sb->start - refOffset;
+
+		while(!sigBoundary.empty()){
 			
-			long unsigned int leftWinStart = sb->start;
-			if(sb->start > refOffset)
-				leftWinStart = sb->start - refOffset;
+			int searchLen = cWinSize;
+			leftWinStart = sb->start - refOffset;
 
-			long unsigned int leftWinStop = chr_size[currchr];
-			if(chr_size[currchr] > (leftWinStart + cWinSize))
-				if (sb->stop < (leftWinStart + cWinSize))
-					leftWinStop = sb->stop;
-				else
-					leftWinStop = leftWinStart + cWinSize;
-
+			long unsigned int leftWinStop;
+			if((chr_size[currchr] - leftWinStart) > refOffset){
+				leftWinStop = leftWinStart + cWinSize;
+			}else{
+				searchLen = (int) (chr_size[currchr] - leftWinStart)/4;
+				leftWinStop = leftWinStart + searchLen;
+			}
+			
 			double lowPval = 1;
 			double maxRatio = 0;
-			long unsigned int transPoint = sb->stop;
-			int hitGap = 0;
-			while(leftWinStop <= sb->stop && (leftWinStop+cWinSize+1) <= chr_size[currchr]){
+			long unsigned int transPoint = 0;
+			
+			while(leftWinStop <= (sb->stop-searchLen) && (leftWinStop+searchLen+1) <= chr_size[currchr]){
 				int leftWinCount = 0;
 				int rightWinCount = 0;
-				unsigned long int gapStart = 0;
+
 				for(int s = leftWinStart; s <= leftWinStop; s++){
 					leftWinCount += basepair[s];
-					rightWinCount += basepair[(s+cWinSize+1)];
-					if(gcContent[s] == 2){
-						if(hitGap == 0)
-							gapStart = s;
-						else if (s < gapStart)
-							gapStart = s;
-						hitGap = 1;
-					}
-					if(gcContent[s+cWinSize+1] == 2){
-						if(hitGap == 0)
-							gapStart = s+cWinSize+1;
-						else if (s < gapStart)
-							gapStart = s;
-						hitGap = 1;
+					rightWinCount += basepair[(s+searchLen+1)];
+				}
+
+				double maxCount = (double) leftWinCount;
+				if(rightWinCount > leftWinCount)
+					maxCount = (double) rightWinCount;
+				double sumCount = (double) leftWinCount + rightWinCount;
+				double ratioDiff = (double) maxCount/sumCount;
+				double bPval = dbinom(maxCount,sumCount,0.5,0);
+//				double bPval = binomialcdistribution(maxCount,sumCount,0.5);
+				if(bPval <= lowPval){
+					if(ratioDiff > maxRatio){
+						lowPval = bPval;
+						maxRatio = ratioDiff;
+						transPoint = leftWinStop + 1;
 					}
 				}
-				if(hitGap == 1){
-					transPoint = gapStart;
-					leftWinStop = sb->stop + 1;
-				}else if (hitGap == 0){
-					unsigned int maxCount = leftWinCount;
-					if(rightWinCount > leftWinCount)
-						maxCount = rightWinCount;
-					unsigned int sumCount = leftWinCount + rightWinCount;
-					double ratioDiff = (double) maxCount/sumCount;
-					double x = (double) maxCount;
-					double n = (double) sumCount;
-					double bPval = dbinom(x,n,0.5,0);
-//					double bPval = binomialcdistribution(maxCount,sumCount,0.5);
-					if(bPval <= lowPval){
-						if(ratioDiff > maxRatio){
-							lowPval = bPval;
-							maxRatio = ratioDiff;
-							transPoint = leftWinStop + 1;
-						}
-					}
-					leftWinStart += zOffsetSize;
-					leftWinStop += zOffsetSize;
-				}
+				leftWinStart += zWinSize;
+				leftWinStop += zWinSize;
+//				leftWinStart += zOffsetSize;
+//				leftWinStop += zOffsetSize;
 			}
 			transPts.push_back(transPoint);
-			if(hitGap == 1){
-				while(gcContent[transPoint] == 2 && transPoint <= chr_size[currchr])
-					transPoint++;
-				transPts.push_back((transPoint-1));
-			}
 			sigBoundary.erase(sb++);
 		}
 		transPts.sort();
@@ -365,52 +374,45 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				c++;
 		}
 		tp = transPts.begin();
-		list<long unsigned int>::iterator nexttp = transPts.begin();
-		nexttp++;
-		while(tp != transPts.end()){
+		
+////////////////////////////////////////////
+//
+// need to make sure that new cnv windows
+// don't overlap other trans points
+//
+////////////////////////////////////////////
+		
+		while(!transPts.empty()){
 //			cout << "\t\t\t\tTransition point at " << *tp << endl;
-			double cnvCount = 0;
-			int alignCount = 0;
+			double leftCnvCount = 0;
+			int leftAlignCount = 0;
+			double rightCnvCount = 0;
+			int rightAlignCount = 0;
+			
 			unsigned long int tpStart = 1;
-			if(*tp > (cWinSize+2))
-				tpStart = (*tp-cWinSize-1);
-			unsigned long int tpStop = chr_size[currchr];
-			if(chr_size[currchr] >= *tp)
-				tpStop = (*tp-1);
+			if(*tp > (cWinSize+1))
+				tpStart = (*tp-cWinSize);
+			unsigned long int tpStop = (unsigned long int) (chr_size[currchr]-tpStart)/2;
+			if(chr_size[currchr] > (*tp+cWinSize)){
+				tpStop = *tp;
+			}
 			for(int b = tpStart; b <= tpStop; b++){
-				cnvCount += basepair[b];
-				alignCount += alignability[b];
+				leftCnvCount += basepair[b];
+				leftAlignCount += alignability[b];
+				rightCnvCount += basepair[b+cWinSize];
+				rightCnvCount += alignability[b+cWinSize];
 			}
-			double cScore = cnvCount/alignCount;
-			cnvWins cnv(currchr,tpStart,tpStop,cScore,0,0,0);
+			double cScore = 0;
+			if(leftAlignCount > 0)
+				cScore = leftCnvCount/leftAlignCount;
+			cnvWins cnv(tpStart,tpStop,cScore,0,0,0);
 			cnv_wins.push_back(cnv);
-			if(gcContent[*tp] == 2 && gcContent[*nexttp] == 2){
-				tpStart = *nexttp+1;
-				tpStop = (*nexttp+cWinSize);
-			}else{
-				tpStart = *tp;
-				tpStop = (*tp+cWinSize);				
-			}
-			if(tpStop > chr_size[currchr])
-				if( (chr_size[currchr]-tpStart) > cOffsetSize)
-					tpStop = chr_size[currchr];
-			if(tpStop <= chr_size[currchr]){
-				cnvCount = 0;
-				alignCount = 0;
-				for(int b = tpStart; b < tpStop; b++){
-					cnvCount += basepair[b];
-					alignCount += alignability[b];
-				}
-				cScore = cnvCount/alignCount;
-				cnvWins cnv_two(currchr,tpStart,tpStop,cScore,0,0,0);
-				cnv_wins.push_back(cnv_two);
-				if(gcContent[*tp] == 2 && gcContent[*nexttp] == 2){
-					tp++;
-					nexttp++;
-				}
-			}
-			tp++;
-			nexttp++;
+			cScore = 0;
+			if(rightAlignCount > 0)
+				cScore = rightCnvCount/rightAlignCount;
+			cnvWins cnvR(tpStart,tpStop,cScore,0,0,0);
+			cnv_wins.push_back(cnvR);
+			transPts.erase(tp++);
 		}
 		cnv_wins.sort();
 
@@ -421,12 +423,13 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				int rVal = importRawSignal(inputFile,1);
 				readInput = 1;
 			}
+			cout << "\tMapping input tags to the genome........." << endl;
 			ibasepair = new unsigned short int[chr_size[currchr]+1];
 			ibasepair[chr_size[currchr]+1] = 0;
 			slist<aRead>::iterator in = input_slist.begin();
 			while(in != input_slist.end()){			
 				if(in->chrom==currchr){					
-					if(in->start < chr_size[currchr]){
+					if(in->start <= chr_size[currchr]){
 						basepair[in->start]++;
 						input_slist.erase(in++);
 					}else{
@@ -471,11 +474,12 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				for(int b = zWinStart; b <= zWinStop; b++){
 					peakCount += basepair[b];
 					alignCount += alignability[b];
-					if(gcContent[b] == 1){
+					
+					if(gcContent[b] == 1)
 						gcCount++;
-					}else if(gcContent[b] == 2){
+					else if(gcContent[b] == 2)
 						nCount++;
-					}
+					
 					if(strcmp(inputFile,inVal)!=0)
 						inCount += ibasepair[b];
 				}
@@ -485,7 +489,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 					while(cnvBegin->stop < zWinStart && cnvBegin != cnv_wins.end())
 						cnvBegin++;
 					cnvEnd = cnvBegin;
-					while( (cnvEnd->start <= zWinStart && cnvEnd->stop >= zWinStart) || (cnvEnd->start <= zWinStop && cnvEnd->stop >= zWinStop)){
+					while( ((cnvEnd->start <= zWinStart && cnvEnd->stop >= zWinStart) || (cnvEnd->start <= zWinStop && cnvEnd->stop >= zWinStop)) && cnvEnd != cnv_wins.end() ){
 						cnvSum += cnvEnd->cnvScore;
 						cnvCount++;
 						cnvEnd++;
@@ -513,8 +517,6 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		}
 		fclose(tempTB);
 		cnv_wins.clear();
-		sigBoundary.clear();
-		transPts.clear();
 		delete [] basepair;
 		delete [] ibasepair;
 		delete [] gcContent;
