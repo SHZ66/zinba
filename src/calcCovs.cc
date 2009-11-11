@@ -100,6 +100,11 @@ if(normalArr == 1)
 
 		alignability = new unsigned short int[chr_size[currchr] + 1];
 		alignability[chr_size[currchr]] = 0;
+		
+for(int ch = 0; ch <= chr_size[currchr]; ch++)
+	alignability[ch] = 0;
+
+		
 		string alignFileS = alignDir + chromReport + ".wig";
 		char * alignFile = new char[alignFileS.size() + 1];
 		strcpy(alignFile, alignFileS.c_str());
@@ -114,13 +119,16 @@ if(normalArr == 1)
 		}
 		fclose(tempTB);
 
-for(int ch = 0; ch <= chr_size[currchr]; ch++){
-	alignability[ch] = 0;
-}
+
 		
 		cout << "\tGetting sequence from .2bit file:\n\t\t" << twoBitFile.c_str() << endl;
 		gcContent = new unsigned short int[chr_size[currchr] + 1];
 		gcContent[chr_size[currchr]] = 0;
+
+for(int ch = 0; ch <= chr_size[currchr]; ch++)
+	gcContent[ch] = 0;
+
+		
 		const char * tInfo = "tempInfo.txt"; 
 		const char * tSeq = "tempSeq.txt";
 		tempTB = fopen(tInfo,"w");
@@ -439,6 +447,10 @@ for(int ch = 0; ch <= chr_size[currchr]; ch++){
 			cout << "\tMapping input tags to the genome........." << endl;
 			ibasepair = new unsigned short int[chr_size[currchr]+1];
 			ibasepair[chr_size[currchr]] = 0;
+			
+for(int ch = 0; ch <= chr_size[currchr]; ch++)
+	ibasepair[ch] = 0;
+			
 			slist<aRead>::iterator in = input_slist.begin();
 			while(in != input_slist.end()){
 				if(in->chrom==currchr){
