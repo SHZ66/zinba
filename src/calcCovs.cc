@@ -72,11 +72,13 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		cout << "\nProcessing " << chromReport << endl;
 		basepair = new unsigned short int[chr_size[currchr]+1];
 		basepair[chr_size[currchr]] = 0;
-		
 
 const char * bpOutseven = "chr7_bp.txt"; 
 const char * bpOutseventeen = "chr17_bp.txt"; 
 const char * chrom = getKey(currchr);
+
+cout << "chrom is " << currchr << " size is " << chr_size[currchr] << endl;
+		
 const char* seven = "chr7";
 const char* seventeen = "chr17";
 if(strcmp(seven,chrom)==0)
@@ -85,8 +87,7 @@ else if (strcmp(seventeen,chrom)==0)
 	tempTB = fopen(bpOutseventeen,"w");
 		
 for(int ch = 0; ch <= chr_size[currchr]; ch++){
-	if(basepair[ch] != 0)
-		cout << "array element " << ch << " not 0" << endl;
+	basepair[ch] = 0;
 }
 
 		cout << "\tMapping reads to chromosome......" << endl;
