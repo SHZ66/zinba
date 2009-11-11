@@ -180,23 +180,23 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		cout << "\t\tRefining boundaries...." << endl;
 		cnv_wins.sort();
 		
-//const char * cWinFile = "cnv_wins.txt";
-//tempTB = fopen(cWinFile,"w");
-//list<cnvWins>::iterator cf = cnv_wins.begin();
-//while(cf != cnv_wins.end()){
-//	if(cf->pGap < 0.01){
-//		long unsigned int cwpos = (long unsigned int) (cf->stop+cf->start)/2;
-//		fprintf(tempTB,"%lu\t%f\n",cwpos,cf->cnvScore);
-//	}
-//	cf++;
-//}
-//fclose (tempTB);
+const char * cWinFile = "cnv_wins.txt";
+tempTB = fopen(cWinFile,"w");
+list<cnvWins>::iterator cf = cnv_wins.begin();
+while(cf != cnv_wins.end()){
+	if(cf->pGap < 0.01){
+		long unsigned int cwpos = (long unsigned int) (cf->stop+cf->start)/2;
+		fprintf(tempTB,"%lu\t%f\n",cwpos,cf->cnvScore);
+	}
+	cf++;
+}
+fclose (tempTB);
 				
 		int numCnvWins = 0;
-		double slideWinSize = numOffsets * 2;
-		double globalSum = 0;
-		double globalSumX2 = 0;
-		double gapThresh = 0;
+		double slideWinSize = numOffsets * 2.0;
+		double globalSum = 0.0;
+		double globalSumX2 = 0.0;
+		double gapThresh = 0.0;
 		int firstVar = cnv_wins.size();
 		int countWin = 0;
 		list<double> localSum;
@@ -211,7 +211,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				globalSum += c->cnvScore;
 				globalSumX2 += pow((c->cnvScore),2);
 				numCnvWins++;
-				if(localSum.size() < (slideWinSize - 1)){
+				if(localSum.size() < (slideWinSize - 1.0)){
 					localSum.push_back(c->cnvScore);
 					localSumX2.push_back(pow((c->cnvScore),2));
 				}else{
@@ -224,8 +224,8 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 
 					list<double>::iterator x = localSum.begin();
 					list<double>::iterator x2 = localSumX2.begin();
-					double sum = 0;
-					double sumX2 = 0;
+					double sum = 0.0;
+					double sumX2 = 0.0;
 					while(x != localSum.end()){
 						sum += *x;
 						sumX2 += *x2;
@@ -256,6 +256,9 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		
 		localSum.clear();
 		localSumX2.clear();
+		
+cout << "global sum " << globalSum << " global sumx2 " << globalSumX2 << " num cnv wins " << numCnvWins << endl;
+		
 		double globalVar = (globalSumX2 -((globalSum * globalSum)/numCnvWins))/(numCnvWins-1);
 		double degfree = (slideWinSize - 1);
 		cout << "\t\t\tGlobal variance is " << globalVar << endl;
