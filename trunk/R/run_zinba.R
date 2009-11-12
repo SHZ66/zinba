@@ -27,7 +27,6 @@ run.zinba=function(filelist=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,i
             winfiles <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,.errorhandling="remove",.options.multicore = mcoptions) %dopar%
                 getsigwindows(file=params[i],formula=formula,threshold=threshold,winout=outfile,peakconfidence=peakconfidence,tol=tol,method=method)
 
-            gc()
 	    write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)
 	    collapsewins(winlist=winlist,winout=winout)
             gc()
