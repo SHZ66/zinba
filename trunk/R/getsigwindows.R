@@ -95,7 +95,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
 
             #starting params for count componenets
             if(i == 1){
-                    prop2=startenrichment(c(.15, .1), data, formula)
+                    prop2=startenrichment(c(.15, .01), data, formula)
             }
             prop1=1-prop0-prop2
             odY = order(Y)
@@ -169,7 +169,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
                 ll[i]=ll_new
                 i=i+1 
             }
-            numpeaks=length(which(probi2>peakconfidence))
+            numpeaks=length(which(probi2>.8))
             data=cbind(data,((data$exp_count>q25)^2),probi2)
             colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
 
@@ -183,6 +183,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
             }else{
                 write.table(data,winfile,quote=F,sep="\t",row.names=F)
             }
+		rm(data); rm(Y); rm(X); rm(XNB); rm(Z); rm(probi0); rm(probi1); rm(probi2); rm(mui1); rm(mui2); rm(start); rm(prop1); rm(prop0);gc();
         }
         time.end <- Sys.time()
         print(difftime(time.end,time.start))

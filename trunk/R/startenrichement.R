@@ -1,4 +1,5 @@
 startenrichment=function(range, data, formula){
+ library(zinba)
  mf <- model.frame(formula=formula, data=data)
  X <- model.matrix(attr(mf, "terms"), data=mf)
 		XNB=as.data.frame(X[,-c(1)])
