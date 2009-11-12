@@ -188,5 +188,4 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
         print(difftime(time.end,time.start))
         return(winfile)
     }
-    gc()
 }
