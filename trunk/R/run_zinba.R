@@ -5,6 +5,7 @@ run.zinba=function(filelist=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,i
 	time.start <- Sys.time()
         if(buildwin==1){
             buildwindowdata(seq=seq,align=align,input=input,twoBit=twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset,filelist=filelist)
+            gc()
 	}
 	if(refinepeaks==1 && is.null(basecountfile)){
 		stop(paste("Basecount file must be specified, currently",basecountfile,sep=" "))
@@ -23,13 +24,16 @@ run.zinba=function(filelist=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,i
             registerDoMC(numProc)
             mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
             getDoParWorkers()
-            winfiles <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,.options.multicore = mcoptions) %dopar%
+            winfiles <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,.errorhandling="remove",.options.multicore = mcoptions) %dopar%
                 getsigwindows(file=params[i],formula=formula,threshold=threshold,winout=outfile,peakconfidence=peakconfidence,tol=tol,method=method)
 
+            gc()
 	    write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)
 	    collapsewins(winlist=winlist,winout=winout)
+            gc()
 	    if(refinepeaks==1){
 		getrefinedpeaks(winout=winout,coordout=coordout,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,pWinSize=pWinSize,pquant=pquant,peakconfidence=peakconfidence,threshold=threshold,method=method)
+                gc()
 	    }
 	}
 	time.end <- Sys.time()
