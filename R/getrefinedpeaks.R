@@ -1,7 +1,10 @@
 getrefinedpeaks=function(winout,coordout,basecountfile,bpout,peakout,twoBit,pWinSize,pquant,peakconfidence=.8,threshold=.01,method='pscl'){
     createcoordfile(file=winout,threshold=threshold,peakconfidence=peakconfidence,coordout=coordout,method=method)
+    gc()
     basecountimport(inputfile=basecountfile,coordfile=coordout,outputfile=bpout,twobitfile=twoBit)
+    gc()
     peakbound(bpprofile=bpout,output=peakout,winSize=pWinSize,quantile=pquant)
+    gc()
     unlink(coordout)
     unlink(bpout)
 }

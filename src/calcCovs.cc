@@ -460,6 +460,8 @@ if(normalArr == 1)
 					in++;
 				}
 			}
+			if(input_slist.empty())
+				input_slist.clear();
 		}
 		
 		cout << "\tGetting counts for zinba windows.........." << endl;
@@ -542,6 +544,7 @@ if(normalArr == 1)
 		if(readInput == 1)
 			delete [] ibasepair;
 	}
+	signal_slist.clear();
 	return 0;
 }
 
@@ -593,14 +596,16 @@ int calcCovs::importRawSignal(const char * signalFile,int dataType){
 	unsigned long int lineCount = 0;
 	char cChrom[128];
 	unsigned long int iStart;
+	int ret;
+	aRead sig;
 	
 	slist<aRead>::iterator back =  signal_slist.previous(signal_slist.end());
 	slist<aRead>::iterator iback = input_slist.previous(input_slist.end());
 	
 	while(!feof(fh)){
-		int ret = fscanf(fh,"%s%lu",cChrom,&iStart);
-		unsigned short int chromInt = getHashValue(cChrom);
-		aRead sig(chromInt,iStart);
+		ret = fscanf(fh,"%s%lu",cChrom,&sig.start);
+		sig.chrom = getHashValue(cChrom);
+//		sig.start = iStart;
 		lineCount++;
 		if(dataType == 0)
 			back = signal_slist.insert_after(back,sig);
@@ -613,7 +618,7 @@ int calcCovs::importRawSignal(const char * signalFile,int dataType){
 		cout << "\tSorting reads ...";
 		signal_slist.sort();
 	}else if(dataType == 1){
-		cout << "\t\tImported " << lineCount << " reads" << endl;
+		cout << "\t\tImported " << lineCount << " inpput reads" << endl;
 		cout << "\t\tSorting reads ...";
 		input_slist.sort();
 	}

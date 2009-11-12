@@ -11,13 +11,7 @@
 namespace sgi = ::__gnu_cxx;
 using namespace sgi;
 using namespace std;
-/*
-void print_ops(){
-		cout << "USAGE: buildWindows:\n";
-		cout << "\tseq file\n\tinput file\n\talign directory\n\ttwoBit\n\tz win\n\tz offset\n\tcnv win size\n\tcnv offset\n\tparamfile\n";
-}
-*/
-//int main(int argc=0, char **argv=NULL){
+
 extern "C" {
 void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **RtwoBitFile,int *RzWinSize,int *RzOffsetSize,int *RcWinSize,int *RcOffsetSize,char **Rfilelist){
 
@@ -31,20 +25,6 @@ void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **R
 	int cOffsetSize = RcOffsetSize[0];
 	string filelist = Rfilelist[0];
 	
-/*	if(argc < 9){
-		print_ops();
-		exit(1);
-	}else{
-		string expSeqFile = argv[1];
-		string inSeqFile = argv[2];
-		string alignDir = argv[3];
-		string twoBitFile = argv[4];
-		int zWinSize = atoi(argv[5]);
-		int zOffsetSize = atoi(argv[6]);
-		int cWinSize = atoi(argv[7]);
-		int cOffsetSize = atoi(argv[8]);
-		string paramFile = argv[9];
-*/
 		int ret;
 		calcCovs newAnalysis;// = new analysis;
 		Rprintf("\nImporting reads from file %s \n", expSeqFile.c_str());
@@ -60,7 +40,5 @@ void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **R
 		string outfile_prefix = expSeqFile.substr(0,found);
 		ret = newAnalysis.processSignals(zWinSize,zOffsetSize,cWinSize,cOffsetSize,alignDir,twoBitFile,inSeqFile.c_str(),outfile_prefix.c_str(),filelist);
 		Rprintf("\n\n--------BUILD WINDOWS COMPLETE-------\n\n");
-//	}
-//	return 0;
 }
 }
