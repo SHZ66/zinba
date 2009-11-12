@@ -13,7 +13,7 @@ cnvWins::cnvWins(const cnvWins& s){
 	pGap = s.pGap;
 }
 
-cnvWins::cnvWins(unsigned long int _start, unsigned long int _stop,double _cnvScore,double _varWin, double _chiSq, double _pGap){
+cnvWins::cnvWins(unsigned long int _start,unsigned long int _stop,double _cnvScore,double _varWin,double _chiSq,double _pGap){
 	start = _start;
 	stop = _stop;
 	cnvScore = _cnvScore;
