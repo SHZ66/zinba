@@ -15,6 +15,7 @@ run.zinba=function(filelist=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,i
 	}else{
             params=scan(filelist,what=character(0))
             winout=paste(outfile,".wins",sep="")
+	    winlist=paste(outfile,".winlist",sep="")
             peakout=paste(outfile,".peaks",sep="")
             coordout=paste(outfile,".coords",sep="")
             bpout=paste(outfile,".bpcount",sep="")
@@ -22,10 +23,11 @@ run.zinba=function(filelist=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,i
             registerDoMC(numProc)
             mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
             getDoParWorkers()
-            wins <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,.options.multicore = mcoptions) %dopar%
-                getsigwindows(file=params[i],formula=formula,threshold=threshold,winout=winout,peakconfidence=peakconfidence,tol=tol,printfile=0,method=method)
+            winfiles <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,.options.multicore = mcoptions) %dopar%
+                getsigwindows(file=params[i],formula=formula,threshold=threshold,winout=outfile,peakconfidence=peakconfidence,tol=tol,method=method)
 
-	    write.table(wins,winout,quote=F,sep="\t",row.names=F)
+	    write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)
+	    collapsewins(winlist=winlist,winout=winout)
 	    if(refinepeaks==1){
 		getrefinedpeaks(winout=winout,coordout=coordout,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,pWinSize=pWinSize,pquant=pquant,peakconfidence=peakconfidence,threshold=threshold,method=method)
 	    }

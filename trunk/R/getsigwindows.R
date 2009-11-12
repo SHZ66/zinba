@@ -1,16 +1,15 @@
-getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=10^-5,printfile=1,method='pscl'){
+getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=10^-5,method='pscl'){
 	time.start <- Sys.time()
 	library(qvalue)
-        #library(pscl)
 	library(MASS)
         options(scipen=999)
-	library(zinba)
 
-#	wins=NULL
+	winfile=NULL
 	if(method=='pscl'){
             files = unlist(strsplit(file,";"))
             for(i in 1:length(files)){
                 data=read.table(files[i], header=TRUE)
+		chrm = data$chromosome[1]
                 mf <- model.frame(formula=formula, data=data)
                 X <- model.matrix(attr(mf, "terms"), data=mf)
                 if(i == 1){
@@ -31,38 +30,26 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
 
     ### PRINT SIGNIFICANT WINDOWS
                 print(paste('For ',files[i],', found ',as.character(numpeaks),' significant wins',sep=''))
-		if(printfile==1){
-	                if(file.exists(winout)){
-	                    write.table(data,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
-	                }else{
-	                    write.table(data,winout,quote=F,sep="\t",row.names=F)
-	                }
-		}else{
-			if(i==1){
-				wins=data
-			}else{
-				wins=rbind(wins,data)
-				if(i==length(files)){
-					time.end <- Sys.time()
-					print(difftime(time.end,time.start))
-					return(wins)
-				}
-			}
-		}
+		winfile = paste(winout,"_",chrm,".temp",sep="")
+	        if(file.exists(winfile)){
+	            write.table(data,winfile,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+	        }else{
+	            write.table(data,winfile,quote=F,sep="\t",row.names=F)
+	        }
 	    }
+	    time.end <- Sys.time()
+	    print(difftime(time.end,time.start))
+	    return(winfile)
 	}else if(method=='mixture'){
             files = unlist(strsplit(file,";"))
             for(i in 1:length(files)){
 		fnum=i
-	        line0 = paste("Processing ",files[i])
                 data=read.table(files[i], header=TRUE)
+		chrm = data$chromosome[1]
 		q25=quantile(data$exp_count, 0.25)
                 mf <- model.frame(formula=formula, data=data)
                 X <- model.matrix(attr(mf, "terms"), data=mf)
 		XNB=as.data.frame(X[,-c(1)])
-		
-print(paste("got here OK 1"))
-		
 		logsumexp=function(v){
 			if(any(is.infinite(v))){
 				stop("infinite value in v\n")
@@ -101,40 +88,22 @@ print(paste("got here OK 1"))
 		linkstr <- 'logit'
                 linkobj <- make.link(linkstr)
                 linkinv <- linkobj$linkinv
-		#starting params for ze0 component
 
-print(paste("got here OK 2"))
-		
+		#starting params for ze0 component
 		model_zero <-.C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(X)), y=as.double(Y0), prior=as.double(rep(1,n)), offset=as.double(rep(0,n)), X=as.double(unlist(X)),  stratum=as.integer(rep(1,n)),init=as.integer(0), rank=integer(1), Xb=double(n*ncol(X)), fitted=as.double((rep(1,n) * Y0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
 		prop0=sum(model_zero$fitted)/n
-		
-print(paste("got here OK 3"))
-		
+
                 #starting params for count componenets
                 if(i == 1){
-		
-print(paste("got here OK 3a"))
-		
                         prop2=startenrichment(c(.15, .1), data, formula)
-			
-print(paste("got here OK 4"))
-			
                 }
                 prop1=1-prop0-prop2
                 odY = order(Y)
                 n1  = round(length(Y) * (1 - prop2))
                 priorCOUNTweight=rep(1-10^-10, length(Y))
                 priorCOUNTweight[odY[1:n1]]=10^-10
-		
-print(paste("got here OK 5"))
-		
                 model_count1 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(1-priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
-		
-print(paste("got here OK 6"))
-		
                 model_count2 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
-		
-print(paste("got here OK 7"))
 		
                 #starting prior probs
                 mui1  <- model_count1$fitted
@@ -148,15 +117,8 @@ print(paste("got here OK 7"))
                 probi0=probi0/(probi0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
                 probi0[Y1]=0
 		
-print(paste("got here OK 8"))
-		
                 probi1  <- prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
-		
-print(paste("got here OK 9"))
-		
                 probi2  <- prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
-		
-print(paste("got here OK 10"))
 		
                 NAs=which(probi1=='NaN'| probi2=='NaN')			
                 if(length(NAs>0)){
@@ -164,7 +126,6 @@ print(paste("got here OK 10"))
                         probi2[NAs]=1
                 }	
 		ll_new <- loglikfun(list(start=start, prop1=prop1, prop2=prop2))
-
 		ll_old <- 2 * ll_new      
 
 		if(!require("MASS")) {
@@ -174,8 +135,6 @@ print(paste("got here OK 10"))
 		ll=matrix(0, 1, 10000)
 		ll[1]=ll_new
 		i=2
-		
-print(paste("got here OK 11"))
 		
 		while(abs((ll_old - ll_new)/ll_old) > tol) {
 #		    print(ll_new)
@@ -211,32 +170,22 @@ print(paste("got here OK 11"))
                     i=i+1 
 		}
 		numpeaks=length(which(probi2>peakconfidence))
-
-		minresid='NA'
 		data=cbind(data,((data$exp_count>q25)^2),probi2)
 		colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
 
+	        line0 = paste("Processing ",files[fnum])
 		line2=paste('Selected number of peaks: ', as.character(numpeaks),sep='')
         ### PRINT SIGNIFICANT WINDOWS
 		print(paste(c(line0,line2)))
-		if(printfile==1){
-			if(file.exists(winout)){
-			    write.table(data,winout,quote=F,sep="\t",row.names=F,col.names=F,append=T)
-			}else{
-			    write.table(data,winout,quote=F,sep="\t",row.names=F)
-			}
+		winfile = paste(winout,"_",chrm,".temp",sep="")
+		if(file.exists(winfile)){
+		    write.table(data,winfile,quote=F,sep="\t",row.names=F,col.names=F,append=T)
 		}else{
-			if(fnum==1){
-				wins=data
-			}else{
-				wins=rbind(wins,data)
-				if(fnum==length(files)){
-					time.end <- Sys.time()
-					print(difftime(time.end,time.start))
-					return(wins)
-				}
-			}
+		    write.table(data,winfile,quote=F,sep="\t",row.names=F)
 		}
             }
+	    time.end <- Sys.time()
+	    print(difftime(time.end,time.start))
+	    return(winfile)
 	}
 }
