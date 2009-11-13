@@ -15,7 +15,7 @@ run.zinba=function(filelist=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,i
 		stop(paste("Method should be either pscl or mixture, currently",method))
 	}else{
             params=scan(filelist,what=character(0))
-            winout=paste(outfile,".wins",sep="")
+#            winout=paste(outfile,".wins",sep="")
 	    winlist=paste(outfile,".winlist",sep="")
             peakout=paste(outfile,".peaks",sep="")
             coordout=paste(outfile,".coords",sep="")
