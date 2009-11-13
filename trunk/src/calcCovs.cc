@@ -517,10 +517,9 @@ if(normalArr == 1)
 					}
 					
 					double cnvLogScore = 0;
-					if(cnvSum > 0)
-						cnvLogScore = log((cnvSum/cnvCount)*(zWinSize*2));
-					if(inCount > 0)
-						inCount = log(inCount);
+					if(cnvCount > 0)
+						cnvLogScore = log(((cnvSum/cnvCount)+1)*(zWinSize*2));
+					inCount = log((inCount+1));
 					double gcPerc = gcCount/zWinSize;
 					double aPerc = alignCount/(zWinSize*2);
 					dataWins zwin(currchr,zWinStart,zWinStop,peakCount,inCount,gcPerc,aPerc,cnvLogScore);
