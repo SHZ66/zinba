@@ -26,13 +26,11 @@ run.zinba=function(filelist=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,i
             getDoParWorkers()
             winfiles <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,.errorhandling="remove",.options.multicore = mcoptions) %dopar%
                 getsigwindows(file=params[i],formula=formula,threshold=threshold,winout=outfile,peakconfidence=peakconfidence,tol=tol,method=method)
-
+ 
 	    write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)
-	    collapsewins(winlist=winlist,winout=winout)
-            gc()
+	    #collapsewins(winlist=winlist,winout=winout)
 	    if(refinepeaks==1){
-		getrefinedpeaks(winout=winout,coordout=coordout,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,pWinSize=pWinSize,pquant=pquant,peakconfidence=peakconfidence,threshold=threshold,method=method)
-                gc()
+		getrefinedpeaks(winlist=winlist,coordout=coordout,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,pWinSize=pWinSize,pquant=pquant,peakconfidence=peakconfidence,threshold=threshold,method=method)
 	    }
 	}
 	time.end <- Sys.time()
