@@ -28,7 +28,7 @@ peakbound=function(bpprofile,output,winSize=200, quantile=.75){
 		        localMax[selMaxInd2[temp > 0]] <- 0
 		    }
 	    	#delete maxes lower than median
-	    	localMax[which(x<quantile(x,quantile))]=0
+	    	localMax[which(x<quantile(x,quantile, na.rm=TRUE))]=0
 	    	#ensure global max is always tagged
 	    	localMax[which.max(x)]=1
 	    	return(which(localMax>0))
