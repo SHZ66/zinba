@@ -34,7 +34,7 @@ peakbound=function(bpprofile,output,winSize=200, quantile=.75){
 	    	return(which(localMax>0))
             }
 
-	    maxNumCol = max(count.fields(bpProfiles,sep="\t"))
+	    maxNumCol = max(count.fields(bpprofile,sep="\t"))
 	    bpProfiles=read.table(bpprofile,header=F,col.names=as.character(1:maxNumCol),skip=1,fill=T,sep="\t")
 	    searchlength=500
 	    peakbound2=function(xx){
