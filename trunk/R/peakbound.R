@@ -36,7 +36,7 @@ peakbound=function(bpprofile,output,winSize=200, quantile=.75){
 
 	    bpProfiles=read.table(bpprofile,header=F,skip=1,fill=T,sep="\t")
 	    searchlength=500
-	    peakbound2=function(xx){	
+	    peakbound2=function(xx){
 		    xna <- is.na(xx) | is.nan(xx) | is.infinite(xx)
 		    xc <- xx[!xna]
 		    x=as.numeric(xc[6:length(xc)])
