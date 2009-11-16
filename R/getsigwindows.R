@@ -30,7 +30,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
 
 ### PRINT SIGNIFICANT WINDOWS
             print(paste('For ',files[i],', found ',as.character(numpeaks),' significant wins',sep=''))
-            winfile = paste(winout,"_",chrm,".temp",sep="")
+            winfile = paste(winout,"_",chrm,".wins",sep="")
             if(file.exists(winfile)){
                 write.table(data,winfile,quote=F,sep="\t",row.names=F,col.names=F,append=T)
             }else{
