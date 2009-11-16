@@ -516,12 +516,12 @@ if(normalArr == 1)
 						cnvEnd++;
 					}
 					
-					double cnvLogScore = 0;
+					double cnvLogScore = 0.0;
 					if(cnvCount > 0)
-						cnvLogScore = log(((cnvSum/cnvCount)+1)*(zWinSize*2));
+						cnvLogScore = log(((cnvSum/cnvCount))*(zWinSize*2.0)+1.0);
 					inCount = log((inCount+1));
 					double gcPerc = gcCount/zWinSize;
-					double aPerc = alignCount/(zWinSize*2);
+					double aPerc = alignCount/(zWinSize*2.0);
 					dataWins zwin(currchr,zWinStart,zWinStop,peakCount,inCount,gcPerc,aPerc,cnvLogScore);
 					z = peak_wins.insert_after(z,zwin);
 				}
