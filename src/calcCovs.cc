@@ -393,7 +393,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 ////////////////////////////////////////////
 		
 		while(!transPts.empty()){
-//			cout << "\t\t\t\tTransition point at " << *tp << endl;
+//cout << "\t\t\t\tTransition point at " << *tp << endl;
 			double leftCnvCount = 0;
 			int leftAlignCount = 0;
 			double rightCnvCount = 0;
@@ -410,7 +410,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				leftCnvCount += basepair[b];
 				leftAlignCount += alignability[b];
 				rightCnvCount += basepair[b+cWinSize];
-				rightCnvCount += alignability[b+cWinSize];
+				rightAlignCount += alignability[b+cWinSize];
 			}
 			double cScore = 0;
 			if(leftAlignCount > 0)
@@ -420,7 +420,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			cScore = 0;
 			if(rightAlignCount > 0)
 				cScore = rightCnvCount/rightAlignCount;
-			cnvWins cnvR(tpStart,tpStop,cScore,0,0,0);
+			cnvWins cnvR((tpStart+cWinSize),(tpStop+cWinSize),cScore,0,0,0);
 			cnv_wins.push_back(cnvR);
 			transPts.erase(tp++);
 		}
