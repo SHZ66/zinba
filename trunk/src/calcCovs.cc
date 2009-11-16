@@ -73,15 +73,10 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		basepair = new unsigned short int[chr_size[currchr]+1];
 //		basepair[0] = 0;
 		
-int normalArr = 0;
-for(int ch = 0; ch <= chr_size[currchr]; ch++){
-	if(basepair[ch] != 0)
-		normalArr = 1;
-	basepair[ch] = 0;
-}
-if(normalArr == 1)
-	cout << "non zero in basepair" << endl;
-
+		for(int ch = 0; ch <= chr_size[currchr]; ch++){
+			basepair[ch] = 0;
+		}
+		
 		cout << "\tMapping reads to chromosome......" << endl;
 		while(i != signal_slist.end()){			
 			if(i->chrom==currchr){
@@ -518,7 +513,7 @@ if(normalArr == 1)
 					
 					double cnvLogScore = 0.0;
 					if(cnvCount > 0)
-						cnvLogScore = log(((cnvSum/cnvCount))*(zWinSize*2.0)+1.0);
+						cnvLogScore = log(((cnvSum/cnvCount)*(zWinSize*2.0))+1.0);
 					inCount = log((inCount+1));
 					double gcPerc = gcCount/zWinSize;
 					double aPerc = alignCount/(zWinSize*2.0);
