@@ -5,7 +5,6 @@ run.zinba=function(filelist=NULL,formula=NULL,outfile=NULL,seq=NULL,align=NULL,i
 	time.start <- Sys.time()
         if(buildwin==1){
             buildwindowdata(seq=seq,align=align,input=input,twoBit=twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset,filelist=filelist)
-            gc()
 	}
 	if(refinepeaks==1 && is.null(basecountfile)){
 		stop(paste("Basecount file must be specified, currently",basecountfile,sep=" "))
