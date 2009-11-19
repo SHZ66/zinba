@@ -1,5 +1,6 @@
 startenrichment=function(range, data, formula){
- library(zinba)
+	library(zinba)
+	library(quantreg)
 	mf <- model.frame(formula=formula, data=data)
 	X <- model.matrix(attr(mf, "terms"), data=mf)
 	XNB=as.data.frame(X[,-c(1)])
@@ -54,8 +55,7 @@ startenrichment=function(range, data, formula){
 		prop2=probs[k]
 		prop1=1-prop0-prop2
 		priorCOUNTweight=rep(10^-10, length(Y))      
-		priorCOUNTweight[as.double(which(t$residuals>quantile(t$residuals,1-probs[k])))
-]=1-10^-10
+		priorCOUNTweight[as.double(which(t$residuals>quantile(t$residuals,1-probs[k])))]=1-10^-10
 		model_count1 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(1-priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')  
 		model_count2 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')  
 
