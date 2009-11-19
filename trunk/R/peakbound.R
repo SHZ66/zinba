@@ -34,6 +34,10 @@ peakbound=function(bpprofile,output,winSize=200, quantile=.75){
 	    	return(which(localMax>0))
             }
 
+
+	    #getBPcount <- readLines("MCF7_FAIRE_w500_o125_mix99_InputAllCovs.bpcount",n=-1)
+	    #dataLine <- strsplit(x=getBPcount[2],split="\t")
+
 	    maxNumCol = max(count.fields(bpprofile,sep="\t"))
 	    bpProfiles=read.table(bpprofile,header=F,col.names=as.character(1:maxNumCol),skip=1,fill=T,sep="\t")
 	    searchlength=500
