@@ -32,7 +32,6 @@ startenrichment=function(range, data, formula){
 		loglik=sum(loglik0*Y0+loglik1*Y1)
 		loglik
 	}
-	t=rq(formula, tau=.5, data=data, method='pfn')
 	Y <- model.response(mf)
 	Z=X
 	n <- length(Y)
@@ -46,6 +45,7 @@ startenrichment=function(range, data, formula){
 
 	probs=seq(range[1], range[2],,5)
 	result=rep(0, length(probs))
+	t=rq(formula, tau=.5+(.3*sum(Y==min(Y))+.2*sum(Y==min(Y+1)))/length(Y), data=data, method='pfn')
 	a=Sys.time()
 	for(k in 1:length(probs)){
 		model_zero <-.C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(X)), y=as.double(Y0), prior=as.double(rep(1,n)), offset=as.double(rep(0,n)), X=as.double(unlist(X)),  stratum=as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), Xb=double(n*ncol(X)), fitted=as.double((rep(1,n) * Y0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
@@ -87,7 +87,7 @@ startenrichment=function(range, data, formula){
 		ll=matrix(0, 1, 10000)
 		ll[1]=ll_new
 		i=2
-		while(i<4) {
+		while(i<3) {
 #			print(ll_new)
 			ll_old <- ll[max(1, i-10)]
 			prop1=sum(probi1)/n
