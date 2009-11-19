@@ -1,4 +1,4 @@
-getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=10^-5,method='pscl'){
+getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=10^-5,method='pscl',initmethod){
     time.start <- Sys.time()
     library(qvalue)
     library(quantreg)
@@ -94,15 +94,28 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
             model_zero <-.C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(X)), y=as.double(Y0), prior=as.double(rep(1,n)), offset=as.double(rep(0,n)), X=as.double(unlist(X)),  stratum=as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), Xb=double(n*ncol(X)), fitted=as.double((rep(1,n) * Y0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
             prop0=sum(model_zero$fitted)/n
 
+
             #starting params for count componenets
-            if(i == 1){
-                    prop2=startenrichment(c(.15, .001), data, formula)
-            }
-            prop1=1-prop0-prop2
-            t=rq(formula, tau=.5+(.3*sum(Y==min(Y))+.2*sum(Y==min(Y+1)))/length(Y), data=data, method='pfn')
-            priorCOUNTweight=rep(10^-10, length(Y))      
-	    priorCOUNTweight[as.double(which(t$residuals>quantile(t$residuals,1-prop2)))]=1-10^-10
-            model_count1 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(1-priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
+           if(initmethod='quantile'){
+	 	if(i == 1){
+	                    prop2=startenrichment(c(.15, .001), data, formula, initmethod)
+	            }
+	            prop1=1-prop0-prop2
+	            t=rq(formula, tau=.5+(.3*sum(Y==min(Y))+.2*sum(Y==min(Y+1)))/length(Y), data=data, method='pfn')
+	            priorCOUNTweight=rep(10^-10, length(Y))      
+		    priorCOUNTweight[as.double(which(t$residuals>quantile(t$residuals,1-prop2)))]=1-10^-10
+  	   }else if(initmethod='count'){
+		if(i == 1){
+	                    prop2=startenrichment(c(.15, .001), data, formula, initmethod)
+	            }
+	            prop1=1-prop0-prop2
+	            n1  = round(length(Y) * (1 - prop2))
+		    priorCOUNTweight=rep(1-10^-10, length(Y))      
+		    priorCOUNTweight[odY[1:n1]]=10^-10
+  	  }
+            
+
+	model_count1 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(1-priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
             model_count2 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
             
             #starting prior probs
