@@ -56,9 +56,13 @@ startenrichment=function(range, data, formula,initmethod){
 		if(initmethod=='quantile'){
   			prop2=probs[k]
 		  	prop1=1-prop0-prop2
-			t=rq(formula, tau=.5+(.3*sum(Y==min(Y))+.2*sum(Y==min(Y+1)))/length(Y), data=data, method='pfn')
+			data2=data
+		        if(sum(colnames(data)=='input_count')==1){data2$input_count=exp(data2$input_count)-1}
+			if(sum(colnames(data)=='exp_cnvwin_log')==1){data2$exp_cnvwin_log=exp(data2$exp_cnvwin_log)-1}
+			t=rq(formula, tau=.5+(.3*sum(Y==min(Y))+.2*sum(Y==min(Y+1)))/length(Y), data=data2, method='pfn')
 			priorCOUNTweight=rep(10^-10, length(Y))      
 			priorCOUNTweight[as.double(which(t$residuals>quantile(t$residuals,1-prop2)))]=1-10^-10
+			rm(data2)
 		  }else if(initmethod=='count'){
 			prop2=probs[k]
 			prop1=1-prop0-prop2
