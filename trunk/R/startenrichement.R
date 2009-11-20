@@ -63,7 +63,8 @@ startenrichment=function(range, data, formula,initmethod){
 			prop2=probs[k]
 			prop1=1-prop0-prop2
 			n1  = round(length(Y) * (1 - prop2))
-			priorCOUNTweight=rep(1-10^-10, length(Y))      
+			priorCOUNTweight=rep(1-10^-10, length(Y))
+                        odY = order(Y)
 			priorCOUNTweight[odY[1:n1]]=10^-10
 		  }
 

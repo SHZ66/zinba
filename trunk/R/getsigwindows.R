@@ -110,7 +110,8 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
 	            }
 	            prop1=1-prop0-prop2
 	            n1  = round(length(Y) * (1 - prop2))
-		    priorCOUNTweight=rep(1-10^-10, length(Y))      
+		    priorCOUNTweight=rep(1-10^-10, length(Y))
+                    odY = order(Y)
 		    priorCOUNTweight[odY[1:n1]]=10^-10
   	  }
             
