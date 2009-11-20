@@ -95,7 +95,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
             prop0=sum(model_zero$fitted)/n
 
 
-            #starting params for count componenets
+            #INITIALIZATION OF THE MIXTURE MODEL
            if(initmethod=='quantile'){
 	 	if(i == 1){
 	                    startprop=startenrichment(c(.15, .001), data, formula, initmethod)
@@ -118,10 +118,35 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
 		    priorCOUNTweight=rep(1-10^-10, length(Y))
                     odY = order(Y)
 		    priorCOUNTweight[odY[1:n1]]=10^-10
-  	  }
+  	  }else if(initmethod=='pscl'){
+            	    mf2 <- model.frame(formula=formula, data=data)
+            	    X2 <- model.matrix(attr(mf2, "terms"), data=mf2)
+            	    if(i == 1){
+                    	a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE)
+	            }else{
+                        a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE,start=param)
+            	    }
+            	    leverage=hat(X, intercept=FALSE)
+            	    fdrlevel=threshold
+            	    standardized=residuals(a)/sqrt(1-leverage)
+            	    pval=1-pnorm(as.matrix(standardized))
+            	    fdr=qvalue(pval)
+            	    peaks=which(fdr[[3]]<fdrlevel)
+	            param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
+		    priorCOUNTweight=rep(10^-10, length(Y))      
+		    priorCOUNTweight[peaks]=1-10^-10
+		    rm(X2)
+		    rm(mf2)
+		    rm(standardized)
+		    rm(leverage)
+		    rm(pval)
+		    rm(fdr)
+		    rm(a)
+		    gc()
+    	  }
             
 
-	model_count1 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(1-priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
+	    model_count1 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(1-priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
             model_count2 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
             
             #starting prior probs
