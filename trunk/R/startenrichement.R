@@ -53,13 +53,13 @@ startenrichment=function(range, data, formula,initmethod){
 		prop0=sum( model_zero$fitted)/n
 
 		#starting params for count componenets
-		if(initmethod='quantile'){
+		if(initmethod=='quantile'){
   			prop2=probs[k]
 		  	prop1=1-prop0-prop2
 			t=rq(formula, tau=.5+(.3*sum(Y==min(Y))+.2*sum(Y==min(Y+1)))/length(Y), data=data, method='pfn')
 			priorCOUNTweight=rep(10^-10, length(Y))      
 			priorCOUNTweight[as.double(which(t$residuals>quantile(t$residuals,1-prop2)))]=1-10^-10
-		  }else if(initmethod='count'){
+		  }else if(initmethod=='count'){
 			prop2=probs[k]
 			prop1=1-prop0-prop2
 			n1  = round(length(Y) * (1 - prop2))
