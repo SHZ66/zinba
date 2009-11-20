@@ -132,6 +132,8 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
             	    pval=1-pnorm(as.matrix(standardized))
             	    fdr=qvalue(pval)
             	    peaks=which(fdr[[3]]<fdrlevel)
+		    prop2=length(peaks)/length(Y)
+		    prop1=1-prop0-prop2
 	            param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
 		    priorCOUNTweight=rep(10^-10, length(Y))      
 		    priorCOUNTweight[peaks]=1-10^-10
