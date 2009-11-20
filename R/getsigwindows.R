@@ -98,12 +98,17 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
             #starting params for count componenets
            if(initmethod=='quantile'){
 	 	if(i == 1){
-	                    prop2=startenrichment(c(.15, .001), data, formula, initmethod)
+	                    startprop=startenrichment(c(.15, .001), data, formula, initmethod)
 	            }
-	            prop1=1-prop0-prop2
-	            t=rq(formula, tau=.5+(.3*sum(Y==min(Y))+.2*sum(Y==min(Y+1)))/length(Y), data=data, method='pfn')
-	            priorCOUNTweight=rep(10^-10, length(Y))      
-		    priorCOUNTweight[as.double(which(t$residuals>quantile(t$residuals,1-prop2)))]=1-10^-10
+	        data2=data
+	        if(sum(colnames(data)=='input_count')==1){data2$input_count=exp(data2$input_count)-1}
+		if(sum(colnames(data)=='exp_cnvwin_log')==1){data2$exp_cnvwin_log=exp(data2$exp_cnvwin_log)-1}
+		prop2=startprop
+            	prop1=1-prop0-prop2
+		t=rq(formula, tau=.5+(.3*sum(Y==min(Y))+.2*sum(Y==min(Y+1)))/length(Y), data=data2, method='pfn')
+		priorCOUNTweight=rep(10^-10, length(Y))      
+		priorCOUNTweight[as.double(which(t$residuals>quantile(t$residuals,1-prop2)))]=1-10^-10
+		rm(data2)
   	   }else if(initmethod=='count'){
 		if(i == 1){
 	                    prop2=startenrichment(c(.15, .001), data, formula, initmethod)
