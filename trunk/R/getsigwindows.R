@@ -110,7 +110,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
 		priorCOUNTweight[as.double(which(t$residuals>quantile(t$residuals,1-prop2)))]=1-10^-10
 		rm(data2)
   	   }else if(initmethod=='count'){
-		if(i == 1){
+		    if(i == 1){
 	                    prop2=startenrichment(c(.15, .001), data, formula, initmethod)
 	            }
 	            prop1=1-prop0-prop2
@@ -126,7 +126,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
 	            }else{
                         a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE,start=param)
             	    }
-            	    leverage=hat(X, intercept=FALSE)
+            	    leverage=hat(X2, intercept=FALSE)
             	    fdrlevel=threshold
             	    standardized=residuals(a)/sqrt(1-leverage)
             	    pval=1-pnorm(as.matrix(standardized))
