@@ -3,7 +3,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NUL
         library(doMC)
         library(foreach)
 	time.start <- Sys.time()
-	if(formulaE==NULL){
+	if(is.null(formulaE)){
 		formulaE=formula
 	}
         if(buildwin==1){
