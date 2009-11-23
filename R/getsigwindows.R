@@ -1,4 +1,4 @@
-getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=10^-5,method='pscl',initmethod){
+getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,winout,tol=10^-5,method='pscl',initmethod){
     time.start <- Sys.time()
     library(qvalue)
     library(quantreg)
@@ -48,9 +48,13 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
             data=read.table(files[i], header=TRUE)
             chrm = data$chromosome[1]
             q25=quantile(data$exp_count, 0.25)
+            formula=exp_count ~ input_count+gcPerc + align_perc + exp_cnvwin_log
             mf <- model.frame(formula=formula, data=data)
+	    mfE <- model.frame(formula=formulaE, data=data)
             X <- model.matrix(attr(mf, "terms"), data=mf)
-            XNB=as.data.frame(X[,-c(1)])
+	    XE <- model.matrix(attr(mfE, "terms"), data=mfE)
+	    XNB=as.data.frame(X[,-c(1)])
+	    XNBE=as.data.frame(XE[,-c(1)])
             logsumexp=function(v){
                     if(any(is.infinite(v))){
                             stop("infinite value in v\n")
@@ -80,7 +84,6 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
                     loglik
             }
             Y <- model.response(mf)
-            Z=X
             n <- length(Y)
             kx <- NCOL(X)
             kz <- NCOL(Z)
@@ -91,14 +94,14 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
             linkinv <- linkobj$linkinv
 
             #starting params for ze0 component
-            model_zero <-.C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(X)), y=as.double(Y0), prior=as.double(rep(1,n)), offset=as.double(rep(0,n)), X=as.double(unlist(X)),  stratum=as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), Xb=double(n*ncol(X)), fitted=as.double((rep(1,n) * Y0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
+            model_zero <-.C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y0), prior=as.double(rep(1,n)), offset=as.double(rep(0,n)), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), Xb=double(n*ncol(XNB)), fitted=as.double((rep(1,n) * Y0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
             prop0=sum(model_zero$fitted)/n
 
 
             #INITIALIZATION OF THE MIXTURE MODEL
            if(initmethod=='quantile'){
 	 	if(i == 1){
-	                    startprop=startenrichment(c(.15, .001), data, formula, initmethod)
+	                    startprop=startenrichment(c(.15, .001), data, formula, formulaE, initmethod)
 	            }
 	        data2=data
 	        if(sum(colnames(data)=='input_count')==1){data2$input_count=exp(data2$input_count)-1}
@@ -111,7 +114,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
 		rm(data2)
   	   }else if(initmethod=='count'){
 		    if(i == 1){
-	                    prop2=startenrichment(c(.15, .001), data, formula, initmethod)
+	                    prop2=startenrichment(c(.15, .001), data, formula, formulaE,initmethod)
 	            }
 	            prop1=1-prop0-prop2
 	            n1  = round(length(Y) * (1 - prop2))
@@ -149,7 +152,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
             
 
 	    model_count1 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(1-priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
-            model_count2 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
+            model_count2 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNBE)), y=as.double(Y), prior=as.double(priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
             
             #starting prior probs
             mui1  <- model_count1$fitted
@@ -189,9 +192,9 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
                 prop2=sum(probi2)/n
                 #updated values for parameters of component means
                  
-                model_zero <- .C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(X)), y=as.double(probi0), prior=as.double(rep(1,n)), offset=as.double(rep(0,n)), X=as.double(unlist(X)),  stratum=as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), Xb=double(n*ncol(X)), fitted=as.double((rep(1,n) * probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')  
+                model_zero <- .C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(probi0), prior=as.double(rep(1,n)), offset=as.double(rep(0,n)), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), Xb=double(n*ncol(XNB)), fitted=as.double((rep(1,n) * probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')  
                 model_count1 <- .C("pglm_fit", family=as.integer(0), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(probi1), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(start$count1), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(start$theta1), package='zinba')  
-                model_count2 <- .C("pglm_fit", family=as.integer(0), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(probi2), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(start$count2), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(start$theta2), package='zinba')  
+                model_count2 <- .C("pglm_fit", family=as.integer(0), N=as.integer(length(Y)), M=as.integer(ncol(XNBE)), y=as.double(Y), prior=as.double(probi2), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNBE)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNBE)), fitted=as.double(start$count2), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(start$theta2), package='zinba')  
 
                 start <- list(count1 = model_count1$fitted, count2 = model_count2$fitted,zero = model_zero$fitted, zerocoef=model_zero$coefficients)
                 start$theta1 <- model_count1$theta
@@ -229,7 +232,7 @@ getsigwindows=function(file,formula,threshold=.01,peakconfidence=.8,winout,tol=1
             }else{
                 write.table(data,winfile,quote=F,sep="\t",row.names=F)
             }
-		rm(data); rm(Y); rm(X); rm(XNB); rm(Z); rm(probi0); rm(probi1); rm(probi2); rm(mui1); rm(mui2); rm(start); rm(prop1); rm(prop0);gc();
+		rm(data); rm(Y); rm(X); rm(XNB); rm(XE);rm(XNBE);rm(probi0); rm(probi1); rm(probi2); rm(mui1); rm(mui2); rm(start); rm(prop1); rm(prop0);gc();
         }
         time.end <- Sys.time()
         print(difftime(time.end,time.start))
