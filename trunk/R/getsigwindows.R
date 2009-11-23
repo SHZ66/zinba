@@ -86,7 +86,6 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             Y <- model.response(mf)
             n <- length(Y)
             kx <- NCOL(X)
-            kz <- NCOL(Z)
             Y0 <- Y <= 0
             Y1 <- Y > 0
             linkstr <- 'logit'

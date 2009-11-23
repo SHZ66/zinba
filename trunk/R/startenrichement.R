@@ -38,7 +38,6 @@ startenrichment=function(range, data, formula,formulaE, initmethod){
 	Y <- model.response(mf)
 	n <- length(Y)
 	kx <- NCOL(X)
-	kz <- NCOL(Z)
 	Y0 <- Y <= 0
 	Y1 <- Y > 0
 	linkstr <- 'logit'
