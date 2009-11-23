@@ -1,25 +1,25 @@
 ##with new parameters
-peakbound=function(bpprofile,output,winSize=200, quantile=.75){
-	    localMaximum=function(x, winSize, quantile) {
+peakbound=function(bpprofile,output,pwinSize=200, winSize,quantile=.75){
+	    localMaximum=function(x, pwinSize, quantile) {
 		    #from MassSpecWavelet Package in BioConductor, written by Pan Du and Simon Lin, modified by Naim Rashid
 		    len <- length(x)
-		    rNum <- ceiling(len/winSize)
-		    y <- matrix(c(x, rep(x[len], rNum * winSize - len)), nrow = winSize)
+		    rNum <- ceiling(len/pwinSize)
+		    y <- matrix(c(x, rep(x[len], rNum * pwinSize - len)), nrow = pwinSize)
 		    y.maxInd <- apply(y, 2, which.max)
 		    selInd <- which(apply(y, 2, function(x) max(x) > x[1] & max(x) > 
-		        x[winSize]))
+		        x[pwinSize]))
 		    localMax <- rep(0, len)
-		    localMax[(selInd - 1) * winSize + y.maxInd[selInd]] <- 1
-		    shift <- floor(winSize/2)
-		    rNum <- ceiling((len + shift)/winSize)
-		    y <- matrix(c(rep(x[1], shift), x, rep(x[len], rNum * winSize - 
-		        len - shift)), nrow = winSize)
+		    localMax[(selInd - 1) * pwinSize + y.maxInd[selInd]] <- 1
+		    shift <- floor(pwinSize/2)
+		    rNum <- ceiling((len + shift)/pwinSize)
+		    y <- matrix(c(rep(x[1], shift), x, rep(x[len], rNum * pwinSize - 
+		        len - shift)), nrow = pwinSize)
 		    y.maxInd <- apply(y, 2, which.max)
 		    selInd <- which(apply(y, 2, function(x) max(x) > x[1] & max(x) > 
-		        x[winSize]))
-		    localMax[(selInd - 1) * winSize + y.maxInd[selInd] - shift] <- 1
+		        x[pwinSize]))
+		    localMax[(selInd - 1) * pwinSize + y.maxInd[selInd] - shift] <- 1
 		    maxInd <- which(localMax > 0)
-		    selInd <- which(diff(maxInd) < winSize)
+		    selInd <- which(diff(maxInd) < pwinSize)
 	    	if (length(selInd) > 0) {
 		        selMaxInd1 <- maxInd[selInd]
 		        selMaxInd2 <- maxInd[selInd + 1]
@@ -45,13 +45,13 @@ peakbound=function(bpprofile,output,winSize=200, quantile=.75){
 		    xna <- is.na(xx) | is.nan(xx) | is.infinite(xx)
 		    xc <- xx[!xna]
 		    x=as.numeric(xc[6:length(xc)])
-		    maxvec=localMaximum(x, winSize=winSize, quantile=quantile)
-		    #maxvec=which.max(x)
-		    xcoords=matrix(0,length(maxvec),9)
-		    bounds=matrix(.C('peakboundc', as.vector(x, mode='integer'), as.integer(length(x)), as.vector(maxvec, mode='integer'), as.integer(length(maxvec)), as.integer(500),  vector("integer",2*length(maxvec)), PACKAGE="zinba")[[6]],length(maxvec),2, byrow=T)
-		    xcoords=cbind(matrix(rep(as.matrix(xx[1:5]),length(maxvec)),length(maxvec),5, byrow=T),bounds[,1], bounds[,2],x[maxvec], maxvec)
-	   	    xcoords
-		    #c(as.matrix(xx[1:5]),bounds[1], bounds[2], x[maxvec], maxvec) 
+		    if(length(x)<winSize*20){
+		    	maxvec=localMaximum(x, pwinSize=pwinSize, quantile=quantile)
+		        xcoords=matrix(0,length(maxvec),9)
+		    	bounds=matrix(.C('peakboundc', as.vector(x, mode='integer'), as.integer(length(x)), as.vector(maxvec, mode='integer'), as.integer(length(maxvec)), as.integer(500),  vector("integer",2*length(maxvec)), PACKAGE="zinba")[[6]],length(maxvec),2, byrow=T)
+		    	xcoords=cbind(matrix(rep(as.matrix(xx[1:5]),length(maxvec)),length(maxvec),5, byrow=T),bounds[,1], bounds[,2],x[maxvec], maxvec)
+	   	    	xcoords
+		    }
 		}
     refPeaks=do.call('rbind', apply(bpProfiles, 1, peakbound2))
     refPeaks[,c(6,7,9)]=as.numeric(refPeaks[,c(6,7,9)])+as.numeric(refPeaks[,3])-1
