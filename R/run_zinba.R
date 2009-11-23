@@ -27,7 +27,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NUL
             mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
             getDoParWorkers()
             winfiles <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,.errorhandling="remove",.options.multicore = mcoptions) %dopar%
-                getsigwindows(file=params[i],formula=formula,threshold=threshold,winout=outfile,peakconfidence=peakconfidence,tol=tol,method=method,initmethod=initmethod )
+                getsigwindows(file=params[i],formula=formula,formulaE=formulaE,threshold=threshold,winout=outfile,peakconfidence=peakconfidence,tol=tol,method=method,initmethod=initmethod )
  
 	    write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)
 	    #collapsewins(winlist=winlist,winout=winout)
