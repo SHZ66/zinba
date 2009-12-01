@@ -217,7 +217,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
                 ll[i]=ll_new
                 i=i+1 
             }
-            numpeaks=length(which(probi2>.8))
+            numpeaks=length(which(probi2>peakconfidence))
             data=cbind(data,((data$exp_count>q25)^2),probi2)
             colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
 
