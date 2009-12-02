@@ -46,7 +46,7 @@ peakbound=function(bpprofile,output,pwinSize=200, winSize,quantile=.75){
 		    xc <- xx[!xna]
 		    x=as.numeric(xc[6:length(xc)])
 		    if(length(x)<winSize*20){
-		    	maxvec=localMaximum(x[(winSize+1):(length(x)-winSize)], pwinSize=pwinSize, quantile=quantile)+winSize
+		    	maxvec=localMaximum(x[(501):(length(x)-500)], pwinSize=pwinSize, quantile=quantile)+500
 		        xcoords=matrix(0,length(maxvec),9)
 		    	bounds=matrix(.C('peakboundc', as.vector(x, mode='integer'), as.integer(length(x)), as.vector(maxvec, mode='integer'), as.integer(length(maxvec)), as.integer(500),  vector("integer",2*length(maxvec)), PACKAGE="zinba")[[6]],length(maxvec),2, byrow=T)
 		    	xcoords=cbind(matrix(rep(as.matrix(xx[1:5]),length(maxvec)),length(maxvec),5, byrow=T),bounds[,1], bounds[,2],x[maxvec], maxvec)
