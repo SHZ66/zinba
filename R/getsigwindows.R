@@ -53,7 +53,6 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             data=read.table(files[i], header=TRUE)
             chrm = data$chromosome[1]
             q25=quantile(data$exp_count, 0.25)
-            formula=exp_count ~ input_count+gcPerc + align_perc + exp_cnvwin_log
             mf <- model.frame(formula=formula, data=data)
 	    mfE <- model.frame(formula=formulaE, data=data)
             X <- model.matrix(attr(mf, "terms"), data=mf)
