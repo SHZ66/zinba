@@ -54,7 +54,7 @@ peakbound=function(bpprofile,output,pwinSize=200, winSize,quantile=.75){
 		    }
 		}
     refPeaks=do.call('rbind', apply(bpProfiles, 1, peakbound2))
-    refPeaks=as.data.frame(refPeaks[which(refPeaks[,6]>0),])
+    refPeaks=refPeaks[which(as.numeric(refPeaks[,6])>0 ),]
     refPeaks[,c(6,7,9)]=as.numeric(refPeaks[,c(6,7,9)])+as.numeric(refPeaks[,3])-1
     colnames(refPeaks)=c('peakID','chrom','start','stop','strand','peak_start','peak_stop','max_score','max_position')
     if(file.exists(output)){
