@@ -1,6 +1,11 @@
 startenrichment=function(range, data, formula,formulaE, initmethod){
-	library(zinba)
-	library(quantreg)
+	suppressPackageStartupMessages(library(quantreg))
+	suppressPackageStartupMessages(library(zinba))
+	#temporary solution to singlularity problem in quantreg
+	sourcePath <- file.path(.path.package("zinba"), "exec")
+  	Fn.Path <- file.path(sourcePath, "quantreg.R")
+	source(Fn.Path)
+	suppressPackageStartupMessages(library(zinba))
 	mf <- model.frame(formula=formula, data=data)
 	mfE <- model.frame(formula=formulaE, data=data)
         X <- model.matrix(attr(mf, "terms"), data=mf)
