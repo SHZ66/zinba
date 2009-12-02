@@ -1,8 +1,13 @@
 getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,winout,tol=10^-5,method='pscl',initmethod){
     time.start <- Sys.time()
-    library(qvalue)
-    library(quantreg)
-    library(MASS)
+    suppressPackageStartupMessages(library(qvalue))
+    suppressPackageStartupMessages(library(quantreg))
+    suppressPackageStartupMessages(library(zinba))
+	#temporary solution to singlularity problem in quantreg
+	sourcePath <- file.path(.path.package("zinba"), "exec")
+  	Fn.Path <- file.path(sourcePath, "quantreg.R")
+	source(Fn.Path)
+    suppressPackageStartupMessages(library(MASS))
     options(scipen=999)
 
     winfile=NULL
