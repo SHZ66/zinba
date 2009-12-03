@@ -345,7 +345,7 @@ function (x, y, tau = 0.5, alpha = 0.1, ci = FALSE, iid = TRUE, interp = TRUE, t
     }
 }
 "rq.fit.fn" <-
-function (x, y, tau = 0.5, beta = 0.99995, eps = 1e-06)
+function (x, y, tau = 0.5, beta = 0.99995, eps = .Machine$double.eps^4)
 {
     n <- length(y)
     p <- ncol(x)
@@ -372,7 +372,7 @@ function (x, y, tau = 0.5, beta = 0.99995, eps = 1e-06)
 }
 
 "rq.fit.fnb" <-
-function (x, y, tau = 0.5, beta = 0.99995, eps = 1e-06)
+function (x, y, tau = 0.5, beta = 0.99995, eps = .Machine$double.eps^4)
 {
     n <- length(y)
     p <- ncol(x)
@@ -399,7 +399,7 @@ function (x, y, tau = 0.5, beta = 0.99995, eps = 1e-06)
 }
 
 "rq.fit.fnc" <-
-function (x, y, R, r, tau = 0.5, beta = 0.9995, eps = 1e-06) 
+function (x, y, R, r, tau = 0.5, beta = 0.9995, eps = .Machine$double.eps^4) 
 {
     n1 <- length(y)
     n2 <- length(r)
@@ -449,7 +449,7 @@ function (x, y, R, r, tau = 0.5, beta = 0.9995, eps = 1e-06)
 # is already done in the rq.fit.fn calls.
 #
 function(x, y, tau = 0.5,  Mm.factor = 0.8,
-	max.bad.fixup = 3, eps = 1e-6)
+	max.bad.fixup = 3, eps = .Machine$double.eps^4)
 {
 	#rq function for n large --
 	n <- length(y)
