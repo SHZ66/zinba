@@ -1,11 +1,6 @@
 startenrichment=function(range, data, formula,formulaE, initmethod){
-	suppressPackageStartupMessages(library(quantreg))
-	suppressPackageStartupMessages(library(zinba))
-	#temporary solution to singlularity problem in quantreg
-	sourcePath <- file.path(.path.package("zinba"), "exec")
-  	Fn.Path <- file.path(sourcePath, "quantreg.R")
-	source(Fn.Path)
-	suppressPackageStartupMessages(library(zinba))
+	library(zinba)
+	library(quantreg)
 	mf <- model.frame(formula=formula, data=data)
 	mfE <- model.frame(formula=formulaE, data=data)
         X <- model.matrix(attr(mf, "terms"), data=mf)
@@ -52,9 +47,6 @@ startenrichment=function(range, data, formula,formulaE, initmethod){
 	probs=seq(range[1], range[2],,5)
 	result=rep(0, length(probs))
 	a=Sys.time()
-	data2=data
-        if(sum(colnames(data)=='input_count')==1){data2$input_count=exp(data2$input_count)-1}
-	if(sum(colnames(data)=='exp_cnvwin_log')==1){data2$exp_cnvwin_log=exp(data2$exp_cnvwin_log)-1}
 
 
 	for(k in 1:length(probs)){
@@ -65,9 +57,13 @@ startenrichment=function(range, data, formula,formulaE, initmethod){
 		if(initmethod=='quantile'){
   			prop2=probs[k]
 		  	prop1=1-prop0-prop2
+			data2=data
+		        if(sum(colnames(data)=='input_count')==1){data2$input_count=exp(data2$input_count)-1}
+			if(sum(colnames(data)=='exp_cnvwin_log')==1){data2$exp_cnvwin_log=exp(data2$exp_cnvwin_log)-1}
 			t=rq(formula, tau=.5+(.3*sum(Y==min(Y))+.2*sum(Y==min(Y+1)))/length(Y), data=data2, method='pfn')
 			priorCOUNTweight=rep(10^-10, length(Y))      
 			priorCOUNTweight[as.double(which(t$residuals>quantile(t$residuals,1-prop2)))]=1-10^-10
+			rm(data2)
 		  }else if(initmethod=='count'){
 			prop2=probs[k]
 			prop1=1-prop0-prop2
@@ -141,5 +137,5 @@ startenrichment=function(range, data, formula,formulaE, initmethod){
 		result[k]=ll_new
 	}
 	return(probs[which.max(result)])
-	rm(data); rm(Y); rm(X); rm(XNB); rm(XE);rm(XNBE);rm(probi0); rm(probi1); rm(probi2); rm(mui1); rm(mui2); rm(start); rm(prop1); rm(prop0);gc();rm(data2);
+	rm(data); rm(Y); rm(X); rm(XNB); rm(XE);rm(XNBE);rm(probi0); rm(probi1); rm(probi2); rm(mui1); rm(mui2); rm(start); rm(prop1); rm(prop0);gc();
 }
