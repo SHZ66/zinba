@@ -16,6 +16,7 @@ export(twobittofa)
 export(twobitinfo)
 export(zeroinfl)
 export(startenrichment)
+export(residuals.zeroinfl)
 # ------------------------------------------
 # S3method declarations.  
 # ------------------------------------------

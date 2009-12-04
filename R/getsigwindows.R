@@ -21,7 +21,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             q25=quantile(data$exp_count, 0.25)
             leverage=hat(X, intercept=FALSE)
             fdrlevel=threshold
-            standardized=residuals(a)/sqrt(1-leverage)
+            standardized=residuals.zeroinfl(a)/sqrt(1-leverage)
             pval=1-pnorm(as.matrix(standardized))
             fdr=qvalue(pval)
             numpeaks=length(which(fdr[[3]]<fdrlevel))
