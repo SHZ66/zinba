@@ -296,9 +296,11 @@ int analysis::importCoords(const char * signalFile){
 		if( (back->end - back->start) > winSizeThresh){
 			const char * exChromName = getKey(back->chrom);
 			unsigned long int wxSize = back->end - back->start;
-			cout << "Excluding " << exChromName << ":" << back->start << "-" << back->end << "SIZE=" << wxSize << endl;
+			cout << "Excluding " << exChromName << ":" << back->start << "-" << back->end << " SIZE=" << wxSize << endl;
+			coord_slist.erase(back++);
+		}else{
+			back++;
 		}
-		back++;
 	}
 	
 	back = coord_slist.begin();	
