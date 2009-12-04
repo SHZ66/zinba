@@ -82,10 +82,11 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 					if(i->chrom == chromInt){
 						int pIndex = 0;
 						unsigned long int startPos = 1;
-						if(i->start > profile_extend){
+						if(i->start > profile_extend)
 							startPos = i->start-profile_extend;
-						}
-						unsigned long int stopPos = i->end+profile_extend;
+						unsigned long int stopPos = chr_size[chromInt];
+						if((i->end+profile_extend) < chr_size[chromInt])
+							stopPos = i->end+profile_extend;
 						profile = new unsigned short int[(stopPos-startPos)+1];
 						profile[(stopPos-startPos)] = 0;
 						for(int s = startPos; s <= stopPos; s++){
@@ -134,7 +135,8 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 					if(getChrmData == 1){
 						cout << "Loading data for " << chrom.c_str() << endl;
 						basepair = new unsigned short int[chr_size[chromInt]+1];
-						basepair[chr_size[chromInt]] = 0;
+						for(int c = 0; c <= chr_size[chromInt];c++)
+							basepair[c] = 0;
 						countBases = 0;
 					}
 				}else if (field[0] == 's' && field[2] == 'a' && getChrmData == 1){
@@ -258,6 +260,9 @@ int analysis::importCoords(const char * signalFile){
 	unsigned long int iStart;
 	unsigned long int iEnd;
 	unsigned short int qFlag;
+///////////////////////////
+	unsigned long int winSizeThresh = 5000;
+//////////////////////////
 	list<coord>::iterator back =  coord_slist.begin();
 	while(!feof(fh)){
 		int readResult = fscanf(fh,"%s%s%lu%lu%hu%s",id,cChrom,&iStart,&iEnd,&qFlag,strand);
@@ -283,6 +288,16 @@ int analysis::importCoords(const char * signalFile){
 			back->qFlag = 1;
 		}
 		lastCoord = *back;		
+		back++;
+	}
+
+	back = coord_slist.begin();
+	while(back != coord_slist.end()){
+		if( (back->end - back->start) > winSizeThresh){
+			const char * exChromName = getKey(back->chrom);
+			unsigned long int wxSize = back->end - back->start;
+			cout << "Excluding " << exChromName << ":" << back->start << "-" << back->end << "SIZE=" << wxSize << endl;
+		}
 		back++;
 	}
 	
