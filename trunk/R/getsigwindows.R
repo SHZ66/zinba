@@ -51,7 +51,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             mf <- model.frame(formula=formula, data=data)
 	    mfE <- model.frame(formula=formulaE, data=data)
             X <- model.matrix(attr(mf, "terms"), data=mf)
-	    XE <- model.matrix(attr(mfE, "terms"), data=mfE)z
+	    XE <- model.matrix(attr(mfE, "terms"), data=mfE)
 	    XNB=as.data.frame(X[,-c(1)])
 	    XNBE=as.data.frame(XE[,-c(1)])
             logsumexp=function(v){
