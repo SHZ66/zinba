@@ -7,6 +7,8 @@ startenrichment=function(range, data, formula,formulaE, initmethod){
 	XE <- model.matrix(attr(mfE, "terms"), data=mfE)
 	XNB=as.data.frame(X[,-c(1)])
 	XNBE=as.data.frame(XE[,-c(1)])
+	if(dim(X)[2]==1){XNB=X}
+        if(dim(XE)[2]==1){XNBE=XE}
 	logsumexp=function(v){
 		if(any(is.infinite(v))){
 			stop("infinite value in v\n")
