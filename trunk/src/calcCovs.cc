@@ -474,7 +474,9 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			cout << "\t\tOffset " << (zOffsetSize * o) << "bp......" << endl;
 			stringstream offset;
 			offset << (zOffsetSize * o);
-			outfileDATA = outfile + "_" + chromReport + "_offset" + offset.str() + "bp.txt";
+			stringstream winsize;
+			winsize << (zWinSize);
+			outfileDATA = outfile + "_" + chromReport + "_win" + winsize.str() + "bp_offset" + offset.str() + "bp.txt";
 			if(o == (numOffsets-1))
 				fprintf(tempTB,"%s\n",outfileDATA.c_str());
 			else

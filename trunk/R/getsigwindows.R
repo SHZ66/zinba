@@ -1,4 +1,4 @@
-getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,winout,tol=10^-5,method='pscl',initmethod, diff=0){
+getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,winout,printFullOut=0,tol=10^-5,method='pscl',initmethod, diff=0){
     time.start <- Sys.time()
     library(qvalue)
     library(quantreg)
@@ -25,8 +25,13 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             pval=1-pnorm(as.matrix(standardized))
             fdr=qvalue(pval)
             numpeaks=length(which(fdr[[3]]<fdrlevel))
-            data=cbind(data, ((data$exp_count>q25)^2), fdr[[3]], standardized)
-            colnames(data)[c(dim(data)[2]-2, dim(data)[2]-1, dim(data)[2])]=c('q25','qvalue', 'residual')
+	    if(printFullOut == 1){
+		data=cbind(data, ((data$exp_count>q25)^2), fdr[[3]], standardized)
+		colnames(data)[c(dim(data)[2]-2, dim(data)[2]-1, dim(data)[2])]=c('q25','qvalue', 'residual')
+	    }else{
+		data=cbind(data$chromosome,data$start,data$stop, ((data$exp_count>q25)^2), fdr[[3]], standardized)
+		colnames(data)=c('chromosome','start','stop','q25','qvalue', 'residual')
+	    }
             param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
 
 ### PRINT SIGNIFICANT WINDOWS
@@ -217,12 +222,17 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
                 i=i+1 
             }
             numpeaks=length(which(probi2>peakconfidence))
-            data=cbind(data,((data$exp_count>q25)^2),probi2)
-            colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
 	    if(diff==0){
-		    data$q25[Y-mui1<0]=0
+		data$q25[Y-mui1<0]=0
             }
-	    line0 = paste("Processing ",files[fnum])
+	    if(printFullOut == 1){
+		data=cbind(data,((data$exp_count>q25)^2),probi2)
+		colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
+	    }else{
+	    	data=cbind(data$chromosome,data$start,data$stop,((data$exp_count>q25)^2),probi2)
+		colnames(data)=c('chromosome','start','stop','q25','peakprob')
+	    }
+            line0 = paste("Processing ",files[fnum])
             line2=paste('Selected number of peaks: ', as.character(numpeaks),sep='')
     ### PRINT SIGNIFICANT WINDOWS
             print(paste(c(line0,line2)))
