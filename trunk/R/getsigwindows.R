@@ -1,4 +1,4 @@
-getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,winout,tol=10^-5,method='pscl',initmethod){
+getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,winout,tol=10^-5,method='pscl',initmethod, diff=0){
     time.start <- Sys.time()
     library(qvalue)
     library(quantreg)
@@ -219,8 +219,10 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             numpeaks=length(which(probi2>peakconfidence))
             data=cbind(data,((data$exp_count>q25)^2),probi2)
             colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
-
-            line0 = paste("Processing ",files[fnum])
+	    if(diff=0_{
+		    data$q25[Y-mui1<0]=0
+            }
+	    line0 = paste("Processing ",files[fnum])
             line2=paste('Selected number of peaks: ', as.character(numpeaks),sep='')
     ### PRINT SIGNIFICANT WINDOWS
             print(paste(c(line0,line2)))
