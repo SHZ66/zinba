@@ -219,7 +219,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             numpeaks=length(which(probi2>peakconfidence))
             data=cbind(data,((data$exp_count>q25)^2),probi2)
             colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
-	    if(diff=0_{
+	    if(diff==0){
 		    data$q25[Y-mui1<0]=0
             }
 	    line0 = paste("Processing ",files[fnum])
