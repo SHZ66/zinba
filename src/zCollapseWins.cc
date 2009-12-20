@@ -60,11 +60,6 @@ int zCollapseWins::importCoords(const char * winlist,const char * coordfile,unsi
 	unsigned short int qFlag;
 	double sigVal;
 	double res;
-	double ec;
-	double ic;
-	double gc;
-	double ap;
-	double ecl;
 	string pscl = "pscl";
 	string mixture = "mixture";
 	char sigFile [256];
@@ -81,7 +76,7 @@ int zCollapseWins::importCoords(const char * winlist,const char * coordfile,unsi
 			if(fh == NULL){return 1;}
 			int readResult = 0;
 			char firstline [256];
-//			fgets(firstline,256,fh);
+			fgets(firstline,256,fh);
 			
 			while(!feof(fh)){
 				if(strcmp(method.c_str(),pscl.c_str()) == 0){
@@ -91,7 +86,7 @@ int zCollapseWins::importCoords(const char * winlist,const char * coordfile,unsi
 							readResult = 0;
 						}
 					}else if(wformat == 1){
-						readResult = fscanf(fh,"%s%lu%lu%f%f%f%f%f%hu%f%f",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&ecl,&qFlag,&sigVal,&res);
+						readResult = fscanf(fh,"%s%lu%lu%*f%*f%*f%*f%*f%hu%f%f",cChrom,&iStart,&iEnd,&qFlag,&sigVal,&res);
 						if(readResult != 10 || sigVal > threshold){
 							readResult = 0;
 						}
@@ -103,7 +98,7 @@ int zCollapseWins::importCoords(const char * winlist,const char * coordfile,unsi
 							readResult = 0;
 						}
 					}else if(wformat == 1){
-						readResult = fscanf(fh,"%s%lu%lu%f%f%f%f%f%hu%f",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&ecl,&qFlag,&sigVal);
+						readResult = fscanf(fh,"%s%lu%lu%*f%*f%*f%*f%*f%hu%f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 						if(readResult != 9 || sigVal < threshold){
 							readResult = 0;
 						}
