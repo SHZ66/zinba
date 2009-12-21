@@ -19,7 +19,7 @@ class analysis{
 	
 		analysis(); //Implemented
 		~analysis(); //Implemented
-		int importCoords(const char *);//Implemented
+		int importCoords(const char *,double,const char *,int);//Implemented
 		int processCoords(const char *,const char *,const char *,const char *);//Implemented
 		int outputData(const char *,int,unsigned short int,unsigned long int,unsigned long int,int,unsigned short int[]);//Implemented
 
@@ -32,7 +32,8 @@ class analysis{
 
 	private:
 		
-		list<coord> coord_slist;//Implemented
+		list<coord> coordIN_slist;//Implemented
+		list<coord> coordOUT_slist;//Implemented
 	
 		unsigned short int chromCounter;//Implemented
 		unsigned short int getHashValue(const char *);//Implemented
