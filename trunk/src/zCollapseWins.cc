@@ -35,32 +35,21 @@ int zCollapseWins::outputData(const char * outputFile){
 	char strand[] = "+";
 	char winID[255];
 	char start[10];
-	char stop[10];
-	
-int countCoords = 0;
-	
+	char stop[10];	
 	list<coord>::iterator outIt =  coordOut_list.begin();
 	while(outIt != coordOut_list.end()){
-
-countCoords++;
-//cout << countCoords << " " << outIt->chrom << endl;
-
 		const char * chromName = getKey(outIt->chrom);
-		const char * neg = "NONE";
-		if(strcmp(chromName,neg) != 0){
-			sprintf(start,"%d", outIt->start);
-			sprintf(stop,"%d", outIt->end);
-			strcpy(winID,chromName);strcat(winID,":");strcat(winID,start);strcat(winID,"-");strcat(winID,stop);
-			fprintf(fh,"%s\t%s\t%lu\t%lu\t1\t+\n",winID,chromName,outIt->start,outIt->end);
-			coordOut_list.erase(outIt++);
-		}
+		sprintf(start,"%d", outIt->start);
+		sprintf(stop,"%d", outIt->end);
+		strcpy(winID,chromName);strcat(winID,":");strcat(winID,start);strcat(winID,"-");strcat(winID,stop);
+		fprintf(fh,"%s\t%s\t%lu\t%lu\t1\t+\n",winID,chromName,outIt->start,outIt->end);
+		outIt++;
 	}
 	fclose (fh);
 	return 0;
 }
 
 int zCollapseWins::importCoords(const char * winlist,const char * coordfile,unsigned short int winSize,unsigned short int wingap,double threshold,string method,int wformat){
-
 	FILE * wlist;
 	wlist = fopen(winlist,"r");
 	if(wlist == NULL){return 1;}
@@ -138,7 +127,7 @@ int zCollapseWins::importCoords(const char * winlist,const char * coordfile,unsi
 	list<coord>::iterator back =  coord_slist.begin();
 	list<coord> tempcoord_list;
 	tempcoord_list.push_front(*back);
-	list<coord>::iterator tempIt = tempcoord_list.begin();
+	list<coord>::iterator tempIt = tempcoord_list.begin();	
 	coord_slist.erase(back++);
 	int flagFinish = 0;
 
@@ -147,15 +136,11 @@ int zCollapseWins::importCoords(const char * winlist,const char * coordfile,unsi
 			flagFinish = 1;
 		if(flagFinish == 0 && back->chrom == tempIt->chrom && back->start <= tempIt->end+1){
 			tempcoord_list.push_back(*back);
-			tempIt = tempcoord_list.rbegin();
+			tempIt = tempcoord_list.end();
+			tempIt--;
 			coord_slist.erase(back++);
 		}else if( (back->chrom == tempIt->chrom && back->start > tempIt->end+1) || back->chrom != tempIt->chrom || flagFinish == 1){
 			if(tempcoord_list.size() == 1 && tempIt->qFlag == 1){
-
-if(tempIt->chrom > 3 || tempIt->chrom < 0){
-	cout << "Chrom1 is " << tempIt->chrom << endl;
-}
-
 				coordOut_list.push_back(*tempIt);
 			}else if(tempcoord_list.size() > 1){
 				// TRIM PRECEEDING WINDOWS BELOW QUARTILE
@@ -169,7 +154,8 @@ if(tempIt->chrom > 3 || tempIt->chrom < 0){
 						tempIt++;
 				}
 				// TRIM TRAILING WINDOWS BELOW QUARTILE
-				tempIt = tempcoord_list.rbegin();
+				tempIt = tempcoord_list.end();
+				tempIt--;
 				while(tempIt != tempcoord_list.begin()){
 					if(tempIt->qFlag == 0)
 						tempcoord_list.erase(tempIt--);
@@ -179,21 +165,19 @@ if(tempIt->chrom > 3 || tempIt->chrom < 0){
 						tempIt--;
 				}
 				if(tempcoord_list.size() <= wingap){
-					tempIt = tempcoord_list.begin();
-					unsigned long int start = tempIt->start;
-					unsigned long int stop = tempIt->end;
-					tempIt++;
-					while(tempIt != tempcoord_list.end()){
-						stop = tempIt->end;
+					if(tempcoord_list.size() > 0){
+						tempIt = tempcoord_list.begin();
+						unsigned short int tChrom = tempIt->chrom;
+						unsigned long int start = tempIt->start;
+						unsigned long int stop = tempIt->end;
 						tempIt++;
+						while(tempIt != tempcoord_list.end()){
+							stop = tempIt->end;
+							tempIt++;
+						}
+						coord c(tChrom,start,stop,1);
+						coordOut_list.push_back(c);
 					}
-					
-if(tempIt->chrom > 3 || tempIt->chrom < 0){
-	cout << "Chrom2 is " << tempIt->chrom << endl;
-}
-					
-					coord c(tempIt->chrom,start,stop,1);
-					coordOut_list.push_back(c);
 				}else{
 					//BREAK UP WINDOWS WITH CONTIGUOUS WINDOWS BELOW QUARTILE IN MIDDLE
 					tempIt = tempcoord_list.begin();
@@ -215,6 +199,7 @@ if(tempIt->chrom > 3 || tempIt->chrom < 0){
 									tempcoord_list.erase(tempIt--);
 									countLowQuart--;
 								}
+								unsigned short int tChrom = tempIt->chrom;
 								unsigned long int start = tempIt->start;
 								unsigned long int stop = tempIt->end;
 								countHighQuart--;
@@ -225,35 +210,26 @@ if(tempIt->chrom > 3 || tempIt->chrom < 0){
 									countHighQuart--;
 								}
 								if((stop-start) <= winSizeThresh){
-									
-if(tempIt->chrom > 3 || tempIt->chrom < 0){
-	cout << "Chrom3 is " << tempIt->chrom << endl;
-}
-									
-									coord c(tempIt->chrom,start,stop,1);
+									coord c(tChrom,start,stop,1);
 									coordOut_list.push_back(c);
 								}else{
-									//COULD FURTHER DROP OUT LOW QUART REGIONS TO POTENTIALLY SAVE THESE REGIONS
-									cout << "Excluding " << back->chrom << ":" << start << "-" << stop << " SIZE=" << (stop-start) << endl;
+									//REMOVE ONCE C PEAKBOUND IS RUNNING
+									const char * cName = getKey(back->chrom);
+									cout << "Excluding " << cName << ":" << start << "-" << stop << " SIZE=" << (stop-start) << endl;
 								}
 								tempIt = tempcoord_list.begin();
 								countLowQuart = 0;
 								countHighQuart = 1;
 							}else{
 								countLowQuart = 0;
-								countHighQuart = countHighQuart + countLowQuart;
+								countHighQuart = countHighQuart + countLowQuart + 1;
 							}
 						}
 						lastCoord = *tempIt;
 						tempIt++;
 					}
-					if(countLowQuart >= wingap){
-						while(countLowQuart > 0){
-							tempcoord_list.erase(tempIt--);
-							countLowQuart--;
-						}
-					}
 					tempIt = tempcoord_list.begin();
+					unsigned short int tChrom = tempIt->chrom;
 					unsigned long int start = tempIt->start;
 					unsigned long int stop = tempIt->end;
 					tempIt++;
@@ -262,21 +238,21 @@ if(tempIt->chrom > 3 || tempIt->chrom < 0){
 						tempIt++;
 					}
 					if((stop-start) <= winSizeThresh){
-if(tempIt->chrom > 3 || tempIt->chrom < 0){
-	cout << "Chrom4 is " << tempIt->chrom << endl;
-}
-						coord c(tempIt->chrom,start,stop,1);
+						coord c(tChrom,start,stop,1);
 						coordOut_list.push_back(c);
 					}else{
-						//COULD FURTHER DROP OUT LOW QUART REGIONS TO POTENTIALLY SAVE THESE REGIONS
-						cout << "Excluding " << back->chrom << ":" << start << "-" << stop << " SIZE=" << (stop-start) << endl;
+						//REMOVE ONCE C PEAKBOUND IS RUNNING
+						const char * cName = getKey(back->chrom);
+						cout << "Excluding " << cName << ":" << start << "-" << stop << " SIZE=" << (stop-start) << endl;
 					}
 				}
 			}
-			tempcoord_list.clear();
-			tempcoord_list.push_front(*back);
-			tempIt = tempcoord_list.begin();
-			coord_slist.erase(back++);
+			if(flagFinish == 0){
+				tempcoord_list.clear();
+				tempcoord_list.push_front(*back);
+				tempIt = tempcoord_list.begin();
+				coord_slist.erase(back++);
+			}
 		}
 	}
 	coordOut_list.sort();
@@ -302,11 +278,9 @@ const char * zCollapseWins::getKey(unsigned short int chrom){
 	map<int, const char*>::iterator i;
 	i = intsToChrom.find(chrom);
 	if(i == intsToChrom.end()){
-		const char * neg = "NONE";
-		return neg;
-//		cout << chrom << endl;
-//		cout << "REALLY REALLY BAD ERROR!" << endl;
-//		exit(1);
+		cout << chrom << endl;
+		cout << "REALLY REALLY BAD ERROR!" << endl;
+		exit(1);
 	}else{
 		return i->second;	
 	}
