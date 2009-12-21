@@ -61,7 +61,7 @@ int bcanalysis::processSignals(const char* outputFile,const char *twoBitFile,int
 	cout << "\tProcessing " << chromReport << ".........." << endl;
 	unsigned short int * basepair = NULL;
 	basepair = new unsigned short int[chr_size[currchr]+1];
-	for(int in = 0; in <= chr_size[currchr]; in++)
+	for(int in = chr_size[currchr]; in--;)
 		basepair[in] = 0;
 	unsigned short int printFLAG = 0;
 	unsigned long int aStart,aStop;
@@ -78,7 +78,7 @@ int bcanalysis::processSignals(const char* outputFile,const char *twoBitFile,int
 			currchr = i->chrom;
 			chromReport = getKey(currchr);
 			basepair = new unsigned short int[chr_size[currchr]+1];
-			for(int in = 0; in <= chr_size[currchr]; in++)
+			for(int in = chr_size[currchr]; in--;)
 				basepair[in] = 0;
 			cout << "\tProcessing " << chromReport << ".........." << endl;
 		}
@@ -92,8 +92,8 @@ int bcanalysis::processSignals(const char* outputFile,const char *twoBitFile,int
 			}else if(i->strand == 0){
 				aStop = i->pos;
 				aStart = 1;
-				if((aStop + extend + 1) >= 1)
-					aStart = aStop + extend + 1;
+				if((aStop - extend + 1) >= 1)
+					aStart = aStop - extend + 1;
 			}
 			for(unsigned long int rpos = aStart; rpos <= aStop;rpos++){
 				basepair[rpos]++;

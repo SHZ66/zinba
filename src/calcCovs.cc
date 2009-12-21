@@ -28,16 +28,16 @@ calcCovs::~calcCovs(){
 	}
 }
 
-int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir, string twoBitFile, const char * inputFile,string outfile,string flist){
+int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir, const char * twoBitFile, const char * inputFile,string outfile,const char * flist,int extension,const char * filetype){
 			
 	FILE * tempTB;
 	const char * tInfo = "tempInfo.txt"; 
 	const char * tChrSize = "tempChromSize.txt";
 	tempTB = fopen(tInfo,"w");
-	fprintf(tempTB,"library(zinba);\ntwobitinfo(infile=\"%s\",outfile=\"%s\");\n",twoBitFile.c_str(),tChrSize);
+	fprintf(tempTB,"library(zinba);\ntwobitinfo(infile=\"%s\",outfile=\"%s\");\n",twoBitFile,tChrSize);
 	fclose (tempTB);
 	
-	cout << "\nGetting chromosome lengths from .2bit file: " << twoBitFile.c_str() << endl;
+	cout << "\nGetting chromosome lengths from .2bit file: " << twoBitFile << endl;
 	int s = system("R CMD BATCH tempInfo.txt /dev/null");
 	if(s == 0){
 		remove(tInfo);
@@ -57,13 +57,15 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 	fclose(tempTB);
 	remove(tChrSize);
 	
-	slist<aRead>::iterator i = signal_slist.begin();
+	slist<bwRead>::iterator i = signal_slist.begin();
 	unsigned short int currchr = 999;
 	unsigned short int * basepair = NULL;
 	unsigned short int * ibasepair = NULL;
 	unsigned short int * gcContent = NULL;	
 	unsigned short int * alignability = NULL;
 	int readInput = 0;
+	const char* noneVal = "none";
+	int extend = (int)(extension/2);
 	
 	while(!signal_slist.empty()){
 		i = signal_slist.begin();
@@ -71,25 +73,23 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		const char * chromReport = getKey(currchr);
 		cout << "\nProcessing " << chromReport << endl;
 		basepair = new unsigned short int[chr_size[currchr]+1];
-//		basepair[0] = 0;
-		
-		for(int ch = 0; ch <= chr_size[currchr]; ch++){
+		for(int ch = chr_size[currchr]; ch--;)
 			basepair[ch] = 0;
-		}
 		
 		cout << "\tMapping reads to chromosome......" << endl;
 		while(i != signal_slist.end()){			
 			if(i->chrom==currchr){
-				if(i->start < chr_size[currchr] && i->start > 0){
-					basepair[i->start]++;
-					signal_slist.erase(i++);
-				}else{
-					if(i->start > chr_size[currchr])
-						basepair[chr_size[currchr]]++;
-					else if(i->start < 1)
-						basepair[1]++;
-					signal_slist.erase(i++);
+				if(i->strand == 1){
+					cStart = chr_size[currchr];
+					if((i->pos + extend-1) <= chr_size[currchr])
+						cStart = i->pos + extend - 1;
+				}else if(i->strand == 0){
+					cStart = 1;
+					if((i->pos - extend + 1) >= 1)
+						cStart = i->pos - extend + 1;
 				}
+				basepair[cStart]++;
+				signal_slist.erase(i++);
 			}else{
 				i++;
 			}
@@ -97,7 +97,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 
 		alignability = new unsigned short int[chr_size[currchr] + 1];
 //		alignability[chr_size[currchr]] = 0;
-		for(int ch = 0; ch <= chr_size[currchr]; ch++)
+		for(int ch = chr_size[currchr]; ch--;)
 			alignability[ch] = 0;
 		string alignFileS = alignDir + chromReport + ".wig";
 		char * alignFile = new char[alignFileS.size() + 1];
@@ -113,15 +113,15 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		}
 		fclose(tempTB);
 		
-		cout << "\tGetting sequence from .2bit file:\n\t\t" << twoBitFile.c_str() << endl;
+		cout << "\tGetting sequence from .2bit file:\n\t\t" << twoBitFile << endl;
 		gcContent = new unsigned short int[chr_size[currchr] + 1];
 		gcContent[chr_size[currchr]] = 0;
-		for(int ch = 0; ch <= chr_size[currchr]; ch++)
+		for(int ch = chr_size[currchr]; ch--;)
 			gcContent[ch] = 0;
 		const char * tInfo = "tempInfo.txt"; 
 		const char * tSeq = "tempSeq.txt";
 		tempTB = fopen(tInfo,"w");
-		fprintf(tempTB,"library(zinba);\ntwobittofa(chrm=\"%s\",start=1,end=%lu,twoBitFile=\"%s\",gcSeq=\"%s\");\n",chromReport,chr_size[currchr],twoBitFile.c_str(),tSeq);
+		fprintf(tempTB,"library(zinba);\ntwobittofa(chrm=\"%s\",start=1,end=%lu,twoBitFile=\"%s\",gcSeq=\"%s\");\n",chromReport,chr_size[currchr],twoBitFile,tSeq);
 		fclose (tempTB);
 
 		int s = system("R CMD BATCH tempInfo.txt /dev/null");
@@ -426,31 +426,31 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		}
 		cnv_wins.sort();
 
-		const char* inVal = "none";
-		if(strcmp(inputFile,inVal)!=0){
+		if(strcmp(inputFile,noneVal)!=0){
 			if(readInput == 0){
 				cout << "\tLoading reads from input file " << inputFile << "........." << endl;
-				int rVal = importRawSignal(inputFile,1);
+				int rVal = importRawSignal(inputFile,filetype,1);
 				readInput = 1;
 			}
 			cout << "\tMapping input tags to the genome........." << endl;
 			ibasepair = new unsigned short int[chr_size[currchr]+1];
 			ibasepair[chr_size[currchr]] = 0;
-			for(int ch = 0; ch <= chr_size[currchr]; ch++)
+			for(int ch = chr_size[currchr]; ch--;)
 				ibasepair[ch] = 0;
-			slist<aRead>::iterator in = input_slist.begin();
+			slist<bwRead>::iterator in = input_slist.begin();
 			while(in != input_slist.end()){
 				if(in->chrom==currchr){
-					if(in->start <= chr_size[currchr] && in->start > 0){
-						ibasepair[in->start]++;
-						input_slist.erase(in++);
-					}else{
-						if(in->start > chr_size[currchr])
-							ibasepair[chr_size[currchr]]++;
-						else if (in->start <= 0)
-							ibasepair[1]++;
-						input_slist.erase(in++);
+					if(in->strand == 1){
+						cStart = chr_size[currchr];
+						if((in->pos + extend-1) <= chr_size[currchr])
+							cStart = in->pos + extend - 1;
+					}else if(in->strand == 0){
+						cStart = 1;
+						if((in->pos - extend + 1) >= 1)
+							cStart = in->pos - extend + 1;
 					}
+					ibasepair[cStart]++;
+					input_slist.erase(in++);
 				}else{
 					in++;
 				}
@@ -460,7 +460,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		}
 		
 		cout << "\tGetting counts for zinba windows.........." << endl;
-		tempTB = fopen(flist.c_str(),"a");
+		tempTB = fopen(flist,"a");
 		numOffsets = 1;
 		if(zOffsetSize > 0){
 			numOffsets = (int) zWinSize/zOffsetSize;
@@ -535,10 +535,15 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		fclose(tempTB);
 		cnv_wins.clear();
 		delete [] basepair;
+		basepair = NULL;
 		delete [] gcContent;
+		gcContent = NULL;
 		delete [] alignability;
-		if(readInput == 1)
+		alignability = NULL;
+		if(readInput == 1){
 			delete [] ibasepair;
+			ibasepair = NULL;
+		}
 	}
 	signal_slist.clear();
 	return 0;
@@ -584,25 +589,44 @@ const char * calcCovs::getKey(unsigned short int chrom){
 	}
 }
 
-int calcCovs::importRawSignal(const char * signalFile,int dataType){
+int calcCovs::importRawSignal(const char * signalFile,const char * filetype,int dataType){
 	FILE * fh;
 	fh = fopen(signalFile,"r");
 	if(fh == NULL){return 1;}
 	
-	unsigned long int lineCount = 0;
 	char cChrom[128];
-	unsigned long int iStart;
-	int ret;
-	aRead sig;
-	
-	slist<aRead>::iterator back =  signal_slist.previous(signal_slist.end());
-	slist<aRead>::iterator iback = input_slist.previous(input_slist.end());
+	unsigned long int pos;
+	unsigned short int sval;
+	char strand[1];
+	const char * bowtie = "bowtie";
+	const char * bed = "bed";
+	char minus[] = "-";char plus[] = "+";
+	unsigned long int start;unsigned long int stop;
+	char line[512];char seq[128];
+	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
+	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
 	
 	while(!feof(fh)){
-		ret = fscanf(fh,"%s%lu",cChrom,&sig.start);
-		sig.chrom = getHashValue(cChrom);
-//		sig.start = iStart;
-		lineCount++;
+		if(strcmp(filetype,bed) == 0){
+			fscanf(fh,"%s%lu%lu%s",cChrom,&start,&stop,strand);
+			if(strcmp(strand,minus) == 0){
+				pos = stop;
+				sval = 0;
+			}else if(strcmp(strand,plus) == 0){
+				pos = start;
+				sval = 1;
+			}
+		}else if (strcmp(filetype,bowtie) == 0){
+			fscanf(fh,"%*s%s%s%lu%s%*s%*d",strand,cChrom,&pos,seq);
+			fgets(line,512,fh);
+			sval = 1;
+			if(strcmp(strand,minus) == 0){
+				pos = pos + strlen(seq);
+				sval = 0;
+			}
+		}
+		unsigned short int chromInt = getHashValue(cChrom);
+		bwRead sig(chromInt,pos,sval);
 		if(dataType == 0)
 			back = signal_slist.insert_after(back,sig);
 		else if(dataType == 1)
@@ -610,11 +634,11 @@ int calcCovs::importRawSignal(const char * signalFile,int dataType){
 	}
 	fclose(fh);
 	if(dataType == 0){
-		cout << "\tImported " << lineCount << " reads" << endl;
+		cout << "\tImported " << signal_slist.size() << " reads" << endl;
 		cout << "\tSorting reads ...";
 		signal_slist.sort();
 	}else if(dataType == 1){
-		cout << "\t\tImported " << lineCount << " inpput reads" << endl;
+		cout << "\t\tImported " << input_slist.size() << " inpput reads" << endl;
 		cout << "\t\tSorting reads ...";
 		input_slist.sort();
 	}

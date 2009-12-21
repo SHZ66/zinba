@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "aRead.h"
+#include "bwRead.h"
 #include "dataWins.h"
 #include "cnvWins.h"
 #include <cstring>
@@ -23,8 +23,8 @@ class calcCovs{
 		calcCovs(); //Implemented
 		~calcCovs(); //Implemented
 		
-		int importRawSignal(const char *,int);//Implemented
-		int processSignals(int,int,int,int,string,string,const char*,string,string);//Implemented
+		int importRawSignal(const char *,const char *,int);//Implemented
+		int processSignals(int,int,int,int,string,const char *,const char*,string,const char *,int,const char *);//Implemented
 		int outputData(const char *, unsigned short int);//Implemented
 		
 		struct ltstr{
@@ -43,11 +43,11 @@ class calcCovs{
 
 	private:
 		
-		slist<aRead> signal_slist;//Implemented
-		slist<aRead> input_slist;
+		slist<bwRead> signal_slist;//Implemented
+		slist<bwRead> input_slist;
 		list<cnvWins> cnv_wins;
 		slist<dataWins> peak_wins;
-	
+
 		unsigned short int chromCounter;//Implemented
 		unsigned short int getHashValue(char *);//Implemented
 		const char * getKey(unsigned short int);//Implemented
