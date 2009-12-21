@@ -17,10 +17,8 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NUL
 		stop(paste("Method should be either pscl or mixture, currently",method))
 	}else{
             params=scan(filelist,what=character(0))
-#            winout=paste(outfile,".wins",sep="")
 	    winlist=paste(outfile,".winlist",sep="")
             peakout=paste(outfile,".peaks",sep="")
-            coordout=paste(outfile,".coords",sep="")
             bpout=paste(outfile,".bpcount",sep="")
 
             registerDoMC(numProc)
@@ -30,9 +28,8 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NUL
                 getsigwindows(file=params[i],formula=formula,formulaE=formulaE,threshold=threshold,winout=outfile,peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,initmethod=initmethod)
  
 	    write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)
-	    #collapsewins(winlist=winlist,winout=winout)
 	    if(refinepeaks==1){
-		getrefinedpeaks(winlist=winlist,coordout=coordout,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,winSize=winSize,winGap=winGap,pWinSize=pWinSize,pquant=pquant,printFullOut=printFullOut,peakconfidence=peakconfidence,threshold=threshold,method=method)
+		getrefinedpeaks(winlist=winlist,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,winSize=winSize,pWinSize=pWinSize,pquant=pquant,printFullOut=printFullOut,peakconfidence=peakconfidence,threshold=threshold,method=method)
 	    }
 	}
 	time.end <- Sys.time()
