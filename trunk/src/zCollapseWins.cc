@@ -214,7 +214,7 @@ int zCollapseWins::importCoords(const char * winlist,const char * coordfile,unsi
 									coordOut_list.push_back(c);
 								}else{
 									//REMOVE ONCE C PEAKBOUND IS RUNNING
-									const char * cName = getKey(back->chrom);
+									const char * cName = getKey(tChrom);
 									cout << "Excluding " << cName << ":" << start << "-" << stop << " SIZE=" << (stop-start) << endl;
 								}
 								tempIt = tempcoord_list.begin();
@@ -242,7 +242,7 @@ int zCollapseWins::importCoords(const char * winlist,const char * coordfile,unsi
 						coordOut_list.push_back(c);
 					}else{
 						//REMOVE ONCE C PEAKBOUND IS RUNNING
-						const char * cName = getKey(back->chrom);
+						const char * cName = getKey(tChrom);
 						cout << "Excluding " << cName << ":" << start << "-" << stop << " SIZE=" << (stop-start) << endl;
 					}
 				}
