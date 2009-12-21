@@ -4,7 +4,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
-#include "aRead.h"
+#include "bwRead.h"
 //#include "base.h"
 #include <map>
 #include <ext/slist>
@@ -20,7 +20,7 @@ class bcanalysis{
 		bcanalysis(); //Implemented
 		~bcanalysis(); //Implemented
 		
-		int importRawSignal(const char *);//Implemented
+		int importRawSignal(const char *,const char *);//Implemented
 		int processSignals(const char *,const char *,int);//Implemented
 		int outputData(const char *, unsigned short int,unsigned short int,unsigned short int[]);//Implemented
 		
@@ -40,7 +40,7 @@ class bcanalysis{
 
 	private:
 		
-		slist<aRead> signal_slist;//Implemented	
+		slist<bwRead> signal_slist;//Implemented	
 		unsigned short int chromCounter;//Implemented
 		unsigned short int getHashValue(char *);//Implemented
 		const char * getKey(unsigned short int);//Implemented

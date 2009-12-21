@@ -14,23 +14,25 @@ using namespace sgi;
 using namespace std;
 
 extern "C"{
-void baseAlignCounts(char **RinputFile,char **RoutputFile, char **Rtwobitfile,int *RextendLength){
-	string inputFile = RinputFile[0];
-	string outputFile = RoutputFile[0];
-	string twobitfile = Rtwobitfile[0];
+void baseAlignCounts(char **RinputFile,char **RoutputFile, char **Rtwobitfile,int *RextendLength,char **Rfiletype){
+	const char * inputFile = RinputFile[0];
+	const char * outputFile = RoutputFile[0];
+	const char * twobitfile = Rtwobitfile[0];
 	int extendLength = RextendLength[0];
+	const char * filetype = Rfiletype[0];
 	
 		bcanalysis newAnalysis;// = new analysis;
-		Rprintf("\nImporting reads from file %s ....\n",inputFile.c_str());
-		int ret=newAnalysis.importRawSignal(inputFile.c_str());
+		Rprintf("\nImporting reads from file %s ....\n",inputFile);
+		Rprintf("Reads are formatted as %s ....\n",filetype);
+		int ret=newAnalysis.importRawSignal(inputFile,filetype);
 
 		if(ret == 1){
-			Rprintf("ERROR opening file %s \n",inputFile.c_str());
+			Rprintf("ERROR opening file %s \n",inputFile);
 			exit(1);
 		}
 
-		Rprintf("Calculating counts at each base\nPrinting output to %s\n",outputFile.c_str());
-		ret = newAnalysis.processSignals(outputFile.c_str(),twobitfile.c_str(),extendLength);
+		Rprintf("Calculating counts at each base\nPrinting output to %s\n",outputFile);
+		ret = newAnalysis.processSignals(outputFile,twobitfile,extendLength);
 		Rprintf("-------- BASE ALIGN COUNTS COMPLETE --------\n");
 
 }
