@@ -68,12 +68,10 @@ int ccanalysis::processSignals(const char* outputFile,const char *twoBitFile){
 	unsigned short int * minusReads = NULL;
 	plusReads = new unsigned short int[chr_size[currchr]+1];
 	minusReads = new unsigned short int[chr_size[currchr]+1];
-cout << "Initializing arrays" << endl;
 	for(int in = 0; in <= chr_size[currchr]; in++){
 		plusReads[in] = 0;
 		minusReads[in] = 0;
 	}
-cout << "Arrays initialized" << endl;
 	double readcountPlus = 0;
 	double readcountMinus = 0;
 	double totalReads = reads_slist.size();
@@ -95,20 +93,18 @@ cout << "Arrays initialized" << endl;
 		}
 		
 		if(i == reads_slist.end()){
-cout << "Analyzing data:" << endl;
+			double denX = 0;
+			double denY = 0;
 			for(int c = 0; c <= 500; c++){
 				double numerator = 0;
-				double denX = 0;
-				double denY = 0;
 				for(int bp = firstBP; bp <= (chr_size[currchr]-c); bp++){
 					numerator += ((double)(plusReads[bp]-(readcountPlus/chr_size[currchr]))*(double)(minusReads[bp+c]-(readcountMinus/chr_size[currchr])));
-					denX += pow((double)(plusReads[bp]-(readcountPlus/chr_size[currchr])),2);
-					denY += pow((double)(minusReads[bp+c]-(readcountMinus/chr_size[currchr])),2);
+					if(c == 0){
+						denX += pow((double)(plusReads[bp]-(readcountPlus/chr_size[currchr])),2);
+						denY += pow((double)(minusReads[bp+c]-(readcountMinus/chr_size[currchr])),2);
+					}
 				}
 				corVals[c] += ((readcountPlus+readcountMinus)/totalReads)*(numerator/(sqrt(denX)*sqrt(denY)));
-cout << "num is " << numerator << " denX is " << denX << " denY is " << denY << endl;
-cout << c << " " << corVals[c] << endl;
-
 			}
 			readcountPlus = 0;
 			readcountMinus = 0;
@@ -133,7 +129,7 @@ cout << c << " " << corVals[c] << endl;
 	FILE * fh;
 	fh = fopen(outputFile,"w");
 	for(int c = 0; c <= 500; c++)
-		fprintf(fh,"%i%f\n",c,corVals[c]);
+		fprintf(fh,"%i\t%f\n",c,corVals[c]);
 	fclose (fh);	
 	return 0;
 }
