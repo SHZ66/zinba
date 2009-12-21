@@ -14,7 +14,7 @@ class bwRead {
 
 			unsigned short int chrom;//2
 			unsigned long int pos;//8
-			unsigned short int strand;
+			unsigned short int strand;//Plus = 1;Minus = 0
 	
 	private:
 			

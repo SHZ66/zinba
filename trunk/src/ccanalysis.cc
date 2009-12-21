@@ -181,10 +181,10 @@ int ccanalysis::importRawSignal(const char * signalFile,const char * filetype){
 			fscanf(fh,"%s%lu%lu%s",cChrom,&start,&stop,strand);
 			if(strcmp(strand,minus) == 0){
 				pos = stop;
-				sval = 1;
+				sval = 0;
 			}else if(strcmp(strand,plus) == 0){
 				pos = start;
-				sval = 0;
+				sval = 1;
 			}
 		}else if (strcmp(filetype,bowtie.c_str()) == 0){
 			fscanf(fh,"%*s%s%s%lu%s%*s%*d",strand,cChrom,&pos,seq);

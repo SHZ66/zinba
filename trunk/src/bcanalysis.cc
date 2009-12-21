@@ -54,7 +54,7 @@ int bcanalysis::processSignals(const char* outputFile,const char *twoBitFile,int
 	fclose(tempTB);
 	remove(tChrSize);
 	
-	slist<aRead>::iterator i = signal_slist.begin();
+	slist<bwRead>::iterator i = signal_slist.begin();
 	unsigned short int currchr = i->chrom;
 	const char * chromReport;
 	chromReport = getKey(currchr);
@@ -64,6 +64,7 @@ int bcanalysis::processSignals(const char* outputFile,const char *twoBitFile,int
 	for(int in = 0; in <= chr_size[currchr]; in++)
 		basepair[in] = 0;
 	unsigned short int printFLAG = 0;
+	unsigned long int aStart,aStop;
 	
 	while(!signal_slist.empty()){
 		if(i == signal_slist.end()){
@@ -83,14 +84,19 @@ int bcanalysis::processSignals(const char* outputFile,const char *twoBitFile,int
 		}
 
 		if(i->chrom==currchr){
-			unsigned long int aStart = 1;
-			unsigned long int aStop = chr_size[currchr];
-			if(i->start > extend)
-				aStart = i->start - extend + 1;
-			if((i->start+extend) < chr_size[currchr])
-				aStop = i->start + extend;
-			for(unsigned long int pos = aStart; pos <= aStop;pos++){
-				basepair[pos]++;
+			if(i->strand == 1){
+				aStart = i->pos;
+				aStop = chr_size[currchr];
+				if((aStart+extend-1) <= chr_size[currchr])
+					aStop = aStart + extend - 1;
+			}else if(i->strand == 0){
+				aStop = i->pos;
+				aStart = 1;
+				if((aStop + extend + 1) >= 1)
+					aStart = aStop + extend + 1;
+			}
+			for(unsigned long int rpos = aStart; rpos <= aStop;rpos++){
+				basepair[rpos]++;
 			}
 			signal_slist.erase(i++);
 		}else{
@@ -117,9 +123,8 @@ int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,u
 	const char * chrom = getKey(currChr);
 	fprintf(fh,"fixedStep chrom=%s start=1 step=1\n",chrom);
 
-	for(int posP = 1; posP <= chr_size[currChr];posP++){
+	for(int posP = 1; posP <= chr_size[currChr];posP++)
 		fprintf(fh,"%hu\n",basepair[posP]);
-	}
 	fclose (fh);
 	return 0;
 }
@@ -150,25 +155,47 @@ const char * bcanalysis::getKey(unsigned short int chrom){
 	}
 }
 
-int bcanalysis::importRawSignal(const char * signalFile){
+int bcanalysis::importRawSignal(const char * signalFile,const char * filetype){
 	FILE * fh;
 	fh = fopen(signalFile,"r");
 	if(fh == NULL){return 1;}
 	
-	unsigned long int lineCount = 0;
 	char cChrom[128];
-	unsigned long int iStart;
-	slist<aRead>::iterator back =  signal_slist.previous(signal_slist.end());
+	unsigned long int pos;
+	unsigned short int sval;
+	char strand[1];
+	const char * bowtie = "bowtie";
+	const char * bed = "bed";
+	char minus[] = "-";char plus[] = "+";
+	unsigned long int start;unsigned long int stop;
+	char line[512];char seq[128];
+	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
 
 	while(!feof(fh)){
-		fscanf(fh,"%s%lu",cChrom,&iStart);
+		if(strcmp(filetype,bed) == 0){
+			fscanf(fh,"%s%lu%lu%s",cChrom,&start,&stop,strand);
+			if(strcmp(strand,minus) == 0){
+				pos = stop;
+				sval = 0;
+			}else if(strcmp(strand,plus) == 0){
+				pos = start;
+				sval = 1;
+			}
+		}else if (strcmp(filetype,bowtie) == 0){
+			fscanf(fh,"%*s%s%s%lu%s%*s%*d",strand,cChrom,&pos,seq);
+			fgets(line,512,fh);
+			sval = 1;
+			if(strcmp(strand,minus) == 0){
+				pos = pos + strlen(seq);
+				sval = 0;
+			}
+		}
 		unsigned short int chromInt = getHashValue(cChrom);
-		aRead sig(chromInt,iStart);
-		lineCount++;	
+		bwRead sig(chromInt,pos,sval);
 		back = signal_slist.insert_after(back,sig);
 	}
 	fclose(fh);
-	cout << "\tLoaded " << lineCount << " reads" << endl;
+	cout << "\tLoaded " << signal_slist.size() << " reads" << endl;
 	signal_slist.sort();
 	return 0;
 }
