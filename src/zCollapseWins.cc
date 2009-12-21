@@ -37,20 +37,30 @@ int zCollapseWins::outputData(const char * outputFile){
 	char start[10];
 	char stop[10];
 	
+int countCoords = 0;
+	
 	list<coord>::iterator outIt =  coordOut_list.begin();
 	while(outIt != coordOut_list.end()){
+
+countCoords++;
+//cout << countCoords << " " << outIt->chrom << endl;
+
 		const char * chromName = getKey(outIt->chrom);
-		sprintf(start,"%d", outIt->start);
-		sprintf(stop,"%d", outIt->end);
-		strcpy(winID,chromName);strcat(winID,":");strcat(winID,start);strcat(winID,"-");strcat(winID,stop);
-		fprintf(fh,"%s\t%s\t%lu\t%lu\t1\t+\n",winID,chromName,outIt->start,outIt->end);
-		coordOut_list.erase(outIt++);
+		const char * neg = "NONE";
+		if(strcmp(chromName,neg) != 0){
+			sprintf(start,"%d", outIt->start);
+			sprintf(stop,"%d", outIt->end);
+			strcpy(winID,chromName);strcat(winID,":");strcat(winID,start);strcat(winID,"-");strcat(winID,stop);
+			fprintf(fh,"%s\t%s\t%lu\t%lu\t1\t+\n",winID,chromName,outIt->start,outIt->end);
+			coordOut_list.erase(outIt++);
+		}
 	}
 	fclose (fh);
 	return 0;
 }
 
 int zCollapseWins::importCoords(const char * winlist,const char * coordfile,unsigned short int winSize,unsigned short int wingap,double threshold,string method,int wformat){
+
 	FILE * wlist;
 	wlist = fopen(winlist,"r");
 	if(wlist == NULL){return 1;}
@@ -58,53 +68,54 @@ int zCollapseWins::importCoords(const char * winlist,const char * coordfile,unsi
 	unsigned long int iStart;
 	unsigned long int iEnd;
 	unsigned short int qFlag;
-	double sigVal;
-	double res;
+	long double sigVal;
 	string pscl = "pscl";
 	string mixture = "mixture";
 	char sigFile [256];
+	int readResult = 0;
+	char firstline [256];
+	int rwline;
 	///////////////////////////
 	unsigned long int winSizeThresh = winSize * 10;
 	//////////////////////////
-	
 	while(!feof(wlist)){
-		int readListResult = fscanf(wlist,"%s",sigFile);
-		string signalFile(sigFile);
-		if(readListResult == 1){
+		int rline = fscanf(wlist,"%s",sigFile);
+		if(rline == 1){
+			string signalFile(sigFile);
 			FILE * fh;
 			fh = fopen(signalFile.c_str(),"r");
 			if(fh == NULL){return 1;}
-			int readResult = 0;
-			char firstline [256];
+			cout << "\tImporting windows from " << signalFile.c_str() << "..." << endl;
 			fgets(firstline,256,fh);
-			
 			while(!feof(fh)){
+				readResult = 0;
 				if(strcmp(method.c_str(),pscl.c_str()) == 0){
 					if(wformat == 0){
-						readResult = fscanf(fh,"%s%lu%lu%hu%f%f",cChrom,&iStart,&iEnd,&qFlag,&sigVal,&res);
-						if(readResult != 6 || sigVal > threshold){
-							readResult = 0;
+						rwline = fscanf(fh,"%s%lu%lu%hu%Lf%*f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+						if(sigVal <= threshold && rwline > 0){
+							readResult = 1;
 						}
 					}else if(wformat == 1){
-						readResult = fscanf(fh,"%s%lu%lu%*f%*f%*f%*f%*f%hu%f%f",cChrom,&iStart,&iEnd,&qFlag,&sigVal,&res);
-						if(readResult != 10 || sigVal > threshold){
-							readResult = 0;
+						rwline = fscanf(fh,"%s%lu%lu%*d%*f%*f%*f%*f%hu%Lf%*f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+						if(sigVal <= threshold && rwline > 0){
+							readResult = 1;
 						}
 					}
 				}else if(strcmp(method.c_str(),mixture.c_str()) == 0){
 					if(wformat == 0){
-						readResult = fscanf(fh,"%s%lu%lu%hu%f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
-						if(readResult != 5 || sigVal < threshold){
-							readResult = 0;
+						rwline = fscanf(fh,"%s%lu%lu%hu%Lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+						if(sigVal >= threshold && rwline > 0){
+							readResult = 1;
 						}
 					}else if(wformat == 1){
-						readResult = fscanf(fh,"%s%lu%lu%*f%*f%*f%*f%*f%hu%f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
-						if(readResult != 9 || sigVal < threshold){
-							readResult = 0;
+						int exp;double inp,gc,ap,ecl;
+						rwline = fscanf(fh,"%s%lu%lu%*d%*f%*f%*f%*f%hu%Lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+						if(sigVal >= threshold && rwline > 0){
+							readResult = 1;
 						}
 					}
 				}
-				if(readResult != 0){
+				if(readResult == 1){
 					string chromIn(cChrom);
 					unsigned short int chromInt = getHashValue(chromIn.c_str());
 					coord c(chromInt,iStart,iEnd,qFlag);
@@ -116,15 +127,17 @@ int zCollapseWins::importCoords(const char * winlist,const char * coordfile,unsi
 	}
 	fclose(wlist);
 
+	for(int ci = 0; ci < chromCounter;ci++){
+		const char * chromName = getKey(ci);
+		cout << ci << " is " << chromName << endl;
+	}
+	
 	cout << "\nImported " << coord_slist.size() << " coordinates" << endl;
 	coord_slist.sort();
 	
-list<int> testList;
 	list<coord>::iterator back =  coord_slist.begin();
-	back = coord_slist.begin();
-	
 	list<coord> tempcoord_list;
-	tempcoord_list.push_back(*back);
+	tempcoord_list.push_front(*back);
 	list<coord>::iterator tempIt = tempcoord_list.begin();
 	coord_slist.erase(back++);
 	int flagFinish = 0;
@@ -134,10 +147,15 @@ list<int> testList;
 			flagFinish = 1;
 		if(flagFinish == 0 && back->chrom == tempIt->chrom && back->start <= tempIt->end+1){
 			tempcoord_list.push_back(*back);
-			tempIt = tempcoord_list.begin();
+			tempIt = tempcoord_list.rbegin();
 			coord_slist.erase(back++);
 		}else if( (back->chrom == tempIt->chrom && back->start > tempIt->end+1) || back->chrom != tempIt->chrom || flagFinish == 1){
 			if(tempcoord_list.size() == 1 && tempIt->qFlag == 1){
+
+if(tempIt->chrom > 3 || tempIt->chrom < 0){
+	cout << "Chrom1 is " << tempIt->chrom << endl;
+}
+
 				coordOut_list.push_back(*tempIt);
 			}else if(tempcoord_list.size() > 1){
 				// TRIM PRECEEDING WINDOWS BELOW QUARTILE
@@ -151,7 +169,7 @@ list<int> testList;
 						tempIt++;
 				}
 				// TRIM TRAILING WINDOWS BELOW QUARTILE
-				tempIt = tempcoord_list.begin();
+				tempIt = tempcoord_list.rbegin();
 				while(tempIt != tempcoord_list.begin()){
 					if(tempIt->qFlag == 0)
 						tempcoord_list.erase(tempIt--);
@@ -169,6 +187,11 @@ list<int> testList;
 						stop = tempIt->end;
 						tempIt++;
 					}
+					
+if(tempIt->chrom > 3 || tempIt->chrom < 0){
+	cout << "Chrom2 is " << tempIt->chrom << endl;
+}
+					
 					coord c(tempIt->chrom,start,stop,1);
 					coordOut_list.push_back(c);
 				}else{
@@ -202,6 +225,11 @@ list<int> testList;
 									countHighQuart--;
 								}
 								if((stop-start) <= winSizeThresh){
+									
+if(tempIt->chrom > 3 || tempIt->chrom < 0){
+	cout << "Chrom3 is " << tempIt->chrom << endl;
+}
+									
 									coord c(tempIt->chrom,start,stop,1);
 									coordOut_list.push_back(c);
 								}else{
@@ -234,6 +262,9 @@ list<int> testList;
 						tempIt++;
 					}
 					if((stop-start) <= winSizeThresh){
+if(tempIt->chrom > 3 || tempIt->chrom < 0){
+	cout << "Chrom4 is " << tempIt->chrom << endl;
+}
 						coord c(tempIt->chrom,start,stop,1);
 						coordOut_list.push_back(c);
 					}else{
@@ -243,14 +274,14 @@ list<int> testList;
 				}
 			}
 			tempcoord_list.clear();
-			tempcoord_list.push_back(*back);
+			tempcoord_list.push_front(*back);
 			tempIt = tempcoord_list.begin();
 			coord_slist.erase(back++);
 		}
 	}
 	coordOut_list.sort();
-	outputData(coordfile);
 	cout << "\nCollapsed to " << coordOut_list.size() << " non-overlapping regions" << endl;
+	outputData(coordfile);
 }
 
 unsigned short int zCollapseWins::getHashValue(const char *currChrom){
@@ -271,9 +302,11 @@ const char * zCollapseWins::getKey(unsigned short int chrom){
 	map<int, const char*>::iterator i;
 	i = intsToChrom.find(chrom);
 	if(i == intsToChrom.end()){
-		cout << chrom << endl;
-		cout << "REALLY REALLY BAD ERROR!" << endl;
-		exit(1);
+		const char * neg = "NONE";
+		return neg;
+//		cout << chrom << endl;
+//		cout << "REALLY REALLY BAD ERROR!" << endl;
+//		exit(1);
 	}else{
 		return i->second;	
 	}
