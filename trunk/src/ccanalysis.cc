@@ -26,7 +26,6 @@ ccanalysis::~ccanalysis(){
 }
 
 int ccanalysis::processSignals(const char* outputFile,const char *twoBitFile){
-	
 	FILE * tempTB;
 	const char * tInfo = "tempInfo.txt"; 
 	const char * tChrSize = "tempChromSize.txt";
@@ -64,10 +63,10 @@ int ccanalysis::processSignals(const char* outputFile,const char *twoBitFile){
 	double corVals [501];
 	for(int v = 0; v <= 500; v++)
 		corVals[v] = 0;
-	unsigned short int * plusReads = NULL;
-	unsigned short int * minusReads = NULL;
-	plusReads = new unsigned short int[chr_size[currchr]+1];
-	minusReads = new unsigned short int[chr_size[currchr]+1];
+	short int * plusReads = NULL;
+	short int * minusReads = NULL;
+	plusReads = new short int[chr_size[currchr]+1];
+	minusReads = new short int[chr_size[currchr]+1];
 	for(int in = 0; in <= chr_size[currchr]; in++){
 		plusReads[in] = 0;
 		minusReads[in] = 0;
@@ -95,14 +94,18 @@ int ccanalysis::processSignals(const char* outputFile,const char *twoBitFile){
 		if(i == reads_slist.end()){
 			double denX = 0;
 			double denY = 0;
+			double rPavg = (double)readcountPlus/chr_size[currchr];
+			double rMavg = (double)readcountMinus/chr_size[currchr];
 			for(int c = 0; c <= 500; c++){
 				double numerator = 0;
-				for(int bp = firstBP; bp <= (chr_size[currchr]-c); bp++){
-					numerator += ((double)(plusReads[bp]-(readcountPlus/chr_size[currchr]))*(double)(minusReads[bp+c]-(readcountMinus/chr_size[currchr])));
+				for(int bp = (chr_size[currchr]-c); bp--;){
 					if(c == 0){
-						denX += pow((double)(plusReads[bp]-(readcountPlus/chr_size[currchr])),2);
-						denY += pow((double)(minusReads[bp+c]-(readcountMinus/chr_size[currchr])),2);
+						plusReads[bp] = plusReads[bp] - rPavg;
+						minusReads[bp+c] = minusReads[bp+c] - rMavg;
+						denX += pow((double)plusReads[bp],2);
+						denY += pow((double)minusReads[bp+c],2);
 					}
+					numerator += (double)(plusReads[bp]*minusReads[bp+c]);
 				}
 				corVals[c] += ((readcountPlus+readcountMinus)/totalReads)*(numerator/(sqrt(denX)*sqrt(denY)));
 			}
@@ -115,8 +118,8 @@ int ccanalysis::processSignals(const char* outputFile,const char *twoBitFile){
 				i = reads_slist.begin();
 				currchr = i->chrom;
 				chromReport = getKey(currchr);
-				plusReads = new unsigned short int[chr_size[currchr]+1];
-				minusReads = new unsigned short int[chr_size[currchr]+1];
+				plusReads = new short int[chr_size[currchr]+1];
+				minusReads = new short int[chr_size[currchr]+1];
 				for(int in = 0; in <= chr_size[currchr]; in++){
 					plusReads[in] = 0;
 					minusReads[in] = 0;
