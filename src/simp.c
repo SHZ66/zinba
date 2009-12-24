@@ -73,7 +73,7 @@ SEXP peakboundc(SEXP f, SEXP bpprofile, SEXP outputfile, SEXP rho){
     error("%s is not tab-delimated\n", input);
   }
  
-//end of while loop for reading in coordinates
+
  
   defineVar(install("x"), mkans(basecount), rho);
   int l=round(INTEGER(eval(f, rho))[0]);
