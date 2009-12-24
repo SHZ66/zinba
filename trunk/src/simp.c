@@ -3,24 +3,95 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
+#include <malloc.h>
 #include <R.h>
+#include <Rinternals.h>
 #include <Rmath.h>
 
 #define min(a,b)  ((a) < (b) ? (a) : (b))
 #define maxx(x,y) ((x) > (y) ? (x) : (y))
+#define MAX_LEN 50000
 
-void peakboundc(int basecount[],int *Rlbasecount, int maxvec[], int *Rlmaxvec, int *Rsearchlength, int results[])
-{
+SEXP mkans(int *);
+int feval(int *, SEXP ,SEXP );
 
+SEXP peakboundc(SEXP f, SEXP bpprofile, SEXP outputfile, SEXP rho){
 
-int lbasecount = *Rlbasecount;
-int lmaxvec = *Rlmaxvec;
+  int i, j, lbasecount, pstart, pstop;
+  int basecount[MAX_LEN];
+  FILE *FI, *FO;
+  char str_buf[MAX_LEN], line[MAX_LEN];
+  char chr[127], ID[127], strand[2];
+	char *delim = "\t";
+	char *ptr= NULL;
+  const char *input =CHAR(STRING_ELT(bpprofile,0));
+  const char *output=CHAR(STRING_ELT(outputfile,0));
+
+  for(j=0; j<MAX_LEN;j++){
+	basecount[j]=0;
+  }
+
+  
+  FI = fopen(input, "r");	
+  if(FI == NULL){		
+    error("cannot open file %s\n", input);
+  }
+
+  FO = fopen(output, "w");	
+  if(FO == NULL){
+    error("cannot open file %s\n", output);
+  }
+  
+  
+
+//skip the first line of the coordinate file
+    if(fgets(str_buf, MAX_LEN, FI) == NULL){
+      error("there are only %d lines in file %s\n", i, input);
+    }
+//read in a line, save the information in each, perform peakbounds, then print out, repeat for each line
+ while(fgets(str_buf, MAX_LEN, FI) != NULL){
+    i = 0;
+     if ((ptr = strtok(str_buf, delim)) != NULL) {
+    do {
+      i++;
+      if(i==1){
+        strcpy(ID, ptr);
+      }else if(i==2){
+        strcpy(chr, ptr);
+      }else if(i==3){
+        pstart = atol(ptr);
+      }else if(i==4){
+        pstop = atol(ptr);
+      }else if(i==5){
+        strcpy(strand, ptr);
+      }else if(i>5){
+        basecount[i-6]  = atoi(ptr);
+      }
+      lbasecount=i-5;
+    } while ((ptr = strtok(NULL, delim)) != NULL);
+  }else{
+    error("%s is not tab-delimated\n", input);
+  }
+ 
+//end of while loop for reading in coordinates
+ 
+  defineVar(install("x"), mkans(basecount), rho);
+  int l=round(INTEGER(eval(f, rho))[0]);
+  int maxvec[l];
+  for(i=1;i<=l;i++){
+  	defineVar(install("x"), mkans(basecount), rho);
+  	maxvec[i-1]=INTEGER(eval(f, rho))[i];
+  }
+////////////////////////////////////////////////////////////////////////
+
+int lmaxvec = l;
+int results[lmaxvec*2];
 int max;
-int searchlength=*Rsearchlength;
+int searchlength=500;
 int  peakstart=0;
 int  peakend=0;
 int  fit=0;
-int  bound,h, i, j, n;
+int  bound,h, n;
 int maxvecbounds[lmaxvec*2];
 double val,sumxy,sumx, sumx2, sumy, sumy2;
 
@@ -103,7 +174,7 @@ maxvecbounds[2*j]=peakstart;
 maxvecbounds[2*j+1]=peakend;
 }	
 
-int dist, l, mingap, indexmingap, sep;
+int dist, mingap, indexmingap, sep;
 
 //final outputted vector of bounds after merging, contains zeros
 //intialize results vector
@@ -151,6 +222,57 @@ while(i<lmaxvec){
 	}
 	i=i+1;
 }
+/////////////////////////////////////////////////////////////////////////
 
-
+for(i=0;i<lmaxvec;i++){ 
+sprintf(line, "%s\t%s\t%d\t%d\t%s\t%d\t%d\n",ID, chr, pstart, pstop, strand, pstart+results[2*i],pstart+results[2*i+1]);	
+fputs(line, FO);
 }
+
+
+
+} 
+ fclose(FO);
+ fclose(FI);
+ return(bpprofile);
+}
+
+
+SEXP mkans(int *x)
+     {
+         SEXP ans;
+	 	
+	 int l = 1500;
+         PROTECT(ans = allocVector(INTSXP, l));
+	 for(int i=0;i<l; i++){
+         	INTEGER(ans)[i] = x[i];
+	 }
+         UNPROTECT(1);
+         return ans;
+     }
+     
+     int feval(int *x, SEXP f,SEXP rho)
+     {
+         defineVar(install("x"), mkans(x), rho);
+	 //PROTECT(ans = allocVector(INTSXP, l));
+	 return(INTEGER(eval(f, rho))[1]);
+     }
+     
+     SEXP zero(SEXP f, SEXP guesses, SEXP tol, SEXP rho)
+     {
+         int * x0 = INTEGER(guesses);
+         int f0, f1, fc, xc;
+     
+        f0 = feval(x0, f, rho);
+	defineVar(install("x"), mkans(x0), rho);
+	int l=round(INTEGER(eval(f, rho))[0]);
+	int maxvec[l];
+	for(int i=1;i<=l;i++){
+		defineVar(install("x"), mkans(x0), rho);
+		maxvec[i-1]=INTEGER(eval(f, rho))[i];
+	}
+
+		
+	return mkans(x0);
+     }
+
