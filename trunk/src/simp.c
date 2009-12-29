@@ -3,7 +3,6 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
-#include <malloc.h>
 #include <R.h>
 #include <Rinternals.h>
 #include <Rmath.h>
