@@ -85,7 +85,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 						cStart = i->pos + extend - 1;
 				}else if(i->strand == 0){
 					cStart = 1;
-					if((i->pos - extend + 1) >= 1)
+					if(i->pos >= extend)
 						cStart = i->pos - extend + 1;
 				}
 				basepair[cStart]++;
@@ -434,7 +434,6 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			}
 			cout << "\tMapping input tags to the genome........." << endl;
 			ibasepair = new unsigned short int[chr_size[currchr]+1];
-			ibasepair[chr_size[currchr]] = 0;
 			for(int ch = chr_size[currchr]; ch--;)
 				ibasepair[ch] = 0;
 			slist<bwRead>::iterator in = input_slist.begin();
@@ -446,7 +445,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 							cStart = in->pos + extend - 1;
 					}else if(in->strand == 0){
 						cStart = 1;
-						if((in->pos - extend + 1) >= 1)
+						if(in->pos >= extend)
 							cStart = in->pos - extend + 1;
 					}
 					ibasepair[cStart]++;
