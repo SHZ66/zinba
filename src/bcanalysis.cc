@@ -166,11 +166,17 @@ int bcanalysis::importRawSignal(const char * signalFile,const char * filetype){
 	char strand[1];
 	const char * bowtie = "bowtie";
 	const char * bed = "bed";
+	const char * tagAlign = "tagAlign";
 	char minus[] = "-";
 	unsigned long int start;unsigned long int stop;
 	char line[512];char seq[128];
 	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
 
+	if(strcmp(filetype,bed) != 0 && strcmp(filetype,bowtie) != 0 && strcmp(filetype,tagAlign) != 0){
+		cout << "Unknown file type: " << filetype << "\nOptions are [bowtie|bed|tagAlign]" << endl;
+		return 2;
+	}
+	
 	while(!feof(fh)){
 		if(strcmp(filetype,bed) == 0){
 			fscanf(fh,"%s%lu%lu%s",cChrom,&start,&stop,strand);
@@ -188,7 +194,7 @@ int bcanalysis::importRawSignal(const char * signalFile,const char * filetype){
 				pos = pos + strlen(seq);
 				sval = 0;
 			}
-		}else if(strcmp(ftype,tagAlign) == 0){
+		}else if(strcmp(filetype,tagAlign) == 0){
 			fscanf(f,"%s%lu%lu%*s%*d%s",cChrom,&start,&stop,strand);
 			sval = 1;
 			pos = start;
