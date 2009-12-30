@@ -7,7 +7,6 @@ export(peakbound)
 export(basecountimport)
 export(basealigncount)
 export(getrefinedpeaks)
-export(crosscorrelation)
 export(getsigwindows)
 export(buildwindowdata)
 export(run.zinba)
@@ -17,6 +16,7 @@ export(twobitinfo)
 export(zeroinfl)
 export(startenrichment)
 export(residuals.zeroinfl)
+export(zcrosscorr)
 # ------------------------------------------
 # S3method declarations.  
 # ------------------------------------------
