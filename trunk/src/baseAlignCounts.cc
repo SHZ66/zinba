@@ -28,8 +28,10 @@ void baseAlignCounts(char **RinputFile,char **RoutputFile, char **Rtwobitfile,in
 	if(ret == 0){
 		Rprintf("Calculating counts at each base\nPrinting output to %s\n",outputFile);
 		ret = newAnalysis.processSignals(outputFile,twobitfile,extendLength);
+		if(ret == 0)
+			Rprintf("-------- BASE ALIGN COUNTS COMPLETE SUCCESSFULLY --------\n");
 	}
-	Rprintf("-------- BASE ALIGN COUNTS COMPLETE --------\n");
-
+	if(ret != 0)
+		Rprintf("-------- BASE ALIGN COUNTS EXITING WITH ERRORS --------\n");
 }
 }
