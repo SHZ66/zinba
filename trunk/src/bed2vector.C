@@ -40,13 +40,14 @@ SEXP read_aligned_tags(SEXP filename,SEXP filetype){
 	// chromosome map
 	hash_map<string, int, hash<string>,equal_to<string> > cind_map;
 	vector<string> cnames;
-	string bowtie = "bowtie";
-	string bed = "bed";
+	const char * bowtie = "bowtie";
+	const char * bed = "bed";
+	const char * tagAlign = "tagAlign";
 
 	FILE *f=fopen(fname,"r");
 	if (!f){
 		Rprintf("Can't open input file %s\n",fname);
-	}else if(strcmp(ftype,bowtie.c_str()) != 0 && strcmp(ftype,bed.c_str()) != 0){
+	}else if(strcmp(ftype,bowtie) != 0 && strcmp(ftype,bed) != 0 && strcmp(ftype,tagAlign) != 0){
 		Rprintf("Unrecognized format: %s [bowtie|bed]",ftype);
 	}else{
 		Rprintf("Opened %s\n",fname);
@@ -62,7 +63,7 @@ SEXP read_aligned_tags(SEXP filename,SEXP filetype){
 		unsigned long int start;unsigned long int stop;
 
 		while(!feof(f)){
-			if (strcmp(ftype,bowtie.c_str()) == 0){
+			if (strcmp(ftype,bowtie) == 0){
 				fscanf(f,"%*s%s%s%lu%s%*s%*d",strand,cChrom,&fpos,seq);
 				fgets(line,512,f);
 				if(strcmp(strand,minus) == 0)
@@ -81,8 +82,16 @@ SEXP read_aligned_tags(SEXP filename,SEXP filetype){
 						}
 					}
 				}
-			}else if(strcmp(ftype,bed.c_str()) == 0){
+			}else if(strcmp(ftype,bed) == 0){
 				fscanf(f,"%s%lu%lu%s",cChrom,&start,&stop,strand);
+				if(strcmp(strand,minus) == 0){
+					fpos = -1 * stop;
+				}else{
+					fpos = start;
+				}
+				nm = 1;
+			}else if(strcmp(ftype,tagAlign) == 0){
+				fscanf(f,"%s%lu%lu%*s%*d%s",cChrom,&start,&stop,strand);
 				if(strcmp(strand,minus) == 0){
 					fpos = -1 * stop;
 				}else{

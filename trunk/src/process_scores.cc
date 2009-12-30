@@ -14,11 +14,9 @@
 
 using namespace std;
 
-process_scores::process_scores(){
-}
+process_scores::process_scores(){}
 
-process_scores::~process_scores(){
-}
+process_scores::~process_scores(){}
 
 int process_scores::adjustCoords(string alignFile,string outDir,const char* twoBitFile,int aThresh,int adjustSize){
 	
