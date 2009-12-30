@@ -67,7 +67,7 @@ int process_scores::adjustCoords(string alignFile,string outDir,const char* twoB
 				align_count[countBases] = 1;
 			}
 			collectdata = 1;
-		}else if (line[0] == 'f' || seqfile.eof()){
+		}else if (line[0] == 'f'){
 			if(collectdata == 1){
 				string outputFile = outDir + chrom + ".wig";
 				cout << "\t\tPrinting output to: " << outputFile.c_str() << endl;
@@ -95,28 +95,53 @@ int process_scores::adjustCoords(string alignFile,string outDir,const char* twoB
 				delete [] align_count;
 				align_count = NULL;
 			}
-			if(!seqfile.eof()){
-				istringstream iss(line);
-				while(iss >> field){
-					if (field[0] == 'c'){
-						chrom = "";
-						for (int it= 6; it < field.length(); it++ )
-							chrom += field.at(it);
-						align_count = new unsigned short int[chr_size[chrom]+1];
-						for(int c = chr_size[chrom]; c--;)
-							align_count[c] = 0;
-					}else if (field[0] == 's' && field[2] == 'a'){
-						string startVal;
-						for (int it= 6; it < field.length(); it++)
-							startVal += field.at(it);
-						startOffset = atoi(startVal.c_str());
-						countBases = startOffset - 1;
-					}
+			istringstream iss(line);
+			while(iss >> field){
+				if (field[0] == 'c'){
+					chrom = "";
+					for (int it= 6; it < field.length(); it++ )
+						chrom += field.at(it);
+					align_count = new unsigned short int[chr_size[chrom]+1];
+					for(int c = chr_size[chrom]; c--;)
+						align_count[c] = 0;
+				}else if (field[0] == 's' && field[2] == 'a'){
+					string startVal;
+					for (int it= 6; it < field.length(); it++)
+						startVal += field.at(it);
+					startOffset = atoi(startVal.c_str());
+					countBases = startOffset - 1;
 				}
-				cout << "\tProcessing " << chrom.c_str() << endl;
 			}
+			cout << "\tProcessing " << chrom.c_str() << endl;
 		}
 	}
+	if(collectdata == 1){
+		string outputFile = outDir + chrom + ".wig";
+		cout << "\t\tPrinting output to: " << outputFile.c_str() << endl;
+		fh = fopen(outputFile.c_str(),"w");
+		if(fh == NULL){
+			cout << "\nERROR: Can't open output file: " << outputFile.c_str() << endl;
+			return 1;
+		}
+		int alignVal = 0;
+		for(int pos = 1; pos < adjustSize;pos++)
+			fprintf(fh,"%i\n",alignVal);
+		for(int i = adjustSize;i <= (countBases - adjustSize); i++){
+			alignVal = 0;
+			alignVal += align_count[(i-adjustSize+1)];
+			alignVal += align_count[(i+adjustSize)];
+			fprintf(fh,"%i\n",alignVal);
+		}
+		alignVal = 0;
+		for(int pos = (countBases - adjustSize+1); pos <= countBases;pos++)
+			fprintf(fh,"%i\n",alignVal);
+		if(countBases < chr_size[chrom])
+			for(int pos = countBases+1;pos <= chr_size[chrom];pos++)
+				fprintf(fh,"%i\n",alignVal);
+		fclose (fh);
+		delete [] align_count;
+		align_count = NULL;
+	}	
 	seqfile.close();
 	return 0;
 }
