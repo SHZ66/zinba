@@ -36,12 +36,11 @@ int bcanalysis::processSignals(const char* outputFile,const char *twoBitFile,int
 	
 	cout << "\nGetting chromosome lengths from .2bit file: " << twoBitFile << endl;
 	int s = system("R CMD BATCH tempInfo.txt /dev/null");
-	if(s == 0){
-		remove(tInfo);
-	}else{
-		cout << "twoBitInfo failed\n";
+	if(s != 0){
+		cout << "\nERROR: failed to generate info file using twoBitInfo, twoBit file is: " << twoBitFile << endl;
 		return 1;
 	}
+	remove(tInfo);
 	
 	tempTB = fopen(tChrSize,"r");
 	char tbChrom[128];
@@ -68,10 +67,8 @@ int bcanalysis::processSignals(const char* outputFile,const char *twoBitFile,int
 	
 	while(!signal_slist.empty()){
 		if(i == signal_slist.end()){
-			if(outputData(outputFile,currchr,printFLAG,basepair) != 0){
-				cout << "Error printing output to file, exiting" << endl;
-				exit(1);
-			}
+			if(outputData(outputFile,currchr,printFLAG,basepair) != 0)
+				return 1;
 			printFLAG = 1;
 			delete [] basepair;
 			i = signal_slist.begin();
@@ -104,23 +101,25 @@ int bcanalysis::processSignals(const char* outputFile,const char *twoBitFile,int
 		}
 	}
 
-	if(outputData(outputFile,currchr,printFLAG,basepair) != 0){
-		cout << "Error printing output to file, exiting" << endl;
-		exit(1);
-	}
+	if(outputData(outputFile,currchr,printFLAG,basepair) != 0)
+		return 1;
 	delete [] basepair;
 	return 0;
 }
 
 int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,unsigned short int pFLAG,unsigned short int basepair[]){
 	FILE * fh;
+	const char * chrom = getKey(currChr);
 	if(pFLAG == 0){
 		fh = fopen(outputFile,"w");
 		fprintf(fh,"track type=wiggle_0 name=\"%s\" desc=\"%s\" visibility=full\n",outputFile,outputFile);
 	}else{
 		fh = fopen(outputFile,"a");
 	}
-	const char * chrom = getKey(currChr);
+	if(fh == NULL){
+		cout << "\nERROR: Can't open output file: " << outputFile << endl;
+		return 1;
+	}
 	fprintf(fh,"fixedStep chrom=%s start=1 step=1\n",chrom);
 
 	for(int posP = 1; posP <= chr_size[currChr];posP++)
@@ -159,7 +158,7 @@ int bcanalysis::importRawSignal(const char * signalFile,const char * filetype){
 	FILE * fh;
 	fh = fopen(signalFile,"r");
 	if(fh == NULL){
-		cout << "ERROR opening file " << inputFile << "\n";
+		cout << "\nERROR: Can't open aligned tags file: " << signalFile << endl;
 		return 1;
 	}
 	
@@ -176,7 +175,7 @@ int bcanalysis::importRawSignal(const char * signalFile,const char * filetype){
 	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
 
 	if(strcmp(filetype,bed) != 0 && strcmp(filetype,bowtie) != 0 && strcmp(filetype,tagAlign) != 0){
-		cout << "ERROR: Unknown file type- " << filetype << "\nOptions are [bowtie|bed|tagAlign]" << endl;
+		cout << "\nERROR: Unknown file type- " << filetype << "\n\tOptions are [bowtie|bed|tagAlign]" << endl;
 		return 1;
 	}
 	
@@ -198,7 +197,7 @@ int bcanalysis::importRawSignal(const char * signalFile,const char * filetype){
 				sval = 0;
 			}
 		}else if(strcmp(filetype,tagAlign) == 0){
-			fscanf(f,"%s%lu%lu%*s%*d%s",cChrom,&start,&stop,strand);
+			fscanf(fh,"%s%lu%lu%*s%*d%s",cChrom,&start,&stop,strand);
 			sval = 1;
 			pos = start;
 			if(strcmp(strand,minus) == 0){

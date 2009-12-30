@@ -29,12 +29,11 @@ int process_scores::adjustCoords(string alignFile,string outDir,const char* twoB
 	
 	//	cout << "\nGetting chromosome lengths from .2bit file: " << twoBitFile << endl;
 	int s = system("R CMD BATCH tempInfo.txt /dev/null");
-	if(s == 0){
-		remove(tInfo);
-	}else{
-		cout << "twoBitInfo failed\n";
-		exit(1);
+	if(s != 0){
+		cout << "\nERROR: failed to generate info file using twoBitInfo, twoBit file is: " << twoBitFile << endl;
+		return 1;
 	}
+	remove(tInfo);	
 	
 	tempTB = fopen(tChrSize,"r");
 	char tbChrom[128];
@@ -58,16 +57,25 @@ int process_scores::adjustCoords(string alignFile,string outDir,const char* twoB
 	string field;
 	string chrom;
 	FILE * fh;
-//	unsigned short int * profile = NULL;
 
 	cout << "Loading align count data from " << alignFile.c_str() << endl;
 	ifstream seqfile(alignFile.c_str());
 	while (getline(seqfile, line)){
-		if (line[0] == 'f'){
+		if (line[0] != 't' && line[0] != 'f'){
+			countBases++;
+			if(atoi(line.c_str()) <= aThresh && atoi(line.c_str()) > 0){
+				align_count[countBases] = 1;
+			}
+			collectdata = 1;
+		}else if (line[0] == 'f' || seqfile.eof()){
 			if(collectdata == 1){
 				string outputFile = outDir + chrom + ".wig";
 				cout << "\t\tPrinting output to: " << outputFile.c_str() << endl;
 				fh = fopen(outputFile.c_str(),"w");
+				if(fh == NULL){
+					cout << "\nERROR: Can't open output file: " << outputFile.c_str() << endl;
+					return 1;
+				}
 				int alignVal = 0;
 				for(int pos = 1; pos < adjustSize;pos++)
 					fprintf(fh,"%i\n",alignVal);
@@ -87,31 +95,26 @@ int process_scores::adjustCoords(string alignFile,string outDir,const char* twoB
 				delete [] align_count;
 				align_count = NULL;
 			}
-			istringstream iss(line);
-			while(iss >> field){
-				if (field[0] == 'c'){
-					chrom = "";
-					for ( int it= 6; it < field.length(); it++ ){
-						chrom += field.at(it);
+			if(!seqfile.eof()){
+				istringstream iss(line);
+				while(iss >> field){
+					if (field[0] == 'c'){
+						chrom = "";
+						for (int it= 6; it < field.length(); it++ )
+							chrom += field.at(it);
+						align_count = new unsigned short int[chr_size[chrom]+1];
+						for(int c = chr_size[chrom]; c--;)
+							align_count[c] = 0;
+					}else if (field[0] == 's' && field[2] == 'a'){
+						string startVal;
+						for (int it= 6; it < field.length(); it++)
+							startVal += field.at(it);
+						startOffset = atoi(startVal.c_str());
+						countBases = startOffset - 1;
 					}
-					align_count = new unsigned short int[chr_size[chrom]+1];
-					for(int c = 0; c <= chr_size[chrom]; c++)
-						align_count[c] = 0;
-				}else if (field[0] == 's' && field[2] == 'a'){
-					string startVal;
-					for ( int it= 6; it < field.length(); it++ )
-						startVal += field.at(it);
-					startOffset = atoi(startVal.c_str());
-					countBases = startOffset - 1;
 				}
+				cout << "\tProcessing " << chrom.c_str() << endl;
 			}
-			cout << "\tProcessing " << chrom.c_str() << endl;
-		}else if (line[0] != 't'){
-			countBases++;
-			if(atoi(line.c_str()) <= aThresh && atoi(line.c_str()) > 0){
-				align_count[countBases] = 1;
-			}
-			collectdata = 1;
 		}
 	}
 	seqfile.close();

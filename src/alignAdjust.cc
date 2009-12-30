@@ -11,7 +11,6 @@ using namespace std;
 
 extern "C" {
 void alignAdjust(char **Rinputfile, char **Routdir,char **Rtwobitfile,int *RaThresh, int *RadjustSize){
- 
 	string inputFile = Rinputfile[0];
 	string outDir = Routdir[0];
 	const char * twoBit = Rtwobitfile[0];
@@ -19,6 +18,10 @@ void alignAdjust(char **Rinputfile, char **Routdir,char **Rtwobitfile,int *RaThr
 	int adjustSize = RadjustSize[0];
 
 	process_scores newProcess;
-	newProcess.adjustCoords(inputFile,outDir,twoBit,aThresh,adjustSize);
+	int ret = newProcess.adjustCoords(inputFile,outDir,twoBit,aThresh,adjustSize);
+	if(ret != 0)
+		Rprintf("\n---------------- ALIGN ADJUST EXITING WITH ERRORS ----------------\n");
+	else
+		Rprintf("\n---------------- ALIGN ADJUST COMPLETED SUCCESSFULLY ----------------\n");
 }
 }
