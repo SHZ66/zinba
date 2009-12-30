@@ -11,9 +11,6 @@
 #include <cstdlib>
 #include <ctime>
 #include <Rmath.h>
-//#include "chisquaredistr.h"
-//#include "binomialdistr.h"
-
 
 using namespace std;
 
@@ -624,7 +621,7 @@ int calcCovs::importRawSignal(const char * signalFile,const char * filetype,int 
 				sval = 0;
 			}
 		}else if(strcmp(filetype,tagAlign) == 0){
-			fscanf(f,"%s%lu%lu%*s%*d%s",cChrom,&start,&stop,strand);
+			fscanf(fh,"%s%lu%lu%*s%*d%s",cChrom,&start,&stop,strand);
 			sval = 1;
 			pos = start;
 			if(strcmp(strand,minus) == 0){
