@@ -599,7 +599,8 @@ int calcCovs::importRawSignal(const char * signalFile,const char * filetype,int 
 	char strand[1];
 	const char * bowtie = "bowtie";
 	const char * bed = "bed";
-	char minus[] = "-";char plus[] = "+";
+	const char * tagAlign = "tagAlign";
+	char minus[] = "-";
 	unsigned long int start;unsigned long int stop;
 	char line[512];char seq[128];
 	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
@@ -608,12 +609,11 @@ int calcCovs::importRawSignal(const char * signalFile,const char * filetype,int 
 	while(!feof(fh)){
 		if(strcmp(filetype,bed) == 0){
 			fscanf(fh,"%s%lu%lu%s",cChrom,&start,&stop,strand);
+			sval = 1;
+			pos = start;
 			if(strcmp(strand,minus) == 0){
 				pos = stop;
 				sval = 0;
-			}else if(strcmp(strand,plus) == 0){
-				pos = start;
-				sval = 1;
 			}
 		}else if (strcmp(filetype,bowtie) == 0){
 			fscanf(fh,"%*s%s%s%lu%s%*s%*d",strand,cChrom,&pos,seq);
@@ -621,6 +621,14 @@ int calcCovs::importRawSignal(const char * signalFile,const char * filetype,int 
 			sval = 1;
 			if(strcmp(strand,minus) == 0){
 				pos = pos + strlen(seq);
+				sval = 0;
+			}
+		}else if(strcmp(filetype,tagAlign) == 0){
+			fscanf(f,"%s%lu%lu%*s%*d%s",cChrom,&start,&stop,strand);
+			sval = 1;
+			pos = start;
+			if(strcmp(strand,minus) == 0){
+				pos = stop;
 				sval = 0;
 			}
 		}
