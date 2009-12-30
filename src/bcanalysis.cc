@@ -40,7 +40,7 @@ int bcanalysis::processSignals(const char* outputFile,const char *twoBitFile,int
 		remove(tInfo);
 	}else{
 		cout << "twoBitInfo failed\n";
-		exit(1);
+		return 1;
 	}
 	
 	tempTB = fopen(tChrSize,"r");
@@ -158,7 +158,10 @@ const char * bcanalysis::getKey(unsigned short int chrom){
 int bcanalysis::importRawSignal(const char * signalFile,const char * filetype){
 	FILE * fh;
 	fh = fopen(signalFile,"r");
-	if(fh == NULL){return 1;}
+	if(fh == NULL){
+		cout << "ERROR opening file " << inputFile << "\n";
+		return 1;
+	}
 	
 	char cChrom[128];
 	unsigned long int pos;
@@ -173,8 +176,8 @@ int bcanalysis::importRawSignal(const char * signalFile,const char * filetype){
 	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
 
 	if(strcmp(filetype,bed) != 0 && strcmp(filetype,bowtie) != 0 && strcmp(filetype,tagAlign) != 0){
-		cout << "Unknown file type: " << filetype << "\nOptions are [bowtie|bed|tagAlign]" << endl;
-		return 2;
+		cout << "ERROR: Unknown file type- " << filetype << "\nOptions are [bowtie|bed|tagAlign]" << endl;
+		return 1;
 	}
 	
 	while(!feof(fh)){
