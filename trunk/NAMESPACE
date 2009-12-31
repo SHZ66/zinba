@@ -18,6 +18,7 @@ export(zeroinfl)
 export(startenrichment)
 export(residuals.zeroinfl)
 export(zcrosscorr)
+export(convertmappability)
 # ------------------------------------------
 # S3method declarations.  
 # ------------------------------------------
