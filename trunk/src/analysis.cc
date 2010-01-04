@@ -194,6 +194,11 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 
 int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,int printStop,unsigned short int pProfile[]){
 	FILE * fh;
+	
+	if(pFlag == 0){
+		cout << "printing output to " << outputFile << endl;
+	}
+	
 	if(pFlag == 0){
 		fh = fopen(outputFile,"w");
 		if(fh==NULL){
