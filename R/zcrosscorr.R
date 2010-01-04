@@ -3,10 +3,6 @@ zcrosscorr <- function(inputfile,filetype,srange=c(50,500),bin=5,acceptflag=F){
   zcc <- get.binding.characteristics(data=data,srange=srange,bin=bin,accept.all.tags=acceptflag)
   print(paste("binding peak separation distance =",zcc$peak$x))
   jfile <- inputfile
-#  dots <- grep("\.",jfile)
-#  substr(jfile,,)
-#  paste(jfile,"_ccplot_",srange[0],"_",srange[1],"bp.jpeg",sep="")
-#  print(paste("Printing cc plot to",jfile))
   print_zcc(zccprofile=zcc,outfile=jfile)
   return(zcc)
 }
