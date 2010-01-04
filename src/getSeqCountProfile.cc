@@ -23,7 +23,11 @@ void getSeqCountProfile(char **Rinputfile,char **Rwinlist,double *Rthreshold,cha
 	int wformat = Rwformat[0];
 	const char* twobitfile = Rtwobitfile[0];
 	const char* chromosome = Rchromosome[0];
-		
+	
+	Rprintf("Inputfile is %s\n",inputFile);
+	Rprintf("Outputfile is %s\n",outputFile);
+	Rprintf("twobitfile is %s\n",twobitfile);
+
 	analysis newAnalysis;// = new analysis;
 	int ret=newAnalysis.importCoords(winlist,threshold,method,wformat);
 
