@@ -1,4 +1,4 @@
-peakbound=function(bpprofile,outfile,pwinSize=200, winSize,quantile=.75){
+peakbound=function(bpprofile,output,pwinSize=200, winSize,quantile=.75){
 	    localMaximum=function(x) {
 		    #from MassSpecWavelet Package in BioConductor, written by Pan Du and Simon Lin, modified by Naim Rashid	
 		    len <- length(x)
@@ -35,13 +35,13 @@ peakbound=function(bpprofile,outfile,pwinSize=200, winSize,quantile=.75){
 		#return local max indexes adjusting for flanking deletion
 	    	return(c(length(which(localMax>0)),which(localMax>0)))
 	} 
-      peakbound2 <- function(f, bpprofile, outfile) {
+      peakbound2 <- function(f, bpprofile, output) {
        f.check <- function(x) {
          x <- f(x)
          if(!is.numeric(x)) stop("Need a numeric result")
          as.integer(x)
        }
-       .Call("peakboundc", body(f.check), as.character(bpprofile), as.character(outfile),new.env(), PACKAGE='zinba')
+       .Call("peakboundc", body(f.check), as.character(bpprofile), as.character(output),new.env(), PACKAGE='zinba')
       }
-      peakbound2(localMaximum, bpprofile, outfile)
+      peakbound2(localMaximum, bpprofile, output)
 }

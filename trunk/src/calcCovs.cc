@@ -93,7 +93,6 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		}
 
 		alignability = new unsigned short int[chr_size[currchr] + 1];
-//		alignability[chr_size[currchr]] = 0;
 		for(int ch = chr_size[currchr]; ch--;)
 			alignability[ch] = 0;
 		string alignFileS = alignDir + chromReport + ".wig";

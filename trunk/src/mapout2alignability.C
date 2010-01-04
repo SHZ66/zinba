@@ -35,17 +35,12 @@ void mapout2alignability(char **Rfilelist,char **Routfile){
 		Rprintf("\t%s .......\n",chrm.c_str());
 		fprintf(fout,"fixedStep chrom=%s start=1 step=1\n",chrm.c_str());
 		char mapChar[1];
-		int mval;
-		int countvals = 0;
 		ifstream mfile (mapfile,ios::in|ios::binary);
 		if(mfile.is_open()){
 			while(!mfile.eof()){
-				mfile.seekg(countvals,ios::beg);
 				mfile.read(mapChar,1);
 				unsigned char mchr = mapChar[0];
-				mval = (int) mchr;
-				fprintf(fout,"%d\n",mval);
-				countvals++;
+				fprintf(fout,"%d\n",(int) mchr);
 			}
 		}
 		mfile.close();
