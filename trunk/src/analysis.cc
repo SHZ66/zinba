@@ -195,7 +195,11 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,int printStop,unsigned short int pProfile[]){
 	FILE * fh;
 	if(pFlag == 0){
-		fh = fopen(outputFile,"w"); 
+		fh = fopen(outputFile,"w");
+		if(fh==NULL){
+			cout << "Unable to open output file: " << outputFile << endl;
+			return 1;
+		}
 		fprintf(fh,"COORDID\tCHROM\tSTART\tSTOP\tSTRAND");
 		for(int p = 1;p <= printStop;p++){
 			fprintf(fh,"\tPosition%i",p);
@@ -203,6 +207,10 @@ int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pC
 		fprintf(fh,"\n");
 	}else if (pFlag == 1){
 		fh = fopen(outputFile,"a");
+		if(fh==NULL){
+			cout << "Unable to open output file: " << outputFile << endl;
+			return 1;
+		}
 	}
 	const char * chromName = getKey(pChrom);
 	char strand[] = "+";
