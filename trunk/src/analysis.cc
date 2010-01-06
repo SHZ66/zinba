@@ -308,7 +308,7 @@ int lcount = 0;
 						rwline = fscanf(fh,"%s%lu%lu%d%lf%lf%lf%lf%hu%lf%lf",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&el,&qFlag,&sigVal,&rs);
 //						rwline = fscanf(fh,"%s%lu%lu%*d%*f%*f%*f%*f%hu%f%*f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 
-	cout << cChrom << " " << iStart << " " << iEnd << " " << ec << " " << ic << " " << gc << " " << ap << " " << el << " " << sigVal << " " << rs << endl;
+	cout << cChrom << "\t" << iStart << "\t" << iEnd << "\t" << ec << "\t" << ic << "\t" << gc << "\t" << ap << "\t" << el << "\t" << sigVal << "\t" << rs << endl;
 	lcount++;
 	if(lcount > 5)
 		exit(1);
