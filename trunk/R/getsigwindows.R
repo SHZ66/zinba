@@ -226,7 +226,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
 		data=cbind(data,((data$exp_count>q25)^2),probi2)
 		colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
 	    }else{
-	    	data=cbind(as.character(data$chromosome),data$start,data$stop,((data$exp_count>q25)^2),probi2)
+	    	data=cbind(data[1:3],((data$exp_count>q25)^2),probi2)
 		colnames(data)=c('chromosome','start','stop','q25','peakprob')
 	    }
 	    if(diff==0){
