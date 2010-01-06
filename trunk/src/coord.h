@@ -8,7 +8,7 @@ class coord {
 	public:
 			coord();
 			~coord();
-			coord(unsigned short int, unsigned long int, unsigned long int,unsigned short int,double);
+			coord(unsigned short int, unsigned long int, unsigned long int,unsigned short int,long double);
 			coord(const coord&);
 			bool operator <(coord) const;
 
