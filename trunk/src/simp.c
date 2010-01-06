@@ -234,7 +234,7 @@ while(i<lmaxvec){
 
 for(i=0;i<lmaxvec;i++){ 
 //sprintf(line, "%s\t%s\t%d\t%d\t%s\t%d\t%d\n",ID, chr, pstart, pstop, strand, pstart+results[2*i],pstart+results[2*i+1]);	
-sprintf(line, "%s\t%s\t%d\t%d\t%s\t%f\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,pstart+results[2*i],pstart+results[2*i+1]);
+sprintf(line, "%s\t%s\t%d\t%d\t%s\t%.14f\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,pstart+results[2*i],pstart+results[2*i+1]);
 fputs(line, FO);
 }
 
