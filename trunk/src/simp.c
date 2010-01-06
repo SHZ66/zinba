@@ -68,7 +68,7 @@ double sig;
       }else if(i==5){
         strcpy(strand, ptr);
       }else if(i==6){
-		sig = atof(ptr)
+		  sig = atof(ptr);
 	  }else if(i>6){
 		  basecount[i-7]  = atoi(ptr);
 //	  }else if(i>5){
