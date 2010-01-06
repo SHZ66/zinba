@@ -291,13 +291,11 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 						rwline = fscanf(fh,"%s%lu%lu%hu%lf%*lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 						if(sigVal <= threshold && rwline > 0){
 							readResult = 1;
-							winSize = iEnd - iStart;
 						}
 					}else if(wformat == 1){
 						rwline = fscanf(fh,"%s%lu%lu%*d%*lf%*lf%*lf%*lf%hu%lf%*lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 						if(sigVal <= threshold && rwline > 0){
 							readResult = 1;
-							winSize = iEnd - iStart;
 						}
 					}
 				}else if(strcmp(method,mixture) == 0){
@@ -305,13 +303,11 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 						rwline = fscanf(fh,"%s%lu%lu%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 						if(sigVal >= threshold && rwline > 0){
 							readResult = 1;
-							winSize = iEnd - iStart;
 						}
 					}else if(wformat == 1){
 						rwline = fscanf(fh,"%s%lu%lu%*d%*lf%*lf%*lf%*lf%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 						if(sigVal >= threshold && rwline > 0){
 							readResult = 1;
-							winSize = iEnd - iStart;
 						}
 					}
 				}
@@ -328,6 +324,7 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 		}
 	}
 	fclose(wlist);
+	winSize = iEnd - iStart;
 	winSizeThresh = winSize * 10;
 	cout << "\nImported " << coordIN_slist.size() << " coordinates" << endl;
 	coordIN_slist.sort();
