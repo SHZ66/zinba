@@ -9,13 +9,15 @@ coord::coord(const coord& c){
 	start = c.start;
 	end = c.end;
 	qFlag = c.qFlag;
+	sigVal = c.sigVal;
 }
 
-coord::coord(unsigned short int _chrom, unsigned long int _start, unsigned long int _end, unsigned short int _qFlag){
+coord::coord(unsigned short int _chrom, unsigned long int _start, unsigned long int _end, unsigned short int _qFlag,long double _sigVal){
 	chrom = _chrom;
 	start = _start;
 	end = _end;
 	qFlag = _qFlag;
+	sigVal = _sigVal;
 }
 
 bool coord::operator <(coord other) const{
