@@ -269,7 +269,7 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 	unsigned long int iEnd;
 	unsigned short int qFlag;
 
-	long double sigVal;
+	double sigVal;
 
 	const char *pscl = "pscl";
 	const char *mixture = "mixture";
