@@ -297,7 +297,7 @@ int lcount = 0;
 				readResult = 0;
 				if(strcmp(method,pscl) == 0){
 					if(wformat == 0){
-						rwline = fscanf(fh,"%s%lu%lu%hu%f%*f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+						rwline = fscanf(fh,"%s%lu%lu%hu%lf%*lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 						if(sigVal <= threshold && rwline > 0){
 							readResult = 1;
 							winSize = iEnd - iStart;
@@ -307,11 +307,11 @@ int lcount = 0;
 //						rwline = fscanf(fh,"%s%lu%lu%*d%*f%*f%*f%*f%hu%f%*f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 
 						
-	std::cout.precision(11);
-	cout << cChrom << "\t" << iStart << "\t" << iEnd << "\t" << qFlag << "\t" << sigVal << endl;
-	lcount++;
-	if(lcount > 5)
-		exit(1);
+//	std::cout.precision(14);
+//	cout << cChrom << "\t" << iStart << "\t" << iEnd << "\t" << qFlag << "\t" << sigVal << endl;
+//	lcount++;
+//	if(lcount > 5)
+//		exit(1);
 						
 						if(sigVal <= threshold && rwline > 0){
 							readResult = 1;
@@ -320,14 +320,13 @@ int lcount = 0;
 					}
 				}else if(strcmp(method,mixture) == 0){
 					if(wformat == 0){
-						rwline = fscanf(fh,"%s%lu%lu%hu%Lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+						rwline = fscanf(fh,"%s%lu%lu%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 						if(sigVal >= threshold && rwline > 0){
 							readResult = 1;
 							winSize = iEnd - iStart;
 						}
 					}else if(wformat == 1){
-						int exp;double inp,gc,ap,ecl;
-						rwline = fscanf(fh,"%s%lu%lu%*d%*f%*f%*f%*f%hu%Lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+						rwline = fscanf(fh,"%s%lu%lu%*d%*lf%*lf%*lf%*lf%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 						if(sigVal >= threshold && rwline > 0){
 							readResult = 1;
 							winSize = iEnd - iStart;
