@@ -12,7 +12,7 @@ coord::coord(const coord& c){
 	sigVal = c.sigVal;
 }
 
-coord::coord(unsigned short int _chrom, unsigned long int _start, unsigned long int _end, unsigned short int _qFlag,long double _sigVal){
+coord::coord(unsigned short int _chrom, unsigned long int _start, unsigned long int _end, unsigned short int _qFlag,double _sigVal){
 	chrom = _chrom;
 	start = _start;
 	end = _end;
