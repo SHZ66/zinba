@@ -195,7 +195,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	return 0;
 }
 
-int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,double pSigVal,int printStop,unsigned short int pProfile[]){
+int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,long double pSigVal,int printStop,unsigned short int pProfile[]){
 	FILE * fh;
 	if(pFlag == 0){
 		fh = fopen(outputFile,"w");
@@ -269,7 +269,7 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 	unsigned long int iEnd;
 	unsigned short int qFlag;
 
-	double sigVal;
+	long double sigVal;
 
 	const char *pscl = "pscl";
 	const char *mixture = "mixture";
@@ -305,7 +305,7 @@ int lcount = 0;
 					}else if(wformat == 1){
 						
 						int ec;double ic,gc,ap,el,rs;
-						rwline = fscanf(fh,"%s%lu%lu%d%lf%lf%lf%lf%hu%lf%lf",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&el,&qFlag,&sigVal,&rs);
+						rwline = fscanf(fh,"%s%lu%lu%d%lf%lf%lf%lf%hu%Lf%lf",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&el,&qFlag,&sigVal,&rs);
 //						rwline = fscanf(fh,"%s%lu%lu%*d%*f%*f%*f%*f%hu%f%*f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 
 	cout << cChrom << "\t" << iStart << "\t" << iEnd << "\t" << ec << "\t" << ic << "\t" << gc << "\t" << ap << "\t" << el << "\t" << qFlag << "\t" << sigVal << "\t" << rs << endl;
