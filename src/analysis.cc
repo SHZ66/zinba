@@ -94,7 +94,8 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 							profile[pIndex] = basepair[s];
 							pIndex++;
 						}
-						if(outputData( outputFile,printFlag,i->chrom,startPos,stopPos,pIndex,profile) != 0){
+//						if(outputData( outputFile,printFlag,i->chrom,startPos,stopPos,pIndex,profile) != 0){
+						if(outputData( outputFile,printFlag,i->chrom,startPos,stopPos,i->sigVal,pIndex,profile) != 0){
 							cout << "Error printing output to file, exiting" << endl;
 							return 1;
 						}
@@ -174,7 +175,8 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 					profile[pIndex] = basepair[s];
 					pIndex++;
 				}
-				if(outputData( outputFile,printFlag,i->chrom,startPos,stopPos,pIndex,profile) != 0){
+//				if(outputData( outputFile,printFlag,i->chrom,startPos,stopPos,pIndex,profile) != 0){
+				if(outputData( outputFile,printFlag,i->chrom,startPos,stopPos,i->sigVal,pIndex,profile) != 0){
 					cout << "Error printing output to file, exiting" << endl;
 					return 1;
 				}
@@ -193,7 +195,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	return 0;
 }
 
-int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,int printStop,unsigned short int pProfile[]){
+int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,long double pSigVal,int printStop,unsigned short int pProfile[]){
 	FILE * fh;
 	if(pFlag == 0){
 		fh = fopen(outputFile,"w");
@@ -201,7 +203,8 @@ int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pC
 			cout << "Unable to open output file: " << outputFile << endl;
 			return 1;
 		}
-		fprintf(fh,"COORDID\tCHROM\tSTART\tSTOP\tSTRAND");
+//		fprintf(fh,"COORDID\tCHROM\tSTART\tSTOP\tSTRAND");
+		fprintf(fh,"COORDID\tCHROM\tSTART\tSTOP\tSTRAND\tSIGVAL");
 		for(int p = 1;p <= printStop;p++){
 			fprintf(fh,"\tPosition%i",p);
 		}
@@ -221,7 +224,8 @@ int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pC
 	sprintf( start,"%d", pStart);
 	sprintf( stop,"%d", pStop);
 	strcpy(winID,chromName);strcat(winID,":");strcat(winID,start);strcat(winID,"-");strcat(winID,stop);
-	fprintf(fh,"%s\t%s\t%lu\t%lu\t%s",winID,chromName,pStart,pStop,strand);
+//	fprintf(fh,"%s\t%s\t%lu\t%lu\t%s",winID,chromName,pStart,pStop,strand);
+	fprintf(fh,"%s\t%s\t%lu\t%lu\t%s\t%Lf",winID,chromName,pStart,pStop,strand,pSigVal);
 	for(int posP = 0; posP < printStop;posP++){
 		fprintf(fh,"\t%i",pProfile[posP]);
 	}
@@ -320,7 +324,7 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 					if(qFlag == 1){
 						string chromIn(cChrom);
 						unsigned short int chromInt = getHashValue(chromIn.c_str());
-						coord c(chromInt,iStart,iEnd,qFlag);
+						coord c(chromInt,iStart,iEnd,qFlag,sigVal);
 						coordIN_slist.push_back(c);
 					}
 				}
@@ -334,44 +338,56 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 	coordIN_slist.sort();
 	
 	list<coord>::iterator back =  coordIN_slist.begin();	
-	list<coord> tempcoord_list;
-	tempcoord_list.push_front(*back);
+//	list<coord> tempcoord_list;
+	coord tempCoord = *back;
+//	tempcoord_list.push_front(*back);
 	coordIN_slist.erase(back++);
-	list<coord>::iterator tempIt = tempcoord_list.begin();
+//	list<coord>::iterator tempIt = tempcoord_list.begin();
 	int flagFinish = 0;
 	
 	while(flagFinish == 0){
 		if(coordIN_slist.empty())
 			flagFinish = 1;
-		if(flagFinish == 0 && back->chrom == tempIt->chrom && back->start <= tempIt->end+1){
-			tempcoord_list.push_back(*back);
-			tempIt = tempcoord_list.end();
-			tempIt--;
+//		if(flagFinish == 0 && back->chrom == tempIt->chrom && back->start <= tempIt->end+1){
+		if(flagFinish == 0 && back->chrom == tempCoord.chrom && back->start <= tempCoord.end+1){
+			tempCoord.end = back->end;
+			if(strcmp(method,pscl) == 0 && tempCoord.sigVal > back->sigVal)
+				tempCoord.sigVal = back->sigVal;
+			else if(strcmp(method,mixture) == 0 && tempCoord.sigVal < back->sigVal)
+				tempCoord.sigVal = back->sigVal;
+//			tempcoord_list.push_back(*back);
+//			tempIt = tempcoord_list.end();
+//			tempIt--;
 			coordIN_slist.erase(back++);
 		}else{
-			tempIt = tempcoord_list.begin();
-			unsigned short int tChrom = tempIt->chrom;
-			unsigned long int start = tempIt->start;
-			unsigned long int stop = tempIt->end;
-			tempIt++;
-			while(tempIt != tempcoord_list.end()){
-				stop = tempIt->end;
-				tempIt++;
-			}
-			if((stop-start) <= winSizeThresh){
-				coord c(tChrom,start,stop,1);
-				coordOUT_slist.push_back(c);
+//			tempIt = tempcoord_list.begin();
+//			unsigned short int tChrom = tempIt->chrom;
+//			unsigned long int start = tempIt->start;
+//			unsigned long int stop = tempIt->end;
+//			tempIt++;
+//			while(tempIt != tempcoord_list.end()){
+//				stop = tempIt->end;
+//				tempIt++;
+//			}
+//			if((stop-start) <= winSizeThresh){
+			if((tempCoord.end-tempCoord.start) <= winSizeThresh){
+//				coord c(tChrom,start,stop,1);
+//				coordOUT_slist.push_back(c);
+				coordOUT_slist.push_back(tempCoord);
 			}else{
 				//REMOVE ONCE C PEAKBOUND IS RUNNING
-				const char * cName = getKey(tChrom);
-				cout << "Excluding " << cName << ":" << start << "-" << stop << " SIZE=" << (stop-start) << endl;
+//				const char * cName = getKey(tChrom);
+//				cout << "Excluding " << cName << ":" << start << "-" << stop << " SIZE=" << (stop-start) << endl;
+				const char * cName = getKey(tempCoord.chrom);
+				cout << "Excluding " << cName << ":" << tempCoord.start << "-" << tempCoord.end << " SIZE=" << (tempCoord.end-tempCoord.start) << endl;
 			}
 
 			if(flagFinish == 0){
-				tempcoord_list.clear();
-				tempcoord_list.push_front(*back);
+//				tempcoord_list.clear();
+//				tempcoord_list.push_front(*back);
+				tempCoord = *back;
 				coordIN_slist.erase(back++);
-				tempIt = tempcoord_list.begin();
+//				tempIt = tempcoord_list.begin();
 			}
 		}
 	}
