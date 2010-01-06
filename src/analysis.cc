@@ -305,7 +305,7 @@ int lcount = 0;
 					}else if(wformat == 1){
 						
 						int ec;double ic,gc,ap,el,rs;
-						rwline = fscanf(fh,"%s%lu%lu%d%f%f%f%f%hu%f%f",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&el,&qFlag,&sigVal,&rs);
+						rwline = fscanf(fh,"%s%lu%lu%d%lf%lf%lf%lf%hu%lf%lf",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&el,&qFlag,&sigVal,&rs);
 //						rwline = fscanf(fh,"%s%lu%lu%*d%*f%*f%*f%*f%hu%f%*f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 
 	cout << cChrom << " " << iStart << " " << iEnd << " " << ec << " " << ic << " " << gc << " " << ap << " " << el << " " << sigVal << " " << rs << endl;
