@@ -63,8 +63,8 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 	list<coord> coordOUT_slist;
 	
 	int lengthThresholds = sizeof(thresholds)/sizeof(double);
-cout << "Thresholds are " << endl;
-	for(int t = 0; t <= lengthThresholds; t++){
+cout << "There are " << lengthThresholds << " thresholds: " << endl;
+	for(int t = 0; t <= (lengthThresholds+1); t++){
 		cout << thresholds[t] << " ";
 	}
 cout << endl;
