@@ -290,11 +290,19 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 			if(fh == NULL){return 1;}
 			cout << "\tImporting windows from " << signalFile.c_str() << "..." << endl;
 			fgets(firstline,256,fh);
+
+int lcount = 0;
+			
 			while(!feof(fh)){
 				readResult = 0;
 				if(strcmp(method,pscl) == 0){
 					if(wformat == 0){
-						rwline = fscanf(fh,"%s%lu%lu%hu%Lf%*f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+						rwline = fscanf(fh,"%s%lu%lu%hu%f%*f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+
+cout << cChrom << " " << iStart << " " << iEnd << " " << sigVal << endl;
+lcount++;
+if(lcount > 5)
+	exit(1);
 						if(sigVal <= threshold && rwline > 0){
 							readResult = 1;
 							winSize = iEnd - iStart;
