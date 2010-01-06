@@ -21,7 +21,6 @@ class analysis{
 		~analysis(); //Implemented
 		int importCoords(const char *,double,const char *,int);//Implemented
 		int processCoords(const char *,const char *,const char *,const char *);//Implemented
-//		int outputData(const char *,int,unsigned short int,unsigned long int,unsigned long int,int,unsigned short int[]);//Implemented
 		int outputData(const char *,int,unsigned short int,unsigned long int,unsigned long int,double,int,unsigned short int[]);//Implemented
 
 		struct ltstr{
