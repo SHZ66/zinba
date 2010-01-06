@@ -111,7 +111,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
 		if(sum(colnames(data)=='exp_cnvwin_log')==1){data2$exp_cnvwin_log=exp(data2$exp_cnvwin_log)-1}
 		prop2=startprop
             	prop1=1-prop0-prop2
-		t=rq(formula, tau=.5+(.3*sum(Y==min(Y))+.2*sum(Y==min(Y+1)))/length(Y), data=data2, method='pfn')
+		t=rq(formula, tau=1-prop2, data=data2, method='pfn')
 		priorCOUNTweight=rep(10^-10, length(Y))      
 		priorCOUNTweight[as.double(which(t$residuals>quantile(t$residuals,1-prop2)))]=1-10^-10
 		rm(data2)
@@ -222,9 +222,6 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
                 i=i+1 
             }
             numpeaks=length(which(probi2>peakconfidence))
-	    if(diff==0){
-		data$q25[Y-mui1<0]=0
-            }
 	    if(printFullOut == 1){
 		data=cbind(data,((data$exp_count>q25)^2),probi2)
 		colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
@@ -232,6 +229,9 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
 	    	data=cbind(as.character(data$chromosome),data$start,data$stop,((data$exp_count>q25)^2),probi2)
 		colnames(data)=c('chromosome','start','stop','q25','peakprob')
 	    }
+	    if(diff==0){
+		data$q25[Y-mui1<0]=0
+            }
             line0 = paste("Processing ",files[fnum])
             line2=paste('Selected number of peaks: ', as.character(numpeaks),sep='')
     ### PRINT SIGNIFICANT WINDOWS
