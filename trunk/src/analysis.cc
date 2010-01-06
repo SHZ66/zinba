@@ -269,7 +269,7 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 	unsigned long int iEnd;
 	unsigned short int qFlag;
 
-	double sigVal;
+	long double sigVal;
 
 	const char *pscl = "pscl";
 	const char *mixture = "mixture";
@@ -303,9 +303,12 @@ int lcount = 0;
 							winSize = iEnd - iStart;
 						}
 					}else if(wformat == 1){
-						rwline = fscanf(fh,"%s%lu%lu%*d%*f%*f%*f%*f%hu%f%*f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+						
+						int ec;double ic,gc,ap,el,rs;
+						rwline = fscanf(fh,"%s%lu%lu%d%f%f%f%f%hu%f%f",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&el,&qFlag,&sigVal,&rs);
+//						rwline = fscanf(fh,"%s%lu%lu%*d%*f%*f%*f%*f%hu%f%*f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 
-	cout << cChrom << " " << iStart << " " << iEnd << " " << sigVal << endl;
+	cout << cChrom << " " << iStart << " " << iEnd << " " << ec << " " << ic << " " << gc << " " << ap << " " << el << " " << sigVal << " " << rs << endl;
 	lcount++;
 	if(lcount > 5)
 		exit(1);
