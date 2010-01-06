@@ -195,7 +195,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	return 0;
 }
 
-int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,long double pSigVal,int printStop,unsigned short int pProfile[]){
+int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,double pSigVal,int printStop,unsigned short int pProfile[]){
 	FILE * fh;
 	if(pFlag == 0){
 		fh = fopen(outputFile,"w");
@@ -225,7 +225,7 @@ int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pC
 	sprintf( stop,"%d", pStop);
 	strcpy(winID,chromName);strcat(winID,":");strcat(winID,start);strcat(winID,"-");strcat(winID,stop);
 //	fprintf(fh,"%s\t%s\t%lu\t%lu\t%s",winID,chromName,pStart,pStop,strand);
-	fprintf(fh,"%s\t%s\t%lu\t%lu\t%s\t%Lf",winID,chromName,pStart,pStop,strand,pSigVal);
+	fprintf(fh,"%s\t%s\t%lu\t%lu\t%s\t%f",winID,chromName,pStart,pStop,strand,pSigVal);
 	for(int posP = 0; posP < printStop;posP++){
 		fprintf(fh,"\t%i",pProfile[posP]);
 	}
@@ -268,7 +268,9 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 	unsigned long int iStart;
 	unsigned long int iEnd;
 	unsigned short int qFlag;
-	long double sigVal;
+
+	double sigVal;
+
 	const char *pscl = "pscl";
 	const char *mixture = "mixture";
 	char sigFile [256];
