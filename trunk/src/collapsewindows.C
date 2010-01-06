@@ -181,7 +181,7 @@ void collapse_windows(const char * winlist, const char * method, int wformat, do
 		char tval[128];
 		sprintf(tval,"%.14lf",thresholds[t]);
 		string tv = string(tval);
-		string outputFile = outfile + ".coords";
+		string outputFile = outfile + "_" + tv + ".coords";
 		fh = fopen(outputFile.c_str(),"w");
 		if(fh==NULL){error("Unable to open output file: %s\n", outputFile.c_str());}
 		fprintf(fh,"COORDID\tCHROM\tSTART\tSTOP\tSTRAND\tSIGVAL\n");
