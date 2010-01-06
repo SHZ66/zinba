@@ -2,6 +2,7 @@ getrefinedpeaks=function(winlist,basecountfile,bpout,peakout,twoBit,winSize,pWin
     if(method=='mixture'){
         threshold = peakconfidence
     }
+    print(paste("Threshold is ",threshold,sep=""))
     basecountimport(inputfile=basecountfile,winlist=winlist,threshold=threshold,method=method,printFullOut=printFullOut,outputfile=bpout,twobitfile=twoBit)
     peakbound(bpprofile=bpout,output=peakout,pwinSize=pWinSize,winSize=winSize,quantile=pquant)
     unlink(bpout)
