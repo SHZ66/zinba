@@ -48,6 +48,7 @@ void collapse_windows(const char * winlist, const char * method, int wformat, do
 	int readResult = 0;
 	char firstline [256];
 	int rwline;
+	string chr;
 	///////////////////////////
 	unsigned long int winSizeThresh;
 	int winSize;
