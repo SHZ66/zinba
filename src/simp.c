@@ -11,8 +11,8 @@
 #define maxx(x,y) ((x) > (y) ? (x) : (y))
 #define MAX_LEN 50000
 
-SEXP mkans(int *);
-int feval(int *, SEXP ,SEXP );
+SEXP mkans(int *, int);
+//int feval(int *, SEXP ,SEXP );
 
 SEXP peakboundc(SEXP f, SEXP bpprofile, SEXP outputfile, SEXP rho){
 
@@ -51,6 +51,10 @@ double sig;
     if(fgets(str_buf, MAX_LEN, FI) == NULL){
       error("there are only %d lines in file %s\n", i, input);
     }
+//print headers to file
+sprintf(line, "ID\tChrom\tStart\tStop\tStrand\tSig\tMaxloc\tMax\tpStart\tpStop\n");
+fputs(line, FO);
+
 //read in a line, save the information in each, perform peakbounds, then print out, repeat for each line
  while(fgets(str_buf, MAX_LEN, FI) != NULL){
     i = 0;
@@ -81,13 +85,11 @@ double sig;
     error("%s is not tab-delimated\n", input);
   }
  
-
- 
-  defineVar(install("x"), mkans(basecount), rho);
-  int l=round(INTEGER(eval(f, rho))[0]);
-  int maxvec[l];
+  defineVar(install("x"), mkans(basecount, lbasecount), rho);
+    int l=round(INTEGER(eval(f, rho))[0]);
+    int maxvec[l];
   for(i=1;i<=l;i++){
-  	defineVar(install("x"), mkans(basecount), rho);
+  	defineVar(install("x"), mkans(basecount, lbasecount), rho);
   	maxvec[i-1]=INTEGER(eval(f, rho))[i];
   }
 ////////////////////////////////////////////////////////////////////////
@@ -186,6 +188,9 @@ int dist, mingap, indexmingap, sep;
 
 //final outputted vector of bounds after merging, contains zeros
 //intialize results vector
+for(i=0; i<2*lmaxvec;i++){
+	results[i]=0;
+}
 results[0]=maxvecbounds[0];
 results[1]=maxvecbounds[1];
 
@@ -231,10 +236,10 @@ while(i<lmaxvec){
 	i=i+1;
 }
 /////////////////////////////////////////////////////////////////////////
-
-for(i=0;i<lmaxvec;i++){ 
-//sprintf(line, "%s\t%s\t%d\t%d\t%s\t%d\t%d\n",ID, chr, pstart, pstop, strand, pstart+results[2*i],pstart+results[2*i+1]);	
-sprintf(line, "%s\t%s\t%d\t%d\t%s\t%.14f\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,pstart+results[2*i],pstart+results[2*i+1]);
+int pos=0;
+for(i=0;i<lmaxvec;i++){
+if(results[2*i]==0){break;}	
+sprintf(line, "%s\t%s\t%d\t%d\t%s\t%f\t%d\t%d\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,pstart+maxvec[i],basecount[maxvec[i]],pstart+results[2*i],pstart+results[2*i+1]);
 fputs(line, FO);
 }
 
@@ -247,11 +252,12 @@ fputs(line, FO);
 }
 
 
-SEXP mkans(int *x)
+
+SEXP mkans(int *x, int len)
      {
          SEXP ans;
 	 	
-	 int l = 1500;
+	 int l = len;
          PROTECT(ans = allocVector(INTSXP, l));
 	 for(int i=0;i<l; i++){
          	INTEGER(ans)[i] = x[i];
@@ -260,14 +266,14 @@ SEXP mkans(int *x)
          return ans;
      }
      
-     int feval(int *x, SEXP f,SEXP rho)
+   /*  int feval(int *x, SEXP f,SEXP rho)
      {
          defineVar(install("x"), mkans(x), rho);
 	 //PROTECT(ans = allocVector(INTSXP, l));
 	 return(INTEGER(eval(f, rho))[1]);
      }
      
-     SEXP zero(SEXP f, SEXP guesses, SEXP tol, SEXP rho)
+    SEXP zero(SEXP f, SEXP guesses, SEXP tol, SEXP rho)
      {
          int * x0 = INTEGER(guesses);
          int f0, f1, fc, xc;
@@ -283,5 +289,5 @@ SEXP mkans(int *x)
 
 		
 	return mkans(x0);
-     }
+     }*/
 
