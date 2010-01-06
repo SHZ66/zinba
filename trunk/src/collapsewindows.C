@@ -2,6 +2,7 @@
 #include <fstream>
 #include <stdio.h>
 #include "coord.h"
+#include "pc.h"
 #include <sstream>
 #include <string>
 #include <string.h>
