@@ -62,6 +62,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	string field;
 //////////////////////////////
 	int profile_extend = 500;
+//	int profile_extend = 0;
 //////////////////////////////
 	int printFlag = 0;
 	int getChrmData = 0;
@@ -316,10 +317,12 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 					}
 				}
 				if(readResult == 1){
-					string chromIn(cChrom);
-					unsigned short int chromInt = getHashValue(chromIn.c_str());
-					coord c(chromInt,iStart,iEnd,qFlag);
-					coordIN_slist.push_back(c);
+					if(qFlag == 1){
+						string chromIn(cChrom);
+						unsigned short int chromInt = getHashValue(chromIn.c_str());
+						coord c(chromInt,iStart,iEnd,qFlag);
+						coordIN_slist.push_back(c);
+					}
 				}
 			}
 			fclose(fh);
@@ -332,8 +335,6 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 	
 	list<coord>::iterator back =  coordIN_slist.begin();	
 	list<coord> tempcoord_list;
-	while(back->qFlag == 0)
-		coordIN_slist.erase(back++);
 	tempcoord_list.push_front(*back);
 	coordIN_slist.erase(back++);
 	list<coord>::iterator tempIt = tempcoord_list.begin();
@@ -342,7 +343,7 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 	while(flagFinish == 0){
 		if(coordIN_slist.empty())
 			flagFinish = 1;
-		if(flagFinish == 0 && back->qFlag == 1 && back->chrom == tempIt->chrom && back->start <= tempIt->end+1){
+		if(flagFinish == 0 && back->chrom == tempIt->chrom && back->start <= tempIt->end+1){
 			tempcoord_list.push_back(*back);
 			tempIt = tempcoord_list.end();
 			tempIt--;
@@ -368,14 +369,8 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 
 			if(flagFinish == 0){
 				tempcoord_list.clear();
-				if(back->qFlag == 1){
-					tempcoord_list.push_front(*back);
-					coordIN_slist.erase(back++);
-				}else{
-					while(back->qFlag == 0)
-						coordIN_slist.erase(back++);
-					tempcoord_list.push_front(*back);
-				}
+				tempcoord_list.push_front(*back);
+				coordIN_slist.erase(back++);
 				tempIt = tempcoord_list.begin();
 			}
 		}
