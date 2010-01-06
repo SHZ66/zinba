@@ -26,6 +26,10 @@ SEXP peakboundc(SEXP f, SEXP bpprofile, SEXP outputfile, SEXP rho){
   const char *input =CHAR(STRING_ELT(bpprofile,0));
   const char *output=CHAR(STRING_ELT(outputfile,0));
 
+/////////////////
+double sig;
+/////////////////
+	
   for(j=0; j<MAX_LEN;j++){
 	basecount[j]=0;
   }
@@ -63,10 +67,15 @@ SEXP peakboundc(SEXP f, SEXP bpprofile, SEXP outputfile, SEXP rho){
         pstop = atol(ptr);
       }else if(i==5){
         strcpy(strand, ptr);
-      }else if(i>5){
-        basecount[i-6]  = atoi(ptr);
+      }else if(i==6){
+		sig = atof(ptr)
+	  }else if(i>6){
+		  basecount[i-7]  = atoi(ptr);
+//	  }else if(i>5){
+//        basecount[i-6]  = atoi(ptr);
       }
-      lbasecount=i-5;
+//      lbasecount=i-5;
+		lbasecount=i-6;
     } while ((ptr = strtok(NULL, delim)) != NULL);
   }else{
     error("%s is not tab-delimated\n", input);
@@ -224,7 +233,8 @@ while(i<lmaxvec){
 /////////////////////////////////////////////////////////////////////////
 
 for(i=0;i<lmaxvec;i++){ 
-sprintf(line, "%s\t%s\t%d\t%d\t%s\t%d\t%d\n",ID, chr, pstart, pstop, strand, pstart+results[2*i],pstart+results[2*i+1]);	
+//sprintf(line, "%s\t%s\t%d\t%d\t%s\t%d\t%d\n",ID, chr, pstart, pstop, strand, pstart+results[2*i],pstart+results[2*i+1]);	
+sprintf(line, "%s\t%s\t%d\t%d\t%s\t%f\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,pstart+results[2*i],pstart+results[2*i+1]);
 fputs(line, FO);
 }
 
