@@ -135,6 +135,7 @@ void collapse_windows(const char * winlist, const char * method, int wformat, do
 	list<coord> tempCoords;	
 	
 	for(int t = 0; t <= lengthThresholds; t++){
+		list<coord>::iterator back =  tempCoords.begin();
 		if(strcmp(method,pscl) == 0){
 			while(back != coordIN_slist.end()){
 				if(back->sigVal <= thresholds[t])
@@ -149,8 +150,7 @@ void collapse_windows(const char * winlist, const char * method, int wformat, do
 			}
 		}
 		tempCoords.sort();
-		
-		list<coord>::iterator back =  tempCoords.begin();
+
 		coord tempCoord = *back;
 		back++;
 		while(back != tempCoords.end()){
