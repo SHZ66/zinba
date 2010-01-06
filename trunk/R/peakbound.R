@@ -33,7 +33,7 @@ peakbound=function(bpprofile,output,pwinSize=200, winSize,quantile=.75){
 		#print out local maxes that are not in the flanking regions	
 		localMax[c(1:500, (len-500):len)]=0
 		#return local max indexes adjusting for flanking deletion
-	    	return(c(length(which(localMax>0)),which(localMax>0)))
+		return(c(length(which(localMax>0)),which(localMax>0)))
 	} 
       peakbound2 <- function(f, bpprofile, output) {
        f.check <- function(x) {
