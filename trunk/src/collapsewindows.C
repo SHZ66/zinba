@@ -63,6 +63,12 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 	list<coord> coordOUT_slist;
 	
 	int lengthThresholds = sizeof(thresholds)/sizeof(double);
+cout << "Thresholds are " << endl;
+	for(int t = 0; t <= lengthThresholds; t++){
+		cout << thresholds[t] << " ";
+	}
+cout << endl;
+	
 	double highThresh;
 	if(strcmp(method,pscl) == 0){
 		highThresh = 0;
@@ -174,9 +180,9 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 					string cName = cnames[tempCoord.chrom];
 					cout << "Excluding " << cName.c_str() << ":" << tempCoord.start << "-" << tempCoord.end << " SIZE=" << (tempCoord.end-tempCoord.start) << endl;
 				}
-				tempCoord = *back;
-				back++;
 			}
+			tempCoord = *back;
+			back++;
 		}
 		coordOUT_slist.sort();
 		cout << "\nCollapsed to " << coordOUT_slist.size() << " non-overlapping regions" << endl;
