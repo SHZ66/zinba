@@ -27,10 +27,15 @@ using namespace std;
 using namespace __gnu_cxx; 
 
 extern "C" {
-void collapse_windows(const char * winlist, const char * method, int wformat, double thresholds[]){
+void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwformat, double thresholds[]){
 	hash_map<string, int, hash<string>,equal_to<string> > cind_map;
 	vector<string> cnames;
 
+	const char * winlist = Rwinlist[0];
+	const char * method = Rmethod[0];
+	int wformat = Rwformat[0];
+//	thresholds = ;
+	
 	string winstring = string(winlist);
 	size_t found = winstring.find_last_of(".");
 	string outfile = winstring.substr(0,found);
