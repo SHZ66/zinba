@@ -161,6 +161,7 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 		}
 		tempCoords.sort();
 		cout << "\t" << tempCoords.size() << " coords at this threshold" << endl;
+		back = tempCoords.begin();
 		coord tempCoord = *back;
 		back++;
 		while(back != tempCoords.end()){
