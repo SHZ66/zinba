@@ -62,13 +62,7 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 	list<coord> coordIN_slist;
 	list<coord> coordOUT_slist;
 	
-	int lengthThresholds = sizeof(thresholds)/sizeof(double);
-cout << "There are " << lengthThresholds << " thresholds: " << endl;
-	for(int t = 0; t <= (lengthThresholds+1); t++){
-		cout << thresholds[t] << " ";
-	}
-cout << endl;
-	
+	int lengthThresholds = sizeof(thresholds)/sizeof(double) + 1;	
 	double highThresh;
 	if(strcmp(method,pscl) == 0){
 		highThresh = 0;
@@ -83,6 +77,11 @@ cout << endl;
 				highThresh = thresholds[t];
 		}
 	}
+	cout << "There are " << lengthThresholds << " thresholds: " << endl;
+	for(int t = 0; t <= lengthThresholds; t++){
+		cout << thresholds[t] << " ";
+	}
+	cout << "\nHigh threshold= " << highThresh << endl;
 	
 	while(!feof(wlist)){
 		int rline = fscanf(wlist,"%s",sigFile);
@@ -145,24 +144,23 @@ cout << endl;
 	cout << "\nImported " << coordIN_slist.size() << " coordinates" << endl;
 	coordIN_slist.sort();
 	list<coord> tempCoords;	
+	list<coord>::iterator back;
 	
 	for(int t = 0; t <= lengthThresholds; t++){
-		list<coord>::iterator back =  tempCoords.begin();
-		if(strcmp(method,pscl) == 0){
-			while(back != coordIN_slist.end()){
+		cout << "Processing threshold " << thresholds[t] << endl;
+		back =  coordIN_slist.begin();
+		while(back != coordIN_slist.end()){
+			if(strcmp(method,pscl) == 0){
 				if(back->sigVal <= thresholds[t])
 					tempCoords.push_back(*back);
-				back++;
-			}
-		}else if(strcmp(method,mixture) == 0){
-			while(back != coordIN_slist.end()){
+			}else if(strcmp(method,mixture) == 0){
 				if(back->sigVal >= thresholds[t])
 					tempCoords.push_back(*back);
-				back++;
 			}
+			back++;
 		}
 		tempCoords.sort();
-
+		cout << "\t" << tempCoords.size() << " coords at this threshold" << endl;
 		coord tempCoord = *back;
 		back++;
 		while(back != tempCoords.end()){
@@ -185,7 +183,7 @@ cout << endl;
 			back++;
 		}
 		coordOUT_slist.sort();
-		cout << "\nCollapsed to " << coordOUT_slist.size() << " non-overlapping regions" << endl;
+		cout << "\tCollapsed to " << coordOUT_slist.size() << " regions" << endl;
 	
 		///output data
 		FILE * fh;
