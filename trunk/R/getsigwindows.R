@@ -220,6 +220,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
                 ll_new <- loglikfun(list(start=start, prop1=prop1, prop2=prop2))
                 ll[i]=ll_new
                 i=i+1 
+		if(i>300){break}
             }
             numpeaks=length(which(probi2>peakconfidence))
 	    if(printFullOut == 1){
