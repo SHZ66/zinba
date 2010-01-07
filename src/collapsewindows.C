@@ -189,7 +189,7 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 		///output data
 		FILE * fh;
 		char tval[128];
-		sprintf(tval,"%lf",thresholds[t]);
+		sprintf(tval,"%.14lf",thresholds[t]);
 		string tv = string(tval);
 		string outputFile = outfile + "_" + tv + ".coords";
 		fh = fopen(outputFile.c_str(),"w");

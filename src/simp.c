@@ -239,7 +239,7 @@ while(i<lmaxvec){
 int pos=0;
 for(i=0;i<lmaxvec;i++){
 if(results[2*i]==0){break;}	
-sprintf(line, "%s\t%s\t%d\t%d\t%s\t%f\t%d\t%d\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,pstart+maxvec[i],basecount[maxvec[i]],pstart+results[2*i],pstart+results[2*i+1]);
+sprintf(line, "%s\t%s\t%d\t%d\t%s\t%.14f\t%d\t%d\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,pstart+maxvec[i],basecount[maxvec[i]],pstart+results[2*i],pstart+results[2*i+1]);
 fputs(line, FO);
 }
 
