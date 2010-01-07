@@ -27,14 +27,14 @@ using namespace std;
 using namespace __gnu_cxx; 
 
 extern "C" {
-void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwformat, double thresholds[]){
+void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwformat, int * RlengthThresholds,double thresholds[]){
 	hash_map<string, int, hash<string>,equal_to<string> > cind_map;
 	vector<string> cnames;
 
 	const char * winlist = Rwinlist[0];
 	const char * method = Rmethod[0];
 	int wformat = Rwformat[0];
-//	thresholds = ;
+	lengthThresholds = RlengthThresholds[0];
 	
 	string winstring = string(winlist);
 	size_t found = winstring.find_last_of(".");
@@ -62,7 +62,7 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 	list<coord> coordIN_slist;
 	list<coord> coordOUT_slist;
 	
-	int lengthThresholds = sizeof(thresholds)/sizeof(double) + 1;	
+//	int lengthThresholds = sizeof(thresholds)/sizeof(double) + 1;	
 	double highThresh;
 	if(strcmp(method,pscl) == 0){
 		highThresh = 0;
