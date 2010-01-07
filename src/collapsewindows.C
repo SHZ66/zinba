@@ -34,7 +34,7 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 	const char * winlist = Rwinlist[0];
 	const char * method = Rmethod[0];
 	int wformat = Rwformat[0];
-	lengthThresholds = RlengthThresholds[0];
+	int lengthThresholds = RlengthThresholds[0];
 	
 	string winstring = string(winlist);
 	size_t found = winstring.find_last_of(".");
