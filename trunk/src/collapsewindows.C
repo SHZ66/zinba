@@ -62,23 +62,22 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 	list<coord> coordIN_slist;
 	list<coord> coordOUT_slist;
 	
-//	int lengthThresholds = sizeof(thresholds)/sizeof(double) + 1;	
 	double highThresh;
 	if(strcmp(method,pscl) == 0){
 		highThresh = 0;
-		for(int t = 0; t <= lengthThresholds; t++){
+		for(int t = 0; t < lengthThresholds; t++){
 			if(thresholds[t] > highThresh)
 				highThresh = thresholds[t];
 		}
 	}else if(strcmp(method,mixture) == 0){
 		highThresh = 1;
-		for(int t = 0; t <= lengthThresholds; t++){
+		for(int t = 0; t < lengthThresholds; t++){
 			if(thresholds[t] < highThresh)
 				highThresh = thresholds[t];
 		}
 	}
 	cout << "There are " << lengthThresholds << " thresholds: " << endl;
-	for(int t = 0; t <= lengthThresholds; t++){
+	for(int t = 0; t < lengthThresholds; t++){
 		cout << thresholds[t] << " ";
 	}
 	cout << "\nHigh threshold= " << highThresh << endl;
@@ -146,7 +145,7 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 	list<coord> tempCoords;	
 	list<coord>::iterator back;
 	
-	for(int t = 0; t <= lengthThresholds; t++){
+	for(int t = 0; t < lengthThresholds; t++){
 		cout << "Processing threshold " << thresholds[t] << endl;
 		back =  coordIN_slist.begin();
 		while(back != coordIN_slist.end()){
