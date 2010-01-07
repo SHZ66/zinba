@@ -2,7 +2,7 @@
 #include <fstream>
 #include <stdio.h>
 #include "calcCovs.h"
-#include <sstream>
+//#include <sstream>
 #include <string>
 #include <stdexcept>
 #include <math.h>
@@ -11,6 +11,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <Rmath.h>
+
+#include <time.h>
 
 using namespace std;
 
@@ -28,20 +30,27 @@ calcCovs::~calcCovs(){
 int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir, const char * twoBitFile, const char * inputFile,string outfile,const char * flist,int extension,const char * filetype){
 			
 	FILE * tempTB;
-	const char * tInfo = "tempInfo.txt"; 
-	const char * tChrSize = "tempChromSize.txt";
+	time_t rtime;
+	struct tm *timeinfo;
+
+	char tInfo[128];// = "tempInfo.txt";
+	char tChrSize[128];// = "tempChromSize.txt";
+	time(&rtime);
+	timeinfo=localtime(&rtime);
+	strftime(tInfo,128,"tempInfo_%H_%M_%S.txt",timeinfo);
+	strftime(tChrSize,128,"tempChromSize_%H_%M_%S.txt",timeinfo);
+	
 	tempTB = fopen(tInfo,"w");
 	fprintf(tempTB,"library(zinba);\ntwobitinfo(infile=\"%s\",outfile=\"%s\");\n",twoBitFile,tChrSize);
 	fclose (tempTB);
 	
 	cout << "\nGetting chromosome lengths from .2bit file: " << twoBitFile << endl;
-	int s = system("R CMD BATCH tempInfo.txt /dev/null");
-	if(s == 0){
-		remove(tInfo);
-	}else{
-		cout << "twoBitInfo failed\n";
-		exit(1);
+	int s = 1;
+	while(s != 0){
+		s = system("R CMD BATCH tempInfo.txt /dev/null");
+		cout << "Trying twoBitInfo again" << endl;
 	}
+	remove(tInfo);
 	
 	tempTB = fopen(tChrSize,"r");
 	char cChrom[128];
@@ -114,19 +123,24 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		gcContent[chr_size[currchr]] = 0;
 		for(int ch = chr_size[currchr]; ch--;)
 			gcContent[ch] = 0;
-		const char * tInfo = "tempInfo.txt"; 
-		const char * tSeq = "tempSeq.txt";
+
+		char tSeq[128];
+		time(&rtime);
+		timeinfo=localtime(&rtime);
+		strftime(tSeq,128,"tempInfo_%H_%M_%S.txt",timeinfo);
+		strftime(tChrSize,128,"tempChromSize_%H_%M_%S.txt",timeinfo);
+
 		tempTB = fopen(tInfo,"w");
 		fprintf(tempTB,"library(zinba);\ntwobittofa(chrm=\"%s\",start=1,end=%lu,twoBitFile=\"%s\",gcSeq=\"%s\");\n",chromReport,chr_size[currchr],twoBitFile,tSeq);
 		fclose (tempTB);
-
-		int s = system("R CMD BATCH tempInfo.txt /dev/null");
-		if(s == 0){
-			remove(tInfo);
-		}else{
-			cout << "twoBitToFa failed\n";
-			exit(1);
+		int s = 1;
+		while(s != 0){
+			s = system("R CMD BATCH tempInfo.txt /dev/null");
+			if(s != 0)
+				cout << "Trying twobitofa again" << endl;
 		}
+		remove(tInfo);
+		
 		ifstream seqfile(tSeq);
 		string line;
 		pos = 1;
@@ -467,11 +481,19 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			list<cnvWins>::iterator cnvBegin = cnv_wins.begin();
 			list<cnvWins>::iterator cnvEnd = cnv_wins.begin();
 			cout << "\t\tOffset " << (zOffsetSize * o) << "bp......" << endl;
-			stringstream offset;
-			offset << (zOffsetSize * o);
-			stringstream winsize;
-			winsize << (zWinSize);
-			outfileDATA = outfile + "_" + chromReport + "_win" + winsize.str() + "bp_offset" + offset.str() + "bp.txt";
+//			stringstream offset;
+//			offset << (zOffsetSize * o);
+			char offset[128];
+			sprintf(offset,"%d",(zOffsetSize * o));
+			
+//			stringstream winsize;
+//			winsize << (zWinSize);
+			char winsize[128];
+			sprintf(winsize,"%d",zWinSize);
+			
+//			outfileDATA = outfile + "_" + chromReport + "_win" + winsize.str() + "bp_offset" + offset.str() + "bp.txt";
+			outfileDATA = outfile + "_" + chromReport + "_win" + string(winsize) + "bp_offset" + string(offset) + "bp.txt";
+			
 			if(o == (numOffsets-1))
 				fprintf(tempTB,"%s\n",outfileDATA.c_str());
 			else
