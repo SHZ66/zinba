@@ -1,6 +1,6 @@
 startenrichment=function(range, data, formula,formulaE, initmethod){
 	library(zinba)
-	library(quantreg)
+	suppressPackageStartupMessages(library(quantreg))
 	mf <- model.frame(formula=formula, data=data)
 	mfE <- model.frame(formula=formulaE, data=data)
         X <- model.matrix(attr(mf, "terms"), data=mf)
