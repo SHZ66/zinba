@@ -47,7 +47,7 @@ class calcCovs{
 		slist<bwRead> input_slist;
 		list<cnvWins> cnv_wins;
 		slist<dataWins> peak_wins;
-
+	
 		unsigned short int chromCounter;//Implemented
 		unsigned short int getHashValue(char *);//Implemented
 		const char * getKey(unsigned short int);//Implemented
