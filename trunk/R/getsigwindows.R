@@ -1,7 +1,7 @@
 getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,winout,printFullOut=0,tol=10^-5,method='pscl',initmethod, diff=0){
     time.start <- Sys.time()
-    library(qvalue)
-    library(quantreg)
+    suppressPackageStartupMessages(library(qvalue))
+    suppressPackageStartupMessages(library(quantreg))
     library(MASS)
     options(scipen=999)
 
