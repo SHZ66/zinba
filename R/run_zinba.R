@@ -1,7 +1,7 @@
 run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,numProc=1,buildwin=0,pWinSize=200,pquant=0.75,refinepeaks=1,printFullOut=0,method='pscl',initmethod='count',diff=0,filetype="bowtie",extension){
-        library(multicore)
-        library(doMC)
-        library(foreach)
+        suppressPackageStartupMessages(library(multicore))
+        suppressPackageStartupMessages(library(doMC))
+        suppressPackageStartupMessages(library(foreach))
 	time.start <- Sys.time()
 	if(is.null(formulaE)){
 		formulaE=formula
