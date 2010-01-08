@@ -89,7 +89,6 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 						if((i->end+profile_extend) < chr_size[chromInt])
 							stopPos = i->end+profile_extend;
 						profile = new unsigned short int[(stopPos-startPos)+1];
-						profile[(stopPos-startPos)] = 0;
 						for(int s = startPos; s <= stopPos; s++){
 							profile[pIndex] = basepair[s];
 							pIndex++;
@@ -136,7 +135,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 					if(getChrmData == 1){
 						cout << "Loading data for " << chrom.c_str() << endl;
 						basepair = new unsigned short int[chr_size[chromInt]+1];
-						for(int c = 0; c <= chr_size[chromInt];c++)
+						for(int c = chr_size[chromInt];c--;)
 							basepair[c] = 0;
 						countBases = 0;
 					}
@@ -169,7 +168,6 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 					startPos = i->start-profile_extend;
 				unsigned long int stopPos = i->end+profile_extend;
 				profile = new unsigned short int[(stopPos-startPos)+1];
-				profile[(stopPos-startPos)] = 0;
 				for(int s = startPos; s <= stopPos; s++){
 					profile[pIndex] = basepair[s];
 					pIndex++;
@@ -281,46 +279,47 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 			string signalFile(sigFile);
 			FILE * fh;
 			fh = fopen(signalFile.c_str(),"r");
-			if(fh == NULL){return 1;}
-			cout << "\tImporting windows from " << signalFile.c_str() << "..." << endl;
-			fgets(firstline,256,fh);
-			while(!feof(fh)){
-				readResult = 0;
-				if(strcmp(method,pscl) == 0){
-					if(wformat == 0){
-						rwline = fscanf(fh,"%s%lu%lu%hu%lf%*lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
-						if(sigVal <= threshold && rwline > 0){
-							readResult = 1;
+			if(fh != NULL){
+				cout << "\tImporting windows from " << signalFile.c_str() << "..." << endl;
+				fgets(firstline,256,fh);
+				while(!feof(fh)){
+					readResult = 0;
+					if(strcmp(method,pscl) == 0){
+						if(wformat == 0){
+							rwline = fscanf(fh,"%s%lu%lu%hu%lf%*lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+							if(sigVal <= threshold && rwline > 0){
+								readResult = 1;
+							}
+						}else if(wformat == 1){
+							rwline = fscanf(fh,"%s%lu%lu%*d%*lf%*lf%*lf%*lf%hu%lf%*lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+							if(sigVal <= threshold && rwline > 0){
+								readResult = 1;
+							}
 						}
-					}else if(wformat == 1){
-						rwline = fscanf(fh,"%s%lu%lu%*d%*lf%*lf%*lf%*lf%hu%lf%*lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
-						if(sigVal <= threshold && rwline > 0){
-							readResult = 1;
+					}else if(strcmp(method,mixture) == 0){
+						if(wformat == 0){
+							rwline = fscanf(fh,"%s%lu%lu%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+							if(sigVal >= threshold && rwline > 0){
+								readResult = 1;
+							}
+						}else if(wformat == 1){
+							rwline = fscanf(fh,"%s%lu%lu%*d%*lf%*lf%*lf%*lf%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+							if(sigVal >= threshold && rwline > 0){
+								readResult = 1;
+							}
 						}
 					}
-				}else if(strcmp(method,mixture) == 0){
-					if(wformat == 0){
-						rwline = fscanf(fh,"%s%lu%lu%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
-						if(sigVal >= threshold && rwline > 0){
-							readResult = 1;
-						}
-					}else if(wformat == 1){
-						rwline = fscanf(fh,"%s%lu%lu%*d%*lf%*lf%*lf%*lf%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
-						if(sigVal >= threshold && rwline > 0){
-							readResult = 1;
+					if(readResult == 1){
+						if(qFlag == 1){
+							string chromIn(cChrom);
+							unsigned short int chromInt = getHashValue(chromIn.c_str());
+							coord c(chromInt,iStart,iEnd,qFlag,sigVal);
+							coordIN_slist.push_back(c);
 						}
 					}
 				}
-				if(readResult == 1){
-					if(qFlag == 1){
-						string chromIn(cChrom);
-						unsigned short int chromInt = getHashValue(chromIn.c_str());
-						coord c(chromInt,iStart,iEnd,qFlag,sigVal);
-						coordIN_slist.push_back(c);
-					}
-				}
+				fclose(fh);
 			}
-			fclose(fh);
 		}
 	}
 	fclose(wlist);
