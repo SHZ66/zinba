@@ -52,7 +52,7 @@ double sig;
       error("there are only %d lines in file %s\n", i, input);
     }
 //print headers to file
-sprintf(line, "ID\tChrom\tStart\tStop\tStrand\tSig\tMaxloc\tMax\tpStart\tpStop\n");
+sprintf(line, "PEAKID\tChrom\tStart\tStop\tStrand\tSig\tMaxloc\tMax\tpStart\tpStop\n");
 fputs(line, FO);
 
 //read in a line, save the information in each, perform peakbounds, then print out, repeat for each line

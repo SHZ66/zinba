@@ -30,7 +30,7 @@ void getSeqCountProfile(char **Rinputfile,char **Rwinlist,double *Rthreshold,cha
 	Rprintf("Getting basecount data for %s\n",chromosome);
 	ret = newAnalysis.processCoords(inputFile,outputFile,twobitfile,chromosome);
 	if(ret == 1)
-		Rprintf("\nError occurred in processing\n");
+		Rprintf("\nERROR occurred in processing\n");
 	Rprintf("\ngetSeqCountProfile COMPLETE\n");
 
 }

@@ -11,7 +11,6 @@
 #include <cstdlib>
 #include <ctime>
 #include <Rmath.h>
-
 #include <time.h>
 
 using namespace std;

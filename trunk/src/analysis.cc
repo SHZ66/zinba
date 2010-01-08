@@ -11,6 +11,7 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
+#include <time.h>
 
 using namespace std;
 
@@ -28,20 +29,30 @@ analysis::~analysis(){
 int analysis::processCoords(const char* inputFile,const char* outputFile,const char* twoBitFile,const char* chrmSearch){
 
 	FILE * tempTB;
-	const char * tInfo = "tempInfo.txt"; 
-	const char * tChrSize = "tempChromSize.txt";
+	time_t rtime;
+	struct tm *timeinfo;
+	
+	char tInfo[128];// = "tempInfo.txt";
+	char tChrSize[128];// = "tempChromSize.txt";
+	char sysCall[256];
+	time(&rtime);
+	timeinfo=localtime(&rtime);
+	strftime(tInfo,128,"tempInfo_%H_%M_%S.txt",timeinfo);
+	strftime(tChrSize,128,"tempChromSize_%H_%M_%S.txt",timeinfo);
+	
 	tempTB = fopen(tInfo,"w");
 	fprintf(tempTB,"library(zinba);\ntwobitinfo(infile=\"%s\",outfile=\"%s\");\n",twoBitFile,tChrSize);
 	fclose (tempTB);
 	
-//	cout << "\nGetting chromosome lengths from .2bit file: " << twoBitFile << endl;
-	int s = system("R CMD BATCH tempInfo.txt /dev/null");
-	if(s == 0){
-		remove(tInfo);
-	}else{
-		cout << "twoBitInfo failed\n";
-		exit(1);
+	cout << "\nGetting chromosome lengths from .2bit file: " << twoBitFile << endl;
+	int s = 1;
+	sprintf(sysCall,"R CMD BATCH %s /dev/null",tInfo);
+	while(s != 0){
+		s = system(sysCall);
+		if(s != 0)
+			cout << "Trying twoBitInfo again, s is" << s << endl;
 	}
+	remove(tInfo);
 	
 	tempTB = fopen(tChrSize,"r");
 	char tbChrom[128];
@@ -74,7 +85,10 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	unsigned long int startOffset = 0;
 	cout << "Getting basecount data from " << inputFile << endl;
 	ifstream seqfile(inputFile);
-	
+	if(!seqfile.is_open()){
+		cout << "Error opening input file" << inputFile << ", exiting" << endl;
+		return 1;
+	}
 	while (getline(seqfile, line)){
 		if (line[0] == 'f'){
 			if(collectData == 1 && getChrmData == 1){
