@@ -35,6 +35,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 
 	char tInfo[128];// = "tempInfo.txt";
 	char tChrSize[128];// = "tempChromSize.txt";
+	char sysCall[256];
 	time(&rtime);
 	timeinfo=localtime(&rtime);
 	strftime(tInfo,128,"tempInfo_%H_%M_%S.txt",timeinfo);
@@ -46,9 +47,11 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 	
 	cout << "\nGetting chromosome lengths from .2bit file: " << twoBitFile << endl;
 	int s = 1;
+	sprintf(sysCall,"R CMD BATCH %s /dev/null",tInfo);
 	while(s != 0){
-		s = system("R CMD BATCH tempInfo.txt /dev/null");
-		cout << "Trying twoBitInfo again" << endl;
+		s = system(sysCall);
+		if(s != 0)
+			cout << "Trying twoBitInfo again, s is" << s << endl;
 	}
 	remove(tInfo);
 	
@@ -127,15 +130,16 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		char tSeq[128];
 		time(&rtime);
 		timeinfo=localtime(&rtime);
-		strftime(tSeq,128,"tempInfo_%H_%M_%S.txt",timeinfo);
-		strftime(tChrSize,128,"tempChromSize_%H_%M_%S.txt",timeinfo);
+		strftime(tInfo,128,"tempInfo_%H_%M_%S.txt",timeinfo);
+		strftime(tSeq,128,"tempSeq_%H_%M_%S.txt",timeinfo);
 
 		tempTB = fopen(tInfo,"w");
 		fprintf(tempTB,"library(zinba);\ntwobittofa(chrm=\"%s\",start=1,end=%lu,twoBitFile=\"%s\",gcSeq=\"%s\");\n",chromReport,chr_size[currchr],twoBitFile,tSeq);
 		fclose (tempTB);
+		sprintf(sysCall,"R CMD BATCH %s /dev/null",tInfo);
 		int s = 1;
 		while(s != 0){
-			s = system("R CMD BATCH tempInfo.txt /dev/null");
+			s = system(sysCall);
 			if(s != 0)
 				cout << "Trying twobitofa again" << endl;
 		}
@@ -660,12 +664,12 @@ int calcCovs::importRawSignal(const char * signalFile,const char * filetype,int 
 	fclose(fh);
 	if(dataType == 0){
 		cout << "\tImported " << signal_slist.size() << " reads" << endl;
-		cout << "\tSorting reads ...";
-		signal_slist.sort();
+		//cout << "\tSorting reads ...";
+		//signal_slist.sort();
 	}else if(dataType == 1){
 		cout << "\t\tImported " << input_slist.size() << " inpput reads" << endl;
-		cout << "\t\tSorting reads ...";
-		input_slist.sort();
+		//cout << "\t\tSorting reads ...";
+		//input_slist.sort();
 	}
 	cout << "COMPLETE" << endl;
 	return 0;
