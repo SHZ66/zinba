@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <Rmath.h>
+
 #include <time.h>
 
 using namespace std;
@@ -111,6 +112,10 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		strcpy(alignFile, alignFileS.c_str());
 		cout << "\tGetting alignability info from:\n\t\t" << alignFile << endl;
 		tempTB = fopen(alignFile,"r");
+		if(tempTB == NULL){
+			cout << "Unable to open alignability file " << alignFile << endl;
+			return 1;
+		}
 		unsigned short int aScore;
 		unsigned long int pos = 1;
 		while(!feof(tempTB)){
@@ -129,14 +134,15 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		char tSeq[128];
 		time(&rtime);
 		timeinfo=localtime(&rtime);
-		strftime(tInfo,128,"tempInfo_%H_%M_%S.txt",timeinfo);
-		strftime(tSeq,128,"tempSeq_%H_%M_%S.txt",timeinfo);
+		strftime(tInfo,128,"tempInfo_%H_%M_%S_%s.txt",timeinfo);
+		strftime(tSeq,128,"tempSeq_%H_%M_%S_%s.txt",timeinfo);
 
 		tempTB = fopen(tInfo,"w");
 		fprintf(tempTB,"library(zinba);\ntwobittofa(chrm=\"%s\",start=1,end=%lu,twoBitFile=\"%s\",gcSeq=\"%s\");\n",chromReport,chr_size[currchr],twoBitFile,tSeq);
 		fclose (tempTB);
 		sprintf(sysCall,"R CMD BATCH %s /dev/null",tInfo);
 		int s = 1;
+
 		while(s != 0){
 			s = system(sysCall);
 			if(s != 0)
@@ -443,6 +449,10 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			if(readInput == 0){
 				cout << "\tLoading reads from input file " << inputFile << "........." << endl;
 				int rVal = importRawSignal(inputFile,filetype,1);
+				if(rVal == 1){
+					cout << "Unable to open file with input reads" << endl;
+					return 1;
+				}
 				readInput = 1;
 			}
 			cout << "\tMapping input tags to the genome........." << endl;
@@ -612,7 +622,10 @@ const char * calcCovs::getKey(unsigned short int chrom){
 int calcCovs::importRawSignal(const char * signalFile,const char * filetype,int dataType){
 	FILE * fh;
 	fh = fopen(signalFile,"r");
-	if(fh == NULL){return 1;}
+	if(fh == NULL){
+		cout << "Unable to open file containing reads " << signalFile << endl;
+		return 1;
+	}
 	
 	char cChrom[128];
 	unsigned long int pos;
@@ -652,6 +665,9 @@ int calcCovs::importRawSignal(const char * signalFile,const char * filetype,int 
 				pos = stop;
 				sval = 0;
 			}
+		}else{
+			cout << "Unrecognized type of file " << filetype << ", must be either bowtie, bed, or tagAlign" << endl;
+			return 1;
 		}
 		unsigned short int chromInt = getHashValue(cChrom);
 		bwRead sig(chromInt,pos,sval);

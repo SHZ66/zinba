@@ -34,13 +34,15 @@ void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **R
 
 	if(ret == 1){
 		Rprintf("ERROR opening file %s \n",expSeqFile.c_str());
-		exit(1);
+	}else{
+		Rprintf("\nBuilding window data\n");
+		size_t found = expSeqFile.find_last_of(".");
+		string outfile_prefix = expSeqFile.substr(0,found);
+		ret = newAnalysis.processSignals(zWinSize,zOffsetSize,cWinSize,cOffsetSize,alignDir,twoBitFile,inSeqFile,outfile_prefix,filelist,extension,filetype);
+		if(ret == 1){
+			Rprintf("ERROR: building windows was unsuccssful\n");
+		}
 	}
-
-	Rprintf("\nBuilding window data\n");
-	size_t found = expSeqFile.find_last_of(".");
-	string outfile_prefix = expSeqFile.substr(0,found);
-	newAnalysis.processSignals(zWinSize,zOffsetSize,cWinSize,cOffsetSize,alignDir,twoBitFile,inSeqFile,outfile_prefix,filelist,extension,filetype);
 	Rprintf("\n\n--------BUILD WINDOWS COMPLETE-------\n\n");
 }
 }
