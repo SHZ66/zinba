@@ -245,7 +245,8 @@ fputs(line, FO);
 
 
 
-} 
+}
+Rprintf("Peak Refinement Complete\n"); 
  fclose(FO);
  fclose(FI);
  return(bpprofile);
