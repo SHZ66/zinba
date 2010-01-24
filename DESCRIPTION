@@ -1,7 +1,7 @@
 Package: zinba
 Type: Package
 Title: ZINBA: Zero-Inflation Negative Binomial Algorithm
-Version: 1.0
+Version: 1.0.1
 Date: 2009-08-05
 Author: Naim Rashid
 Maintainer: Naim Rashid <nrashid@bios.unc.edu>
