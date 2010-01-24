@@ -707,12 +707,13 @@ int calcCovs::importBowtie(const char * signalFile,int extension,int dataType){
 	char strand[1];
 	char minus[] = "-";
 	char line[512];char seq[128];
+	char name[128];char sscore[128];int ival;
 	int extend = (int)(extension/2);
 	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
 	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
 	
 	while(!feof(fh)){
-		fscanf(fh,"%*s%s%s%lu%s%*s%*d",strand,cChrom,&pos,seq);
+		fscanf(fh,"%s%s%s%lu%s%s%i",name,strand,cChrom,&pos,seq,sscore,&ival);
 		fgets(line,512,fh);
 		if(strcmp(strand,minus) == 0){
 			if((pos + strlen(seq)) >= extend)
@@ -751,12 +752,13 @@ int calcCovs::importTagAlign(const char * signalFile,int extension,int dataType)
 	char strand[1];
 	char minus[] = "-";
 	unsigned long int start;unsigned long int stop;
+	char seq[128];int score;
 	int extend = (int)(extension/2);
 	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
 	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
 	
 	while(!feof(fh)){
-		fscanf(fh,"%s%lu%lu%*s%*d%s",cChrom,&start,&stop,strand);
+		fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,seq,score,strand);
 		if(strcmp(strand,minus) == 0){
 			if(stop >= extend)
 				pos = stop - extend + 1;
@@ -794,13 +796,15 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 	char strand[1];
 	char minus[] = "-";
 	unsigned long int start;unsigned long int stop;
+	char name[128];int bscore;char line[512];
 	int extend = (int)(extension/2);
 	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
 	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
 	
 	while(!feof(fh)){
 //		fscanf(fh,"%s%lu%lu%s",cChrom,&start,&stop,strand);
-		fscanf(fh,"%s%lu%lu%*s%*d%s",cChrom,&start,&stop,strand);
+		fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,name,bscore,strand);
+		fgets(line,512,fh);
 		if(strcmp(strand,minus) == 0){
 			if(stop >= extend)
 				pos = stop - extend + 1;
