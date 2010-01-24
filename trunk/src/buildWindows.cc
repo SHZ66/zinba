@@ -30,7 +30,7 @@ void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **R
 	int ret;
 	calcCovs newAnalysis;// = new analysis;
 	Rprintf("\nImporting reads from file %s \n", expSeqFile.c_str());
-	ret=newAnalysis.importRawSignal(expSeqFile.c_str(),filetype,0);
+	ret=newAnalysis.importRawSignal(expSeqFile.c_str(),extension,filetype,0,twoBitFile);
 
 	if(ret == 1){
 		Rprintf("ERROR opening file %s \n",expSeqFile.c_str());

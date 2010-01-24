@@ -23,10 +23,13 @@ class calcCovs{
 		calcCovs(); //Implemented
 		~calcCovs(); //Implemented
 		
-		int importRawSignal(const char *,const char *,int);//Implemented
-		int processSignals(int,int,int,int,string,const char *,const char*,string,const char *,int,const char *);//Implemented
+		int importRawSignal(const char *,int,const char *,int,const char *);//Implemented
+		int processSignals(int,int,int,int,string,const char *,const char *,string,const char *,int,const char *);//Implemented
 		int outputData(const char *, unsigned short int);//Implemented
-		
+		int importBowtie(const char *,int,int);
+		int importTagAlign(const char *,int,int);
+		int importBed(const char *,int,int);
+	
 		struct ltstr{
 			bool operator()(const char* s1, const char* s2) const
 			{
@@ -47,6 +50,8 @@ class calcCovs{
 		slist<bwRead> input_slist;
 		list<cnvWins> cnv_wins;
 		slist<dataWins> peak_wins;
+	
+		unsigned short int tbSizeFlag;
 	
 		unsigned short int chromCounter;//Implemented
 		unsigned short int getHashValue(char *);//Implemented

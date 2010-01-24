@@ -17,13 +17,13 @@ bwRead::bwRead(unsigned short int _chrom, unsigned long int _pos,unsigned short 
 }
 
 bool bwRead::operator <(bwRead other) const{
-	if(chrom==other.chrom){
-		if( pos < other.pos ){
-			return true;
-		}else{
-			return false;	
-		}
-	}else{
+//	if(chrom==other.chrom){
+//		if( pos < other.pos ){
+//			return true;
+//		}else{
+//			return false;	
+//		}
+//	}else{
 		return (chrom<other.chrom);	
-	}
+//	}
 }
