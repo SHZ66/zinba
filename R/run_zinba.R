@@ -1,7 +1,13 @@
 run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,numProc=1,buildwin=0,pWinSize=200,pquant=0.75,refinepeaks=1,printFullOut=0,method='pscl',initmethod='count',diff=0,filetype="bowtie",extension){
-        suppressPackageStartupMessages(library(multicore))
-        suppressPackageStartupMessages(library(doMC))
-        suppressPackageStartupMessages(library(foreach))
+#        suppressPackageStartupMessages(library(multicore))
+#        suppressPackageStartupMessages(library(doMC))
+#        suppressPackageStartupMessages(library(foreach))
+        rmc <- require(multicore)
+        rdmc <- require(doMC)
+        rfor <- require(foreach)
+        if(rmc == FALSE){
+            stop(paste("multicore available"))
+        }
 	time.start <- Sys.time()
 	if(is.null(formulaE)){
 		formulaE=formula
@@ -21,13 +27,20 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NUL
             peakout=paste(outfile,".peaks",sep="")
             bpout=paste(outfile,".bpcount",sep="")
 
-            registerDoMC(numProc)
-            mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
-            getDoParWorkers()
-            winfiles <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,.errorhandling="remove",.options.multicore = mcoptions) %dopar%
-                getsigwindows(file=params[i],formula=formula,formulaE=formulaE,threshold=threshold,winout=outfile,peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,initmethod=initmethod)
- 
-	    write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)
+            if(rmc == TRUE && rdmc == TRUE && rfor == TRUE){
+                registerDoMC(numProc)
+                mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
+                getDoParWorkers()
+                winfiles <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,.errorhandling="remove",.options.multicore = mcoptions) %dopar%
+                    getsigwindows(file=params[i],formula=formula,formulaE=formulaE,threshold=threshold,winout=outfile,peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,initmethod=initmethod)
+            
+               write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)
+            }else{
+                for(i in 1:length(params)){
+                    wfile <- getsigwindows(file=params[i],formula=formula,formulaE=formulaE,threshold=threshold,winout=outfile,peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,initmethod=initmethod)
+                    winfiles <- rbind(wfile)
+                }
+            }
 	    if(refinepeaks==1){
 		getrefinedpeaks(winlist=winlist,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,winSize=winSize,pWinSize=pWinSize,pquant=pquant,printFullOut=printFullOut,peakconfidence=peakconfidence,threshold=threshold,method=method)
 	    }
