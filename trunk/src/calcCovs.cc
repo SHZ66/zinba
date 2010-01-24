@@ -99,11 +99,16 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		fclose (tempTB);
 		sprintf(sysCall,"R CMD BATCH %s /dev/null",tInfo);
 		int s = 1;
-
+		int twobitCount = 0;
 		while(s != 0){
 			s = system(sysCall);
-			if(s != 0)
-				cout << "Trying twobitofa again" << endl;
+			twobitCount++;
+			if(twobitCount < 5 && s != 0){
+				cout << "Trying twoBitToFa again, s is" << s << endl;
+			}else if(twobitCount >= 5 && s != 0){
+				cout << "twoBitToFa failed, exiting" << endl;
+				return 1;
+			}
 		}
 		remove(tInfo);
 		
@@ -575,11 +580,17 @@ int calcCovs::importRawSignal(const char * signalFile,int extension,const char *
 
 		cout << "\tGetting chromosome lengths from .2bit file: " << twoBitFile << endl;
 		int s = 1;
+		int twobitCount = 0;
 		sprintf(sysCall,"R CMD BATCH %s /dev/null",tInfo);
 		while(s != 0){
 			s = system(sysCall);
-			if(s != 0)
+			twobitCount++;
+			if(twobitCount < 5 && s != 0){
 				cout << "Trying twoBitInfo again, s is" << s << endl;
+			}else if(twobitCount >= 5 && s != 0){
+				cout << "TwoBitInfo failed, exiting" << endl;
+				return 1;
+			}
 		}
 		remove(tInfo);
 
@@ -758,7 +769,7 @@ int calcCovs::importTagAlign(const char * signalFile,int extension,int dataType)
 	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
 	
 	while(!feof(fh)){
-		fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,seq,score,strand);
+		fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,seq,&score,strand);
 		if(strcmp(strand,minus) == 0){
 			if(stop >= extend)
 				pos = stop - extend + 1;
