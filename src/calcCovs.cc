@@ -59,6 +59,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		while(!signal_slist.empty() && i->chrom==currchr){
 			basepair[i->pos]++;
 			signal_slist.erase(i++);
+		printf("%d", cStart);
 		}
 
 		alignability = new unsigned short int[chr_size[currchr] + 1];
