@@ -814,7 +814,7 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 	
 	while(!feof(fh)){
 //		fscanf(fh,"%s%lu%lu%s",cChrom,&start,&stop,strand);
-		fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,name,bscore,strand);
+		fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,name,&bscore,strand);
 		if(strcmp(strand,minus) == 0){
 			if(stop >= extend)
 				pos = stop - extend + 1;
