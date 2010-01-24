@@ -807,7 +807,7 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 	char strand[1];
 	char minus[] = "-";
 	unsigned long int start;unsigned long int stop;
-	char name[128];int bscore;char line[512];
+	char name[128];int bscore;
 	int extend = (int)(extension/2);
 	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
 	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
@@ -815,7 +815,6 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 	while(!feof(fh)){
 //		fscanf(fh,"%s%lu%lu%s",cChrom,&start,&stop,strand);
 		fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,name,bscore,strand);
-		fgets(line,512,fh);
 		if(strcmp(strand,minus) == 0){
 			if(stop >= extend)
 				pos = stop - extend + 1;
