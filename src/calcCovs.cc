@@ -59,7 +59,6 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		while(!signal_slist.empty() && i->chrom==currchr){
 			basepair[i->pos]++;
 			signal_slist.erase(i++);
-		printf("%d", cStart);
 		}
 
 		alignability = new unsigned short int[chr_size[currchr] + 1];
@@ -765,7 +764,7 @@ int calcCovs::importTagAlign(const char * signalFile,int extension,int dataType)
 				pos = 1;
 		}else{
 			if((start + extend-1) <= chr_size[getHashValue(cChrom)])
-				pos = start - extend - 1;
+				pos = start + extend - 1;
 			else
 				pos = chr_size[getHashValue(cChrom)];
 		}
@@ -800,6 +799,7 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
 	
 	while(!feof(fh)){
+//		fscanf(fh,"%s%lu%lu%s",cChrom,&start,&stop,strand);
 		fscanf(fh,"%s%lu%lu%*s%*d%s",cChrom,&start,&stop,strand);
 		if(strcmp(strand,minus) == 0){
 			if(stop >= extend)
@@ -808,7 +808,7 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 				pos = 1;
 		}else{
 			if((start + extend-1) <= chr_size[getHashValue(cChrom)])
-				pos = start - extend - 1;
+				pos = start + extend - 1;
 			else
 				pos = chr_size[getHashValue(cChrom)];
 		}
