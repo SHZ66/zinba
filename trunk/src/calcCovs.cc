@@ -50,11 +50,6 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		currchr = i->chrom;
 		const char * chromReport = getKey(currchr);
 		cout << "\nProcessing " << chromReport << endl;
-
-int flagRep = 0;
-const char * cx = "chrX";
-if(strcmp(chromReport,cx) == 0)
-	flagRep = 1;
 		
 		basepair = new unsigned short int[chr_size[currchr]+1];
 		for(int ch = chr_size[currchr]; ch--;)
@@ -62,11 +57,6 @@ if(strcmp(chromReport,cx) == 0)
 
 		cout << "\tMapping reads to chromosome......" << endl;
 		while(!signal_slist.empty() && i->chrom==currchr){
-			
-//if(flagRep == 1){
-//	cout << "Size of list is " << signal_slist.size() << endl;
-//	cout << "Pos is " << i->pos << endl;
-//}			
 			basepair[i->pos]++;
 			signal_slist.erase(i++);
 		}
