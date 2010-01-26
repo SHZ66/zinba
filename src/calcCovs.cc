@@ -12,6 +12,7 @@
 #include <ctime>
 #include <Rmath.h>
 
+#include <algorithm>
 #include <time.h>
 
 using namespace std;
@@ -36,18 +37,23 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 	char tInfo[128];// = "tempInfo.txt";
 	char sysCall[256];
 	
-	slist<bwRead>::iterator i = signal_slist.begin();
+//	slist<bwRead>::iterator i = signal_slist.begin();
 	unsigned short int currchr = 999;
+	
 	unsigned short int * basepair = NULL;
 	unsigned short int * ibasepair = NULL;
-	unsigned short int * gcContent = NULL;	
-	unsigned short int * alignability = NULL;
+//	unsigned short int * gcContent = NULL;	
+//	unsigned short int * alignability = NULL;
+	unsigned char * gcContent = NULL;	
+	unsigned char * alignability = NULL;
+
 	int readInput = 0;
 	const char* noneVal = "none";
 	
 	while(!signal_slist.empty()){
-		i = signal_slist.begin();
-		currchr = i->chrom;
+//		i = signal_slist.begin();
+//		currchr = i->chrom;
+		currchr = signal_slist[0].chrom;
 		const char * chromReport = getKey(currchr);
 		cout << "\nProcessing " << chromReport << endl;
 		
@@ -56,14 +62,26 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			basepair[ch] = 0;
 
 		cout << "\tMapping reads to chromosome......" << endl;
-		while(!signal_slist.empty() && i->chrom==currchr){
-			basepair[i->pos]++;
-			signal_slist.erase(i++);
+		int eraseInd = 0;
+		for(int i = 0;i <= (int) signal_slist.size();i++){
+			if(signal_slist[i].chrom==currchr){
+				basepair[signal_slist[i].pos]++;
+			}else{
+				eraseInd = i;
+				i = (int) signal_slist.size();
+			}
 		}
+		signal_slist.erase(signal_slist.begin(),signal_slist.begin()+eraseInd);
+//		while(!signal_slist.empty() && i->chrom==currchr){
+//			basepair[i->pos]++;
+//			signal_slist.erase(i++);
+//		}
 
-		alignability = new unsigned short int[chr_size[currchr] + 1];
+//		alignability = new unsigned short int[chr_size[currchr] + 1];
+		alignability = new unsigned char[chr_size[currchr] + 1];
 		for(int ch = chr_size[currchr]; ch--;)
-			alignability[ch] = 0;
+			alignability[ch] = (unsigned char) 0;
+//			alignability[ch] = 0;
 		string alignFileS = alignDir + chromReport + ".wig";
 		char * alignFile = new char[alignFileS.size() + 1];
 		strcpy(alignFile, alignFileS.c_str());
@@ -77,17 +95,18 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		unsigned long int pos = 1;
 		while(!feof(tempTB)){
 			int ret = fscanf(tempTB,"%hu",&aScore);
-			alignability[pos] = aScore;
+//			alignability[pos] = aScore;
+			alignability[pos] = (unsigned char) aScore;
 			pos++;
 		}
 		fclose(tempTB);
 		
 		cout << "\tGetting sequence from .2bit file:\n\t\t" << twoBitFile << endl;
-		gcContent = new unsigned short int[chr_size[currchr] + 1];
-		gcContent[chr_size[currchr]] = 0;
+//		gcContent = new unsigned short int[chr_size[currchr] + 1];
+		gcContent = new unsigned char[chr_size[currchr] + 1];
 		for(int ch = chr_size[currchr]; ch--;)
-			gcContent[ch] = 0;
-
+			gcContent[ch] = (unsigned char) 0;
+//			gcContent[ch] = 0;		
 		char tSeq[128];
 		time(&rtime);
 		timeinfo=localtime(&rtime);
@@ -121,13 +140,16 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		while(getline(seqfile,line)){
 			if(line[0] != '>'){
 				for(int s = 0; s < line.length();s++){
-					unsigned short int ent = 0;
 					if(line[s] == 'G' || line[s] == 'C'){
-						ent = 1;
+//						gcContent[pos] = 1;
+						gcContent[pos] = (unsigned char) 1;
 					}else if (line[s] == 'N'){
-						ent = 2;
+//						gcContent[pos] = 2;
+						gcContent[pos] = (unsigned char) 2;
+					}else{
+//						gcContent[pos] = 0;
+						gcContent[pos] = (unsigned char) 0;
 					}
-					gcContent[pos] = ent;
 					pos++;
 				}
 			}
@@ -150,11 +172,13 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				int alignCount = 0;
 				double nCount = 0.0;
 				for(int b = cWinStart; b <= cWinStop; b++){
-					if(gcContent[b] == 2){
+//					if(gcContent[b] == 2){
+					if((int) gcContent[b] == 2){
 						nCount++;						
 					}else{
 						cnvCount += basepair[b];
-						alignCount += alignability[b];
+//						alignCount += alignability[b];
+						alignCount += (int) alignability[b];
 					}
 				}
 				double cScore = 0.0;
@@ -389,9 +413,11 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			}
 			for(int b = tpStart; b <= tpStop; b++){
 				leftCnvCount += basepair[b];
-				leftAlignCount += alignability[b];
+//				leftAlignCount += alignability[b];
+				leftAlignCount += (int) alignability[b];
 				rightCnvCount += basepair[b+cWinSize];
-				rightAlignCount += alignability[b+cWinSize];
+//				rightAlignCount += alignability[b+cWinSize];
+				rightAlignCount += (int) alignability[b+cWinSize];
 			}
 			double cScore = 0;
 			if(leftAlignCount > 0)
@@ -410,8 +436,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		if(strcmp(inputFile,noneVal)!=0){
 			if(readInput == 0){
 				cout << "\tLoading reads from input file " << inputFile << "........." << endl;
-				const char * tbskip = "skip";
-				int rVal = importRawSignal(inputFile,extension,filetype,1,tbskip);
+				int rVal = importRawSignal(inputFile,extension,filetype,1,twoBitFile);
 				if(rVal == 1){
 					cout << "Unable to open file with input reads" << endl;
 					return 1;
@@ -422,11 +447,22 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			ibasepair = new unsigned short int[chr_size[currchr]+1];
 			for(int ch = chr_size[currchr]; ch--;)
 				ibasepair[ch] = 0;
-			slist<bwRead>::iterator in = input_slist.begin();
-			while(!input_slist.empty() && in->chrom==currchr){
-				ibasepair[in->pos]++;
-				input_slist.erase(in++);
+
+			eraseInd = 0;
+			for(int i = 0;i <= (int) input_slist.size();i++){
+				if(input_slist[i].chrom==currchr){
+					basepair[input_slist[i].pos]++;
+				}else{
+					eraseInd = i;
+					i = (int) input_slist.size();
+				}
 			}
+			input_slist.erase(input_slist.begin(),input_slist.begin()+eraseInd);
+//			slist<bwRead>::iterator in = input_slist.begin();
+//			while(!input_slist.empty() && in->chrom==currchr){
+//				ibasepair[in->pos]++;
+//				input_slist.erase(in++);
+//			}
 		}
 		
 		cout << "\tGetting counts for zinba windows.........." << endl;
@@ -462,11 +498,16 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				double inCount = 0;
 				for(int b = zWinStart; b <= zWinStop; b++){
 					peakCount += basepair[b];
-					alignCount += alignability[b];
+//					alignCount += alignability[b];
+					alignCount += (int) alignability[b];
 					
-					if(gcContent[b] == 1)
+//					if(gcContent[b] == 1)
+//						gcCount++;
+//					else if(gcContent[b] == 2)
+//						nCount++;
+					if((int) gcContent[b] == 1)
 						gcCount++;
-					else if(gcContent[b] == 2)
+					else if((int) gcContent[b] == 2)
 						nCount++;
 					
 					if(readInput == 1)
@@ -607,93 +648,33 @@ int calcCovs::importRawSignal(const char * signalFile,int extension,const char *
 		tbSizeFlag = 1;
 	}
 				  
-//	FILE * fh;
-//	fh = fopen(signalFile,"r");
-//	if(fh == NULL){
-//		cout << "Unable to open file containing reads " << signalFile << endl;
-//		return 1;
-//	}
-	
-//	char cChrom[128];
-//	unsigned long int pos;
-//	unsigned short int sval = 1;
-//	char strand[1];
 	const char * bowtie = "bowtie";
 	const char * bed = "bed";
 	const char * tagAlign = "tagAlign";
 	int rval = 0;
-//	char minus[] = "-";
-//	unsigned long int start;unsigned long int stop;
-//	char line[512];char seq[128];
-//	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
-//	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
-//	int extend = (int)(extension/2);
-	
-//	while(!feof(fh)){
-		if(strcmp(filetype,bed) == 0){
-			rval = importBed(signalFile,extension,dataType);
-//			fscanf(fh,"%s%lu%lu%s",cChrom,&start,&stop,strand);
-//			if(strcmp(strand,minus) == 0){
-//				if(stop >= extend)
-//					pos = stop - extend + 1;
-//				else
-//					pos = 1;
-//			}else{
-//				if((start + extend-1) <= chr_size[getHashValue(cChrom)])
-//					pos = start - extend - 1;
-//				else
-//					pos = chr_size[getHashValue(cChrom)];
-//			}
-		}else if (strcmp(filetype,bowtie) == 0){
-			rval = importBowtie(signalFile,extension,dataType);
-//			fscanf(fh,"%*s%s%s%lu%s%*s%*d",strand,cChrom,&pos,seq);
-//			fgets(line,512,fh);
-//			if(strcmp(strand,minus) == 0){
-//				if((pos + strlen(seq)) >= extend)
-//					pos = (pos + strlen(seq)) - extend + 1;
-//				else
-//					pos = 1;
-//			}else{
-//				if((pos + extend-1) <= chr_size[getHashValue(cChrom)])
-//					pos += extend - 1;
-//				else
-//					pos = chr_size[getHashValue(cChrom)];
-//			}
-		}else if(strcmp(filetype,tagAlign) == 0){
-			rval = importTagAlign(signalFile,extension,dataType);
-//			fscanf(fh,"%s%lu%lu%*s%*d%s",cChrom,&start,&stop,strand);
-//			if(strcmp(strand,minus) == 0){
-//				if(stop >= extend)
-//					pos = stop - extend + 1;
-//				else
-//					pos = 1;
-//			}else{
-//				if((start + extend-1) <= chr_size[getHashValue(cChrom)])
-//					pos = start - extend - 1;
-//				else
-//					pos = chr_size[getHashValue(cChrom)];
-//			}
-		}else{
-			cout << "Unrecognized type of file " << filetype << ", must be either bowtie, bed, or tagAlign" << endl;
-			return 1;
-		}
-//		unsigned short int chromInt = getHashValue(cChrom);
-//		bwRead sig(chromInt,pos,sval);
-//		if(dataType == 0)
-//			back = signal_slist.insert_after(back,sig);
-//		else if(dataType == 1)
-//			iback = input_slist.insert_after(iback,sig);			
-//	}
-//	fclose(fh);
+
+	if(strcmp(filetype,bed) == 0){
+		rval = importBed(signalFile,extension,dataType);
+	}else if (strcmp(filetype,bowtie) == 0){
+		rval = importBowtie(signalFile,extension,dataType);
+	}else if(strcmp(filetype,tagAlign) == 0){
+		rval = importTagAlign(signalFile,extension,dataType);
+	}else{
+		cout << "Unrecognized type of file " << filetype << ", must be either bowtie, bed, or tagAlign" << endl;
+		return 1;
+	}
+
 	if(rval == 0){
 		if(dataType == 0){
 			cout << "\tImported " << signal_slist.size() << " reads" << endl;
 			cout << "\tSorting reads ...";
-			signal_slist.sort();
+			sort (signal_slist.begin(), signal_slist.end());
+//			signal_slist.sort();
 		}else if(dataType == 1){
 			cout << "\t\tImported " << input_slist.size() << " inpput reads" << endl;
 			cout << "\t\tSorting reads ...";
-			input_slist.sort();
+			sort (input_slist.begin(), input_slist.end());
+//			input_slist.sort();
 		}
 		cout << "COMPLETE" << endl;
 	}else{
@@ -714,35 +695,41 @@ int calcCovs::importBowtie(const char * signalFile,int extension,int dataType){
 		
 	char cChrom[128];
 	unsigned long int pos;
-	unsigned short int sval = 1;
+//	unsigned short int sval = 1;
 	char strand[1];
 	char minus[] = "-";
 	char line[512];char seq[128];
 	char name[128];char sscore[128];int ival;
 	int extend = (int)(extension/2);
-	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
-	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
-	
+	int rval;
+//	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
+//	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
+
 	while(!feof(fh)){
-		fscanf(fh,"%s%s%s%lu%s%s%i",name,strand,cChrom,&pos,seq,sscore,&ival);
+		rval = fscanf(fh,"%s%s%s%lu%s%s%i",name,strand,cChrom,&pos,seq,sscore,&ival);
 		fgets(line,512,fh);
-		if(strcmp(strand,minus) == 0){
-			if((pos + strlen(seq)) >= extend)
-				pos = (pos + strlen(seq)) - extend + 1;
-			else
-				pos = 1;
-		}else{
-			if((pos + extend-1) <= chr_size[getHashValue(cChrom)])
-				pos += extend - 1;
-			else
-				pos = chr_size[getHashValue(cChrom)];
+		if(rval == 7){
+			if(strcmp(strand,minus) == 0){
+				if((pos + strlen(seq)) >= extend)
+					pos = (pos + strlen(seq)) - extend + 1;
+				else
+					pos = 1;
+			}else{
+				if((pos + extend-1) <= chr_size[getHashValue(cChrom)])
+					pos += extend - 1;
+				else
+					pos = chr_size[getHashValue(cChrom)];
+			}
+			unsigned short int chromInt = getHashValue(cChrom);
+//			bwRead sig(chromInt,pos,sval);
+			bwRead sig(chromInt,pos);
+			if(dataType == 0)
+				signal_slist.push_back(sig);
+//				back = signal_slist.insert_after(back,sig);
+			else if(dataType == 1)
+				input_slist.push_back(sig);
+//				iback = input_slist.insert_after(iback,sig);
 		}
-		unsigned short int chromInt = getHashValue(cChrom);
-		bwRead sig(chromInt,pos,sval);
-		if(dataType == 0)
-			back = signal_slist.insert_after(back,sig);
-		else if(dataType == 1)
-			iback = input_slist.insert_after(iback,sig);
 	}
 	fclose(fh);
 	return 0;
@@ -765,28 +752,34 @@ int calcCovs::importTagAlign(const char * signalFile,int extension,int dataType)
 	unsigned long int start;unsigned long int stop;
 	char seq[128];int score;
 	int extend = (int)(extension/2);
-	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
-	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
+	int rval;
+//	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
+//	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
 	
 	while(!feof(fh)){
-		fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,seq,&score,strand);
-		if(strcmp(strand,minus) == 0){
-			if(stop >= extend)
-				pos = stop - extend + 1;
-			else
-				pos = 1;
-		}else{
-			if((start + extend-1) <= chr_size[getHashValue(cChrom)])
-				pos = start + extend - 1;
-			else
-				pos = chr_size[getHashValue(cChrom)];
+		rval = fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,seq,&score,strand);
+		if(rval == 6){
+			if(strcmp(strand,minus) == 0){
+				if(stop >= extend)
+					pos = stop - extend + 1;
+				else
+					pos = 1;
+			}else{
+				if((start + extend-1) <= chr_size[getHashValue(cChrom)])
+					pos = start + extend - 1;
+				else
+					pos = chr_size[getHashValue(cChrom)];
+			}
+			unsigned short int chromInt = getHashValue(cChrom);
+//			bwRead sig(chromInt,pos,sval);
+			bwRead sig(chromInt,pos);
+			if(dataType == 0)
+				signal_slist.push_back(sig);
+//				back = signal_slist.insert_after(back,sig);
+			else if(dataType == 1)
+				input_slist.push_back(sig);
+//				iback = input_slist.insert_after(iback,sig);
 		}
-		unsigned short int chromInt = getHashValue(cChrom);
-		bwRead sig(chromInt,pos,sval);
-		if(dataType == 0)
-			back = signal_slist.insert_after(back,sig);
-		else if(dataType == 1)
-			iback = input_slist.insert_after(iback,sig);
 	}
 	fclose(fh);
 	return 0;
@@ -809,29 +802,34 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 	unsigned long int start;unsigned long int stop;
 	char name[128];int bscore;
 	int extend = (int)(extension/2);
-	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
-	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
+	int rval;
+//	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
+//	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
 	
 	while(!feof(fh)){
-//		fscanf(fh,"%s%lu%lu%s",cChrom,&start,&stop,strand);
-		fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,name,&bscore,strand);
-		if(strcmp(strand,minus) == 0){
-			if(stop >= extend)
-				pos = stop - extend + 1;
-			else
-				pos = 1;
-		}else{
-			if((start + extend-1) <= chr_size[getHashValue(cChrom)])
-				pos = start + extend - 1;
-			else
-				pos = chr_size[getHashValue(cChrom)];
+		rval = fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,name,&bscore,strand);
+		if(rval == 6){
+			if(strcmp(strand,minus) == 0){
+				if(stop >= extend)
+					pos = stop - extend + 1;
+				else
+					pos = 1;
+			}else{
+				if((start + extend-1) <= chr_size[getHashValue(cChrom)])
+					pos = start + extend - 1;
+				else
+					pos = chr_size[getHashValue(cChrom)];
+			}
+			unsigned short int chromInt = getHashValue(cChrom);
+//			bwRead sig(chromInt,pos,sval);
+			bwRead sig(chromInt,pos);
+			if(dataType == 0)
+				signal_slist.push_back(sig);
+//				back = signal_slist.insert_after(back,sig);
+			else if(dataType == 1)
+				input_slist.push_back(sig);
+//				iback = input_slist.insert_after(iback,sig);
 		}
-		unsigned short int chromInt = getHashValue(cChrom);
-		bwRead sig(chromInt,pos,sval);
-		if(dataType == 0)
-			back = signal_slist.insert_after(back,sig);
-		else if(dataType == 1)
-			iback = input_slist.insert_after(iback,sig);
 	}
 	fclose(fh);
 	return 0;

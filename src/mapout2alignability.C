@@ -26,6 +26,7 @@ void mapout2alignability(char **Rfilelist,char **Routfile){
 	FILE * flist;
 	flist = fopen(filelist,"r");
 	char mapfile[128];
+	char mapChar[1];
 	while(!feof(flist)){
 		fscanf(flist,"%s",mapfile);
 		Rprintf("\nProcessing %s .......\n",mapfile);
@@ -34,7 +35,6 @@ void mapout2alignability(char **Rfilelist,char **Routfile){
 		chrm.erase(bout);
 		Rprintf("\t%s .......\n",chrm.c_str());
 		fprintf(fout,"fixedStep chrom=%s start=1 step=1\n",chrm.c_str());
-		char mapChar[1];
 		ifstream mfile (mapfile,ios::in|ios::binary);
 		if(mfile.is_open()){
 			while(!mfile.eof()){
