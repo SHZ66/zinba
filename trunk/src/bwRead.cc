@@ -11,7 +11,7 @@ bwRead::bwRead(const bwRead& s){
 }
 
 //bwRead::bwRead(unsigned short int _chrom, unsigned long int _pos,unsigned short int _strand){
-bwRead::bwRead(unsigned short int _chrom, unsigned long int _pos){
+bwRead::bwRead(unsigned short int _chrom, unsigned int _pos){
 	chrom = _chrom;
 	pos = _pos;
 //	strand = _strand;
