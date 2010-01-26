@@ -20,10 +20,13 @@ class bcanalysis{
 		bcanalysis(); //Implemented
 		~bcanalysis(); //Implemented
 		
-		int importRawSignal(const char *,const char *);//Implemented
-		int processSignals(const char *,const char *,int);//Implemented
+		int importRawSignal(const char *,int,const char *,const char *);//Implemented
+		int processSignals(const char *,int);//Implemented
 		int outputData(const char *, unsigned short int,unsigned short int,unsigned short int[]);//Implemented
-		
+		int importTagAlign(const char *,int);
+		int importBowtie(const char *,int);
+		int importBed(const char *,int);
+	
 		struct ltstr{
 			bool operator()(const char* s1, const char* s2) const
 			{
@@ -40,7 +43,10 @@ class bcanalysis{
 
 	private:
 		
-		slist<bwRead> signal_slist;//Implemented	
+//		slist<bwRead> signal_slist;//Implemented
+		vector<bwRead> signal_slist;//Implemented
+		unsigned short int tbSizeFlag;
+		
 		unsigned short int chromCounter;//Implemented
 		unsigned short int getHashValue(char *);//Implemented
 		const char * getKey(unsigned short int);//Implemented

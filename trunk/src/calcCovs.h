@@ -29,7 +29,7 @@ class calcCovs{
 		int importBowtie(const char *,int,int);
 		int importTagAlign(const char *,int,int);
 		int importBed(const char *,int,int);
-	
+
 		struct ltstr{
 			bool operator()(const char* s1, const char* s2) const
 			{
@@ -45,9 +45,11 @@ class calcCovs{
 		};
 
 	private:
-		
-		slist<bwRead> signal_slist;//Implemented
-		slist<bwRead> input_slist;
+
+		vector<bwRead> signal_slist;//Implemented
+		vector<bwRead> input_slist;
+//		slist<bwRead> signal_slist;//Implemented
+//		slist<bwRead> input_slist;
 		list<cnvWins> cnv_wins;
 		slist<dataWins> peak_wins;
 	
