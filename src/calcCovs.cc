@@ -458,7 +458,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			eraseInd = 0;
 			for(int i = 0;i <= (int) input_slist.size();i++){
 				if(input_slist[i].chrom==currchr){
-					basepair[input_slist[i].pos]++;
+					ibasepair[input_slist[i].pos]++;
 				}else{
 					eraseInd = i;
 					i = (int) input_slist.size();
