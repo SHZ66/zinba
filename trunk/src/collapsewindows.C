@@ -54,6 +54,7 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 	int readResult = 0;
 	char firstline [256];
 	int rwline;
+	double sres;int ec;double ic;double gc;double ap;double cnv;
 	string chr;
 	///////////////////////////
 	unsigned long int winSizeThresh;
@@ -95,23 +96,23 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 				readResult = 0;
 				if(strcmp(method,pscl) == 0){
 					if(wformat == 0){
-						rwline = fscanf(fh,"%s%lu%lu%hu%lf%*lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
-						if(sigVal <= highThresh && rwline > 0)
+						rwline = fscanf(fh,"%s%lu%lu%hu%f%f",cChrom,&iStart,&iEnd,&qFlag,&sigVal,&sres);
+						if(sigVal <= highThresh && rwline == 6)
 							readResult = 1;
 					}else if(wformat == 1){
-						rwline = fscanf(fh,"%s%lu%lu%*d%*lf%*lf%*lf%*lf%hu%lf%*lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
-						if(sigVal <= highThresh && rwline > 0)
+						rwline = fscanf(fh,"%s%lu%lu%d%f%f%f%f%hu%f%f",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal,&sres);
+						if(sigVal <= highThresh && rwline == 11)
 							readResult = 1;
 					}
 				}else if(strcmp(method,mixture) == 0){
 					if(wformat == 0){
-						rwline = fscanf(fh,"%s%lu%lu%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
-						if(sigVal >= highThresh && rwline > 0)
+						rwline = fscanf(fh,"%s%lu%lu%hu%f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+						if(sigVal >= highThresh && rwline == 5)
 							readResult = 1;
 					}else if(wformat == 1){
 						int exp;double inp,gc,ap,ecl;
-						rwline = fscanf(fh,"%s%lu%lu%*d%*lf%*lf%*lf%*lf%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
-						if(sigVal >= highThresh && rwline > 0)
+						rwline = fscanf(fh,"%s%lu%lu%d%f%f%f%f%hu%f",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal);
+						if(sigVal >= highThresh && rwline== 10)
 							readResult = 1;
 					}
 				}

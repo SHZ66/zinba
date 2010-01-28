@@ -26,10 +26,10 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             fdr=qvalue(pval)
             numpeaks=length(which(fdr[[3]]<fdrlevel))
 	    if(printFullOut == 1){
-		data=cbind(data, ((data$exp_count>q25)^2), fdr[[3]], standardized)
+		data=cbind(data, ((data$exp_count>q25)^2), formatC(fdr[[3]],format="f",digits=16), standardized)
 		colnames(data)[c(dim(data)[2]-2, dim(data)[2]-1, dim(data)[2])]=c('q25','qvalue', 'residual')
 	    }else{
-		data=cbind(data[1:3],((data$exp_count>q25)^2), fdr[[3]], standardized)
+		data=cbind(data[1:3],((data$exp_count>q25)^2), formatC(fdr[[3]],format="f",digits=16), standardized)
 		colnames(data)=c('chromosome','start','stop','q25','qvalue', 'residual')
 	    }
             param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
@@ -224,10 +224,10 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             }
             numpeaks=length(which(probi2>peakconfidence))
 	    if(printFullOut == 1){
-		data=cbind(data,((data$exp_count>q25)^2),probi2)
+		data=cbind(data,((data$exp_count>q25)^2),formatC(probi2,format="f",digits=16))
 		colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
 	    }else{
-	    	data=cbind(data[1:3],((data$exp_count>q25)^2),probi2)
+	    	data=cbind(data[1:3],((data$exp_count>q25)^2),formatC(probi2,format="f",digits=16))
 		colnames(data)=c('chromosome','start','stop','q25','peakprob')
 	    }
 	    if(diff==0){
