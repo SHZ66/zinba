@@ -269,24 +269,85 @@ const char * analysis::getKey(unsigned short int chrom){
 }
 
 int analysis::importCoords(const char *winlist,double threshold,const char *method,int wformat){
+	
+	const char *pscl = "pscl";
+	const char *mixture = "mixture";
+	int rval;
+	if(strcmp(method,pscl) == 0){
+		cout << "Getting significant regions from pscl run" << endl;
+		rval = importPscl(winlist,threshold,wformat);
+	}else if(strcmp(method,mixture) == 0){
+		cout << "Getting significant regions from mixture run" << endl;
+		rval = importMixture(winlist,threshold,wformat);
+	}else{
+		cout << "ERROR: method must be either pscl OR mixture" << endl;
+		return 1;
+	}
+
+	if(rval == 0){
+		cout << "\nImported " << coordIN_slist.size() << " coordinates" << endl;
+		coordIN_slist.sort();
+		list<coord>::iterator back =  coordIN_slist.begin();
+		///////////////////////////
+		unsigned long int winSizeThresh = (back->end - back->start) * 10;
+		//////////////////////////
+		coord tempCoord = *back;
+		coordIN_slist.erase(back++);
+		int flagFinish = 0;
+		
+		while(flagFinish == 0){
+			if(coordIN_slist.empty())
+				flagFinish = 1;
+			if(flagFinish == 0 && back->chrom == tempCoord.chrom && back->start <= tempCoord.end+1){
+				tempCoord.end = back->end;
+				if(strcmp(method,pscl) == 0 && tempCoord.sigVal > back->sigVal)
+					tempCoord.sigVal = back->sigVal;
+				else if(strcmp(method,mixture) == 0 && tempCoord.sigVal < back->sigVal)
+					tempCoord.sigVal = back->sigVal;
+				coordIN_slist.erase(back++);
+			}else{
+				if((tempCoord.end-tempCoord.start) <= winSizeThresh){
+					coordOUT_slist.push_back(tempCoord);
+				}else{
+					//REMOVE ONCE C PEAKBOUND IS RUNNING
+					const char * cName = getKey(tempCoord.chrom);
+					cout << "Excluding " << cName << ":" << tempCoord.start << "-" << tempCoord.end << " SIZE=" << (tempCoord.end-tempCoord.start) << endl;
+				}
+
+				if(flagFinish == 0){
+					tempCoord = *back;
+					coordIN_slist.erase(back++);
+				}
+			}
+		}
+		coordOUT_slist.sort();
+		cout << "\nCollapsed to " << coordOUT_slist.size() << " non-overlapping regions" << endl;
+		return 0;
+	}else{
+		cout << "ERROR: problem importing windows" << endl;
+		return 1;
+	}
+}
+
+int analysis::importPscl(const char *winlist,double threshold,int wformat){
+
 	FILE * wlist;
 	wlist = fopen(winlist,"r");
-	if(wlist == NULL){return 1;}
+	if(wlist == NULL){
+		cout << "ERROR: opening window list file" << endl;
+		return 1;
+	}
 	char cChrom[128];
 	unsigned long int iStart;
 	unsigned long int iEnd;
 	unsigned short int qFlag;
 	double sigVal;
-	const char *pscl = "pscl";
-	const char *mixture = "mixture";
 	char sigFile [256];
 	int readResult = 0;
 	char firstline [256];
 	int rwline;
-	///////////////////////////
-	unsigned long int winSizeThresh;
-	int winSize;
-	//////////////////////////
+	double sres;int ec;double ic;double gc;double ap;double cnv;
+
 	while(!feof(wlist)){
 		int rline = fscanf(wlist,"%s",sigFile);
 		if(rline == 1){
@@ -298,31 +359,18 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 				fgets(firstline,256,fh);
 				while(!feof(fh)){
 					readResult = 0;
-					if(strcmp(method,pscl) == 0){
-						if(wformat == 0){
-							rwline = fscanf(fh,"%s%lu%lu%hu%lf%*lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
-							if(sigVal <= threshold && rwline > 0){
-								readResult = 1;
-							}
-						}else if(wformat == 1){
-							rwline = fscanf(fh,"%s%lu%lu%*d%*lf%*lf%*lf%*lf%hu%lf%*lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
-							if(sigVal <= threshold && rwline > 0){
-								readResult = 1;
-							}
+					if(wformat == 0){
+						rwline = fscanf(fh,"%s%lu%lu%hu%f%f",cChrom,&iStart,&iEnd,&qFlag,&sigVal,&sres);
+						if(sigVal <= threshold && rwline == 6){
+							readResult = 1;
 						}
-					}else if(strcmp(method,mixture) == 0){
-						if(wformat == 0){
-							rwline = fscanf(fh,"%s%lu%lu%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
-							if(sigVal >= threshold && rwline > 0){
-								readResult = 1;
-							}
-						}else if(wformat == 1){
-							rwline = fscanf(fh,"%s%lu%lu%*d%*lf%*lf%*lf%*lf%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
-							if(sigVal >= threshold && rwline > 0){
-								readResult = 1;
-							}
+					}else if(wformat == 1){
+						rwline = fscanf(fh,"%s%lu%lu%d%f%f%f%f%hu%f%f",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal,&sres);
+						if(sigVal <= threshold && rwline == 11){
+							readResult = 1;
 						}
 					}
+
 					if(readResult == 1){
 						if(qFlag == 1){
 							string chromIn(cChrom);
@@ -333,45 +381,74 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 					}
 				}
 				fclose(fh);
+			}else{
+				cout << "ERROR: problem opening .wins file " << signalFile.c_str() << endl;
+				return 1;
 			}
 		}
 	}
 	fclose(wlist);
-	winSize = iEnd - iStart;
-	winSizeThresh = winSize * 10;
-	cout << "\nImported " << coordIN_slist.size() << " coordinates" << endl;
-	coordIN_slist.sort();
-	
-	list<coord>::iterator back =  coordIN_slist.begin();	
-	coord tempCoord = *back;
-	coordIN_slist.erase(back++);
-	int flagFinish = 0;
-	
-	while(flagFinish == 0){
-		if(coordIN_slist.empty())
-			flagFinish = 1;
-		if(flagFinish == 0 && back->chrom == tempCoord.chrom && back->start <= tempCoord.end+1){
-			tempCoord.end = back->end;
-			if(strcmp(method,pscl) == 0 && tempCoord.sigVal > back->sigVal)
-				tempCoord.sigVal = back->sigVal;
-			else if(strcmp(method,mixture) == 0 && tempCoord.sigVal < back->sigVal)
-				tempCoord.sigVal = back->sigVal;
-			coordIN_slist.erase(back++);
-		}else{
-			if((tempCoord.end-tempCoord.start) <= winSizeThresh){
-				coordOUT_slist.push_back(tempCoord);
-			}else{
-				//REMOVE ONCE C PEAKBOUND IS RUNNING
-				const char * cName = getKey(tempCoord.chrom);
-				cout << "Excluding " << cName << ":" << tempCoord.start << "-" << tempCoord.end << " SIZE=" << (tempCoord.end-tempCoord.start) << endl;
-			}
+	return 0;
+}
 
-			if(flagFinish == 0){
-				tempCoord = *back;
-				coordIN_slist.erase(back++);
+int analysis::importMixture(const char *winlist,double threshold,int wformat){
+
+	FILE * wlist;
+	wlist = fopen(winlist,"r");
+	if(wlist == NULL){
+		cout << "ERROR: opening window list file" << endl;
+		return 1;
+	}
+	char cChrom[128];
+	unsigned long int iStart;
+	unsigned long int iEnd;
+	unsigned short int qFlag;
+	double sigVal;	
+	char sigFile [256];
+	int readResult = 0;
+	char firstline [256];
+	int rwline;
+	int ec;double ic;double gc;double ap;double cnv;
+	
+	while(!feof(wlist)){
+		int rline = fscanf(wlist,"%s",sigFile);
+		if(rline == 1){
+			string signalFile(sigFile);
+			FILE * fh;
+			fh = fopen(signalFile.c_str(),"r");
+			if(fh != NULL){
+				cout << "\tImporting windows from " << signalFile.c_str() << "..." << endl;
+				fgets(firstline,256,fh);
+				while(!feof(fh)){
+					readResult = 0;
+					if(wformat == 0){
+						rwline = fscanf(fh,"%s%lu%lu%hu%f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+						if(sigVal >= threshold && rwline == 5){
+							readResult = 1;
+						}
+					}else if(wformat == 1){
+						rwline = fscanf(fh,"%s%lu%lu%d%f%f%f%f%hu%f",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal);
+						if(sigVal >= threshold && rwline == 10){
+							readResult = 1;
+						}
+					}
+					
+					if(readResult == 1){
+						if(qFlag == 1){
+							string chromIn(cChrom);
+							unsigned short int chromInt = getHashValue(chromIn.c_str());
+							coord c(chromInt,iStart,iEnd,qFlag,sigVal);
+							coordIN_slist.push_back(c);
+						}
+					}
+				}
+				fclose(fh);
+			}else{
+				cout << "ERROR: problem opening .wins file " << signalFile.c_str() << endl;
+				return 1;
 			}
 		}
 	}
-	coordOUT_slist.sort();
-	cout << "\nCollapsed to " << coordOUT_slist.size() << " non-overlapping regions" << endl;
+	fclose(wlist);
+	return 0;
 }

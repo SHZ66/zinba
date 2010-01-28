@@ -22,7 +22,9 @@ class analysis{
 		int importCoords(const char *,double,const char *,int);//Implemented
 		int processCoords(const char *,const char *,const char *,const char *);//Implemented
 		int outputData(const char *,int,unsigned short int,unsigned long int,unsigned long int,double,int,unsigned short int[]);//Implemented
-
+		int importPscl(const char *,double,int);
+		int importMixture(const char *,double,int);
+	
 		struct ltstr{
 			bool operator()(const char* s1, const char* s2) const
 			{
