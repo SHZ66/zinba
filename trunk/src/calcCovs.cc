@@ -646,8 +646,7 @@ int calcCovs::importRawSignal(const char * signalFile,int extension,const char *
 
 		tempTB = fopen(tChrSize,"r");
 		char cChrom[128];
-//		unsigned long int cStart;
-		unsigned int cStart;
+		unsigned long int cStart;
 		while(!feof(tempTB)){
 			int ret = fscanf(tempTB,"%s%lu",cChrom,&cStart);
 			unsigned short int chromInt = getHashValue(cChrom);
@@ -657,7 +656,7 @@ int calcCovs::importRawSignal(const char * signalFile,int extension,const char *
 		remove(tChrSize);
 		tbSizeFlag = 1;
 	}
-				  
+
 	const char * bowtie = "bowtie";
 	const char * bed = "bed";
 	const char * tagAlign = "tagAlign";

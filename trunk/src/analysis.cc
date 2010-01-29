@@ -230,8 +230,8 @@ int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pC
 	char winID[255];
 	char start[10];
 	char stop[10];
-	sprintf( start,"%d", pStart);
-	sprintf( stop,"%d", pStop);
+	sprintf( start,"%lu", pStart);
+	sprintf( stop,"%lu", pStop);
 	strcpy(winID,chromName);strcat(winID,":");strcat(winID,start);strcat(winID,"-");strcat(winID,stop);
 	fprintf(fh,"%s\t%s\t%lu\t%lu\t%s\t%.14f",winID,chromName,pStart,pStop,strand,pSigVal);
 	for(int posP = 0; posP < printStop;posP++){
@@ -360,12 +360,12 @@ int analysis::importPscl(const char *winlist,double threshold,int wformat){
 				while(!feof(fh)){
 					readResult = 0;
 					if(wformat == 0){
-						rwline = fscanf(fh,"%s%lu%lu%hu%f%f",cChrom,&iStart,&iEnd,&qFlag,&sigVal,&sres);
+						rwline = fscanf(fh,"%s%lu%lu%hu%lf%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal,&sres);
 						if(sigVal <= threshold && rwline == 6){
 							readResult = 1;
 						}
 					}else if(wformat == 1){
-						rwline = fscanf(fh,"%s%lu%lu%d%f%f%f%f%hu%f%f",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal,&sres);
+						rwline = fscanf(fh,"%s%lu%lu%d%lf%lf%lf%lf%hu%lf%lf",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal,&sres);
 						if(sigVal <= threshold && rwline == 11){
 							readResult = 1;
 						}
@@ -381,10 +381,10 @@ int analysis::importPscl(const char *winlist,double threshold,int wformat){
 					}
 				}
 				fclose(fh);
-			}else{
-				cout << "ERROR: problem opening .wins file " << signalFile.c_str() << endl;
-				return 1;
-			}
+			}//else{
+				//cout << "ERROR: problem opening .wins file " << signalFile.c_str() << endl;
+				//return 1;
+			//}
 		}
 	}
 	fclose(wlist);
@@ -422,12 +422,12 @@ int analysis::importMixture(const char *winlist,double threshold,int wformat){
 				while(!feof(fh)){
 					readResult = 0;
 					if(wformat == 0){
-						rwline = fscanf(fh,"%s%lu%lu%hu%f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+						rwline = fscanf(fh,"%s%lu%lu%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 						if(sigVal >= threshold && rwline == 5){
 							readResult = 1;
 						}
 					}else if(wformat == 1){
-						rwline = fscanf(fh,"%s%lu%lu%d%f%f%f%f%hu%f",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal);
+						rwline = fscanf(fh,"%s%lu%lu%d%lf%lf%lf%lf%hu%lf",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal);
 						if(sigVal >= threshold && rwline == 10){
 							readResult = 1;
 						}
@@ -443,10 +443,10 @@ int analysis::importMixture(const char *winlist,double threshold,int wformat){
 					}
 				}
 				fclose(fh);
-			}else{
-				cout << "ERROR: problem opening .wins file " << signalFile.c_str() << endl;
-				return 1;
-			}
+			}//else{
+				//cout << "ERROR: problem opening .wins file " << signalFile.c_str() << endl;
+				//return 1;
+			//}
 		}
 	}
 	fclose(wlist);

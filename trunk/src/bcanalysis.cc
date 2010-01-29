@@ -154,7 +154,7 @@ int bcanalysis::importRawSignal(const char * signalFile,int extension,const char
 		tempTB = fopen(tChrSize,"r");
 		char cChrom[128];
 //		unsigned long int cStart;
-		unsigned int cStart;
+		unsigned long int cStart;
 		while(!feof(tempTB)){
 			int ret = fscanf(tempTB,"%s%lu",cChrom,&cStart);
 			unsigned short int chromInt = getHashValue(cChrom);

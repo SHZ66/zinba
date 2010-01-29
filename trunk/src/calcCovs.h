@@ -62,7 +62,7 @@ class calcCovs{
 		map<int, const char*> intsToChrom;//Implemented
 	
 //		map<unsigned short int,unsigned long int> chr_size;
-		map<unsigned short int,unsigned int> chr_size;
+		map<unsigned short int,unsigned long int> chr_size;
 };
 
 #endif /*CALCCOVS_H_*/
