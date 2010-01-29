@@ -54,50 +54,58 @@ SEXP read_aligned_tags(SEXP filename,SEXP filetype){
 		// read in bowtie line
 		int fcount=0;
 		char cChrom[128];
-		int fpos;
+		long unsigned int fpos;
 		int nm;
 		char strand[1];
 		char minus[] = "-";
 		char line[512];char seq[128];
 		string chr;string mm;
 		unsigned long int start;unsigned long int stop;
+		char name[128];
+		int rval;char qscore[128];int eval;
 
 		while(!feof(f)){
 			if (strcmp(ftype,bowtie) == 0){
-				fscanf(f,"%*s%s%s%lu%s%*s%*d",strand,cChrom,&fpos,seq);
+				rval = fscanf(f,"%s%s%s%lu%s%s%d",name,strand,cChrom,&fpos,seq,qscore,eval);
 				fgets(line,512,f);
-				if(strcmp(strand,minus) == 0)
-					fpos = -1 * (fpos + strlen(seq) - 1);
-				// determine number of mismatches
-				mm = string(line);
-				nm=0;
-				if(mm.size()>0) {
-					nm++;
-					string::size_type tp(0);
-					while(tp!=string::npos) {
-						tp = mm.find(",",tp);
-						if(tp!=string::npos) {
-							tp++;
-							++nm;
+				if(rval == 7){
+					if(strcmp(strand,minus) == 0)
+						fpos = -1 * (fpos + strlen(seq) - 1);
+					// determine number of mismatches
+					mm = string(line);
+					nm=0;
+					if(mm.size()>0) {
+						nm++;
+						string::size_type tp(0);
+						while(tp!=string::npos) {
+							tp = mm.find(",",tp);
+							if(tp!=string::npos) {
+								tp++;
+								++nm;
+							}
 						}
 					}
 				}
 			}else if(strcmp(ftype,bed) == 0){
-				fscanf(f,"%s%lu%lu%s",cChrom,&start,&stop,strand);
-				if(strcmp(strand,minus) == 0){
-					fpos = -1 * stop;
-				}else{
-					fpos = start;
+				rval = fscanf(f,"%s%lu%lu%s%d%s",cChrom,&start,&stop,name,eval,strand);
+				if(rval == 6){
+					if(strcmp(strand,minus) == 0){
+						fpos = -1 * stop;
+					}else{
+						fpos = start;
+					}
+					nm = 1;
 				}
-				nm = 1;
 			}else if(strcmp(ftype,tagAlign) == 0){
-				fscanf(f,"%s%lu%lu%*s%*d%s",cChrom,&start,&stop,strand);
-				if(strcmp(strand,minus) == 0){
-					fpos = -1 * stop;
-				}else{
-					fpos = start;
+				rval = fscanf(f,"%s%lu%lu%s%d%s",cChrom,&start,&stop,name,eval,strand);
+				if(rval == 6){
+					if(strcmp(strand,minus) == 0){
+						fpos = -1 * stop;
+					}else{
+						fpos = start;
+					}
+					nm = 1;
 				}
-				nm = 1;
 			}
 			// determine the chromosome index
 			chr = string(cChrom);

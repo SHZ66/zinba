@@ -96,22 +96,22 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 				readResult = 0;
 				if(strcmp(method,pscl) == 0){
 					if(wformat == 0){
-						rwline = fscanf(fh,"%s%lu%lu%hu%f%f",cChrom,&iStart,&iEnd,&qFlag,&sigVal,&sres);
+						rwline = fscanf(fh,"%s%lu%lu%hu%lf%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal,&sres);
 						if(sigVal <= highThresh && rwline == 6)
 							readResult = 1;
 					}else if(wformat == 1){
-						rwline = fscanf(fh,"%s%lu%lu%d%f%f%f%f%hu%f%f",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal,&sres);
+						rwline = fscanf(fh,"%s%lu%lu%d%lf%lf%lf%lf%hu%lf%lf",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal,&sres);
 						if(sigVal <= highThresh && rwline == 11)
 							readResult = 1;
 					}
 				}else if(strcmp(method,mixture) == 0){
 					if(wformat == 0){
-						rwline = fscanf(fh,"%s%lu%lu%hu%f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+						rwline = fscanf(fh,"%s%lu%lu%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 						if(sigVal >= highThresh && rwline == 5)
 							readResult = 1;
 					}else if(wformat == 1){
 						int exp;double inp,gc,ap,ecl;
-						rwline = fscanf(fh,"%s%lu%lu%d%f%f%f%f%hu%f",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal);
+						rwline = fscanf(fh,"%s%lu%lu%d%lf%lf%lf%lf%hu%lf",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal);
 						if(sigVal >= highThresh && rwline== 10)
 							readResult = 1;
 					}
@@ -163,9 +163,12 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 		cout << "\t" << tempCoords.size() << " coords at this threshold" << endl;
 		back = tempCoords.begin();
 		coord tempCoord = *back;
+		int flagEnd = 0;
 		back++;
-		while(back != tempCoords.end()){
-			if(back->chrom == tempCoord.chrom && back->start <= tempCoord.end+1){
+		while(flagEnd == 0){
+			if(back == tempCoords.end())
+				flagEnd = 1;
+			if(back->chrom == tempCoord.chrom && back->start <= tempCoord.end+1 && flagEnd == 0){
 				tempCoord.end = back->end;
 				if(strcmp(method,pscl) == 0 && tempCoord.sigVal > back->sigVal)
 					tempCoord.sigVal = back->sigVal;
@@ -179,9 +182,10 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 					string cName = cnames[tempCoord.chrom];
 					cout << "Excluding " << cName.c_str() << ":" << tempCoord.start << "-" << tempCoord.end << " SIZE=" << (tempCoord.end-tempCoord.start) << endl;
 				}
+				tempCoord = *back;
 			}
-			tempCoord = *back;
-			back++;
+			if(flagEnd == 0)
+				back++;
 		}
 		coordOUT_slist.sort();
 		cout << "\tCollapsed to " << coordOUT_slist.size() << " regions" << endl;
@@ -203,8 +207,8 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 		back = coordOUT_slist.begin();
 		while(back != coordOUT_slist.end()){
 			chromName = cnames[back->chrom];
-			sprintf( start,"%d", back->start);
-			sprintf( stop,"%d", back->end);
+			sprintf( start,"%lu", back->start);
+			sprintf( stop,"%lu", back->end);
 			strcpy(winID,chromName.c_str());strcat(winID,":");strcat(winID,start);strcat(winID,"-");strcat(winID,stop);
 			fprintf(fh,"%s\t%s\t%lu\t%lu\t%s\t%.14f\n",winID,chromName.c_str(),back->start,back->end,strand,back->sigVal);
 			back++;

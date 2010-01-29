@@ -27,8 +27,9 @@ void mapout2alignability(char **Rfilelist,char **Routfile){
 	flist = fopen(filelist,"r");
 	char mapfile[128];
 	char mapChar[1];
+	int rval;
 	while(!feof(flist)){
-		fscanf(flist,"%s",mapfile);
+		rval = fscanf(flist,"%s",mapfile);
 		Rprintf("\nProcessing %s .......\n",mapfile);
 		string chrm = string(mapfile);
 		size_t bout = chrm.find("b.out");
