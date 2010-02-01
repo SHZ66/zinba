@@ -44,7 +44,7 @@ class analysis{
 		map<int, const char*> intsToChrom;//Implemented
 	
 		map<unsigned short int,unsigned long int> chr_size;
-
+		map<unsigned short int,unsigned long int> chr_med;
 };
 
 #endif /*ANALYSIS_H_*/
