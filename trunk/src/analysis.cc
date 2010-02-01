@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <time.h>
+#include <algorithm>
 
 using namespace std;
 
@@ -89,6 +90,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 		cout << "Error opening input file" << inputFile << ", exiting" << endl;
 		return 1;
 	}
+int bcount = 0;
 	while (getline(seqfile, line)){
 		if (line[0] == 'f'){
 			if(collectData == 1 && getChrmData == 1){
@@ -119,9 +121,23 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 						i++;
 					}
 				}
+
+				sort(basepair, basepair+chr_size[chromInt]);
+				int nonzeroInd = 0;
+				while(basepair[nonzeroInd] != 0)
+					nonzeroInd++;
+								
+				int nzlength = chr_size[chromInt] - nonzeroInd;
+				int medInd = (int) nzlength/2;
+				chr_med[chromInt] = basepair[nonzeroInd+medInd];
+				int sfInd = (int) nzlength * 0.75;
+				int nInd = (int) nzlength * 0.9;
+
+cout << "Med is " << chr_med[chromInt] << "\n75th percentile is " << basepair[nonzeroInd+sfInd] << "\n90th percentile is " << basepair[nonzeroInd+nInd] << "\n" << endl;
+				
 				delete [] basepair;
 				basepair = NULL;
-				
+
 				if(coordOUT_slist.empty()){
 					seqfile.close();
 					return 0;

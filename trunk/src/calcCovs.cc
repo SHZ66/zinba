@@ -37,22 +37,18 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 	char tInfo[128];// = "tempInfo.txt";
 	char sysCall[256];
 	
-//	slist<bwRead>::iterator i = signal_slist.begin();
 	unsigned short int currchr = 999;
-	
 	unsigned short int * basepair = NULL;
 	unsigned short int * ibasepair = NULL;
-//	unsigned short int * gcContent = NULL;	
-//	unsigned short int * alignability = NULL;
 	unsigned char * gcContent = NULL;	
 	unsigned char * alignability = NULL;
+	int i;
 
 	int readInput = 0;
 	const char* noneVal = "none";
 	
 	while(!signal_slist.empty()){
-//		i = signal_slist.begin();
-//		currchr = i->chrom;
+		i = 0;
 		currchr = signal_slist[0].chrom;
 		const char * chromReport = getKey(currchr);
 		cout << "\nProcessing " << chromReport << endl;
@@ -62,26 +58,16 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			basepair[ch] = 0;
 
 		cout << "\tMapping reads to chromosome......" << endl;
-		int eraseInd = 0;
-		for(int i = 0;i <= (int) signal_slist.size();i++){
-			if(signal_slist[i].chrom==currchr){
-				basepair[signal_slist[i].pos]++;
-			}else{
-				eraseInd = i;
-				i = (int) signal_slist.size();
-			}
+		while(signal_slist[i].chrom==currchr && i < (int) signal_slist.size()){
+			basepair[signal_slist[i].pos]++;
+			i++;
 		}
-		signal_slist.erase(signal_slist.begin(),signal_slist.begin()+eraseInd);
-//		while(!signal_slist.empty() && i->chrom==currchr){
-//			basepair[i->pos]++;
-//			signal_slist.erase(i++);
-//		}
+		signal_slist.erase(signal_slist.begin(),signal_slist.begin()+i);
 
-//		alignability = new unsigned short int[chr_size[currchr] + 1];
 		alignability = new unsigned char[chr_size[currchr] + 1];
 		for(int ch = chr_size[currchr]; ch--;)
 			alignability[ch] = (unsigned char) 0;
-//			alignability[ch] = 0;
+
 		string alignFileS = alignDir + chromReport + ".wig";
 		char * alignFile = new char[alignFileS.size() + 1];
 		strcpy(alignFile, alignFileS.c_str());
@@ -92,22 +78,19 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			return 1;
 		}
 		unsigned short int aScore;
-		unsigned int pos = 1;
-//		unsigned long int pos = 1;
+		unsigned long int pos = 1;
 		while(!feof(tempTB)){
 			int ret = fscanf(tempTB,"%hu",&aScore);
-//			alignability[pos] = aScore;
 			alignability[pos] = (unsigned char) aScore;
 			pos++;
 		}
 		fclose(tempTB);
 		
 		cout << "\tGetting sequence from .2bit file:\n\t\t" << twoBitFile << endl;
-//		gcContent = new unsigned short int[chr_size[currchr] + 1];
 		gcContent = new unsigned char[chr_size[currchr] + 1];
 		for(int ch = chr_size[currchr]; ch--;)
 			gcContent[ch] = (unsigned char) 0;
-//			gcContent[ch] = 0;		
+
 		char tSeq[128];
 		time(&rtime);
 		timeinfo=localtime(&rtime);
@@ -135,22 +118,17 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		ifstream seqfile(tSeq);
 		string line;
 		pos = 1;
-		unsigned int nStart = 0;
-		unsigned int nStop = 0;
-//		unsigned long int nStart = 0;
-//		unsigned long int nStop = 0;
+		unsigned long int nStart = 0;
+		unsigned long int nStop = 0;
 		unsigned short int prevEnt = 0;
 		while(getline(seqfile,line)){
 			if(line[0] != '>'){
 				for(int s = 0; s < line.length();s++){
 					if(line[s] == 'G' || line[s] == 'C'){
-//						gcContent[pos] = 1;
 						gcContent[pos] = (unsigned char) 1;
 					}else if (line[s] == 'N'){
-//						gcContent[pos] = 2;
 						gcContent[pos] = (unsigned char) 2;
 					}else{
-//						gcContent[pos] = 0;
 						gcContent[pos] = (unsigned char) 0;
 					}
 					pos++;
@@ -166,10 +144,8 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			numOffsets = (int) cWinSize/cOffsetSize;
 		}
 		for(int o = 0; o < numOffsets; o++){
-//			unsigned long int cWinStart = (cOffsetSize * o) + 1;
-//			unsigned long int cWinStop = cWinStart + cWinSize - 1;
-			unsigned int cWinStart = (cOffsetSize * o) + 1;
-			unsigned int cWinStop = cWinStart + cWinSize - 1;
+			unsigned long int cWinStart = (cOffsetSize * o) + 1;
+			unsigned long int cWinStop = cWinStart + cWinSize - 1;
 			if(cWinStop > chr_size[currchr])
 				cWinStop = chr_size[currchr];
 			while(cWinStop <= chr_size[currchr]){
@@ -177,12 +153,10 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				int alignCount = 0;
 				double nCount = 0.0;
 				for(int b = cWinStart; b <= cWinStop; b++){
-//					if(gcContent[b] == 2){
 					if((int) gcContent[b] == 2){
 						nCount++;						
 					}else{
 						cnvCount += basepair[b];
-//						alignCount += alignability[b];
 						alignCount += (int) alignability[b];
 					}
 				}
@@ -409,21 +383,17 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			double rightCnvCount = 0;
 			int rightAlignCount = 0;
 			
-//			unsigned long int tpStart = 1;
-			unsigned int tpStart = 1;
+			unsigned long int tpStart = 1;
 			if(*tp > (cWinSize+1))
 				tpStart = (*tp-cWinSize);
-//			unsigned long int tpStop = (unsigned long int) (chr_size[currchr]-tpStart)/2;
-			unsigned int tpStop = (unsigned int) (chr_size[currchr]-tpStart)/2;
+			unsigned long int tpStop = (unsigned long int) (chr_size[currchr]-tpStart)/2;
 			if(chr_size[currchr] > (*tp+cWinSize)){
 				tpStop = *tp;
 			}
 			for(int b = tpStart; b <= tpStop; b++){
 				leftCnvCount += basepair[b];
-//				leftAlignCount += alignability[b];
 				leftAlignCount += (int) alignability[b];
 				rightCnvCount += basepair[b+cWinSize];
-//				rightAlignCount += alignability[b+cWinSize];
 				rightAlignCount += (int) alignability[b+cWinSize];
 			}
 			double cScore = 0;
@@ -451,25 +421,16 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				readInput = 1;
 			}
 			cout << "\tMapping input tags to the genome........." << endl;
+			i = 0;
 			ibasepair = new unsigned short int[chr_size[currchr]+1];
 			for(int ch = chr_size[currchr]; ch--;)
 				ibasepair[ch] = 0;
 
-			eraseInd = 0;
-			for(int i = 0;i <= (int) input_slist.size();i++){
-				if(input_slist[i].chrom==currchr){
-					ibasepair[input_slist[i].pos]++;
-				}else{
-					eraseInd = i;
-					i = (int) input_slist.size();
-				}
+			while(input_slist[i].chrom==currchr && i < (int) input_slist.size()){
+				ibasepair[input_slist[i].pos]++;
+				i++;
 			}
-			input_slist.erase(input_slist.begin(),input_slist.begin()+eraseInd);
-//			slist<bwRead>::iterator in = input_slist.begin();
-//			while(!input_slist.empty() && in->chrom==currchr){
-//				ibasepair[in->pos]++;
-//				input_slist.erase(in++);
-//			}
+			input_slist.erase(input_slist.begin(),input_slist.begin()+i);
 		}
 		
 		cout << "\tGetting counts for zinba windows.........." << endl;
@@ -495,10 +456,8 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				fprintf(tempTB,"%s\n",outfileDATA.c_str());
 			else
 				fprintf(tempTB,"%s;",outfileDATA.c_str());
-//			unsigned long int zWinStart = (zOffsetSize * o) + 1;
-//			unsigned long int zWinStop = zWinStart + zWinSize - 1;
-			unsigned int zWinStart = (zOffsetSize * o) + 1;
-			unsigned int zWinStop = zWinStart + zWinSize - 1;
+			unsigned long int zWinStart = (zOffsetSize * o) + 1;
+			unsigned long int zWinStop = zWinStart + zWinSize - 1;
 			while(zWinStop <= chr_size[currchr]){
 				int peakCount = 0;
 				double alignCount = 0;
@@ -507,13 +466,8 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				double inCount = 0;
 				for(int b = zWinStart; b <= zWinStop; b++){
 					peakCount += basepair[b];
-//					alignCount += alignability[b];
 					alignCount += (int) alignability[b];
 					
-//					if(gcContent[b] == 1)
-//						gcCount++;
-//					else if(gcContent[b] == 2)
-//						nCount++;
 					if((int) gcContent[b] == 1)
 						gcCount++;
 					else if((int) gcContent[b] == 2)
@@ -678,12 +632,10 @@ int calcCovs::importRawSignal(const char * signalFile,int extension,const char *
 			cout << "\tImported " << signal_slist.size() << " reads" << endl;
 			cout << "\tSorting reads ...";
 			sort (signal_slist.begin(), signal_slist.end());
-//			signal_slist.sort();
 		}else if(dataType == 1){
 			cout << "\t\tImported " << input_slist.size() << " inpput reads" << endl;
 			cout << "\t\tSorting reads ...";
 			sort (input_slist.begin(), input_slist.end());
-//			input_slist.sort();
 		}
 		cout << "COMPLETE" << endl;
 	}else{
@@ -703,21 +655,16 @@ int calcCovs::importBowtie(const char * signalFile,int extension,int dataType){
 	}
 		
 	char cChrom[128];
-	unsigned int pos;
-//	unsigned long int pos;
-//	unsigned short int sval = 1;
+	unsigned long int pos;
 	char strand[1];
 	char minus[] = "-";
 	char line[512];char seq[128];
 	char name[128];char sscore[128];int ival;
 	int extend = (int)(extension/2);
 	int rval;
-//	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
-//	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
 
 	while(!feof(fh)){
-//		rval = fscanf(fh,"%s%s%s%lu%s%s%i",name,strand,cChrom,&pos,seq,sscore,&ival);
-		rval = fscanf(fh,"%s%s%s%u%s%s%i",name,strand,cChrom,&pos,seq,sscore,&ival);
+		rval = fscanf(fh,"%s%s%s%lu%s%s%i",name,strand,cChrom,&pos,seq,sscore,&ival);
 		fgets(line,512,fh);
 		if(rval == 7){
 			if(strcmp(strand,minus) == 0){
@@ -736,10 +683,8 @@ int calcCovs::importBowtie(const char * signalFile,int extension,int dataType){
 			bwRead sig(chromInt,pos);
 			if(dataType == 0)
 				signal_slist.push_back(sig);
-//				back = signal_slist.insert_after(back,sig);
 			else if(dataType == 1)
 				input_slist.push_back(sig);
-//				iback = input_slist.insert_after(iback,sig);
 		}
 	}
 	fclose(fh);
@@ -756,22 +701,16 @@ int calcCovs::importTagAlign(const char * signalFile,int extension,int dataType)
 	}
 	
 	char cChrom[128];
-	unsigned int pos;
-//	unsigned long int pos;
-//	unsigned short int sval = 1;
+	unsigned long int pos;
 	char strand[1];
 	char minus[] = "-";
-//	unsigned long int start;unsigned long int stop;
-	unsigned int start;unsigned int stop;
+	unsigned long int start;unsigned long int stop;
 	char seq[128];int score;
 	int extend = (int)(extension/2);
 	int rval;
-//	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
-//	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
 	
 	while(!feof(fh)){
-//		rval = fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,seq,&score,strand);
-		rval = fscanf(fh,"%s%u%u%s%i%s",cChrom,&start,&stop,seq,&score,strand);
+		rval = fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,seq,&score,strand);
 		if(rval == 6){
 			if(strcmp(strand,minus) == 0){
 				if(stop >= extend)
@@ -789,10 +728,8 @@ int calcCovs::importTagAlign(const char * signalFile,int extension,int dataType)
 			bwRead sig(chromInt,pos);
 			if(dataType == 0)
 				signal_slist.push_back(sig);
-//				back = signal_slist.insert_after(back,sig);
 			else if(dataType == 1)
 				input_slist.push_back(sig);
-//				iback = input_slist.insert_after(iback,sig);
 		}
 	}
 	fclose(fh);
@@ -809,22 +746,16 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 	}
 	
 	char cChrom[128];
-	unsigned int pos;
-//	unsigned long int pos;
-//	unsigned short int sval = 1;
+	unsigned long int pos;
 	char strand[1];
 	char minus[] = "-";
-	unsigned int start;unsigned int stop;
-//	unsigned long int start;unsigned long int stop;
+	unsigned long int start;unsigned long int stop;
 	char name[128];int bscore;
 	int extend = (int)(extension/2);
 	int rval;
-//	slist<bwRead>::iterator back =  signal_slist.previous(signal_slist.end());
-//	slist<bwRead>::iterator iback = input_slist.previous(input_slist.end());
 	
 	while(!feof(fh)){
-//		rval = fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,name,&bscore,strand);
-		rval = fscanf(fh,"%s%u%u%s%i%s",cChrom,&start,&stop,name,&bscore,strand);
+		rval = fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,name,&bscore,strand);
 		if(rval == 6){
 			if(strcmp(strand,minus) == 0){
 				if(stop >= extend)
@@ -842,10 +773,8 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 			bwRead sig(chromInt,pos);
 			if(dataType == 0)
 				signal_slist.push_back(sig);
-//				back = signal_slist.insert_after(back,sig);
 			else if(dataType == 1)
 				input_slist.push_back(sig);
-//				iback = input_slist.insert_after(iback,sig);
 		}
 	}
 	fclose(fh);
