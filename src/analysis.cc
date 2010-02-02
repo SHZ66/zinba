@@ -121,20 +121,6 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 						i++;
 					}
 				}
-
-				sort(basepair, basepair+chr_size[chromInt]);
-				int nonzeroInd = 0;
-				while(basepair[nonzeroInd] != 0)
-					nonzeroInd++;
-								
-				int nzlength = chr_size[chromInt] - nonzeroInd;
-				int medInd = (int) nzlength/2;
-				chr_med[chromInt] = basepair[nonzeroInd+medInd];
-				int sfInd = (int) nzlength * 0.75;
-				int nInd = (int) nzlength * 0.9;
-
-cout << "Med is " << chr_med[chromInt] << "\n75th percentile is " << basepair[nonzeroInd+sfInd] << "\n90th percentile is " << basepair[nonzeroInd+nInd] << "\n" << endl;
-				
 				delete [] basepair;
 				basepair = NULL;
 
