@@ -59,24 +59,7 @@ int bcanalysis::processSignals(const char* outputFile,int extend){
 		printFLAG = 1;
 		delete [] basepair;
 		basepair = NULL;
-			
-currchr = signal_slist[i].chrom;
-chromReport = getKey(currchr);
-if(i < (int) signal_slist.size())
-	cout << "\tNeed to switch chrom, new " << chromReport << ", pos now " << signal_slist[i].pos << endl;
-else
-	cout << "\ti greater than list length" << endl;
-
 		signal_slist.erase(signal_slist.begin(),signal_slist.begin()+i);
-
-currchr = signal_slist[0].chrom;
-chromReport = getKey(currchr);
-if(signal_slist.empty())
-	cout << "the list is empty" << endl;
-else
-	cout << "\tDeleted signals\n\tChrom now " << chromReport << ", pos now " << signal_slist[0].pos << endl;
-		
-		
 	}
 	return 0;
 }

@@ -90,7 +90,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 		cout << "Error opening input file" << inputFile << ", exiting" << endl;
 		return 1;
 	}
-int bcount = 0;
+
 	while (getline(seqfile, line)){
 		if (line[0] == 'f'){
 			if(collectData == 1 && getChrmData == 1){
