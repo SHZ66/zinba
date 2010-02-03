@@ -56,6 +56,7 @@ sprintf(line, "PEAKID\tChrom\tStart\tStop\tStrand\tSig\tMaxloc\tMax\tpStart\tpSt
 fputs(line, FO);
 Rprintf("Begin Peak Refinement\n"); 
 //read in a line, save the information in each, perform peakbounds, then print out, repeat for each line
+int m=0;
  while(fgets(str_buf, MAX_LEN, FI) != NULL){
     i = 0;
      if ((ptr = strtok(str_buf, delim)) != NULL) {
@@ -237,6 +238,7 @@ while(i<lmaxvec){
 }
 /////////////////////////////////////////////////////////////////////////
 int pos=0;
+
 for(i=0;i<lmaxvec;i++){
 if(results[2*i]==0){break;}	
 sprintf(line, "%s\t%s\t%d\t%d\t%s\t%.14f\t%d\t%d\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,pstart+maxvec[i],basecount[maxvec[i]],pstart+results[2*i],pstart+results[2*i+1]);
