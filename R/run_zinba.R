@@ -22,7 +22,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NUL
 	}else if(method != 'pscl' && method != 'mixture'){
 		stop(paste("Method should be either pscl or mixture, currently",method))
 	}else{
-            params=scan(filelist,what=character(0))
+            params=scan(filelist,what=character(0),quiet=T)
 	    winlist=paste(outfile,".winlist",sep="")
             peakout=paste(outfile,".peaks",sep="")
             bpout=paste(outfile,".bpcount",sep="")
