@@ -78,11 +78,11 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
                     prop2=parms$prop2
                     theta1=parms$start$theta1
                     theta2=parms$start$theta2
-                    loglik0=log(prob0+prop1*dnbinom(0, size = theta1, mu = mu1)+prop2*dnbinom(0, size = theta2, mu = mu2))
-                    loglik1=log(prop1*dnbinom(Y, size = theta1, mu = mu1)+prop2*dnbinom(Y, size = theta2, mu = mu2))
-                    NAs=which(loglik1==-Inf | loglik1==-Inf)
+                    loglik0=log(prob0+(1-prob0)*prop1*dnbinom(0, size = theta1, mu = mu1)+(1-prob0)*prop2*dnbinom(0, size = theta2, mu = mu2))
+                    loglik1=log((1-prob0)*prop1*dnbinom(Y, size = theta1, mu = mu1)+(1-prob0)*prop2*dnbinom(Y, size = theta2, mu = mu2))
+                    NAs=which(loglik1==-Inf)
                     if(length(NAs>0)){
-                            loglik1[NAs]=apply(cbind(log(prop1)+dnbinom(Y[NAs], size = theta1, mu = mu1[NAs],log=TRUE),log(prop2)+dnbinom(Y[NAs], size = theta2, mu = mu2[NAs], log=TRUE)), 1, logsumexp)
+                            loglik1[NAs]=apply(cbind(log((1-prob0)*prop1)+dnbinom(Y[NAs], size = theta1, mu = mu1[NAs],log=TRUE),log((1-prob0)*prop2)+dnbinom(Y[NAs], size = theta2, mu = mu2[NAs], log=TRUE)), 1, logsumexp)
                     }
                     loglik=sum(loglik0*Y0+loglik1*Y1)
                     loglik
@@ -98,7 +98,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
 
             #starting params for ze0 component
             model_zero <-.C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y0), prior=as.double(rep(1,n)), offset=as.double(rep(0,n)), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), Xb=double(n*ncol(XNB)), fitted=as.double((rep(1,n) * Y0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
-            prop0=sum(model_zero$fitted)/n
+
 
 
             #INITIALIZATION OF THE MIXTURE MODEL
@@ -110,16 +110,16 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
 	        if(sum(colnames(data)=='input_count')==1){data2$input_count=exp(data2$input_count)-1}
 		if(sum(colnames(data)=='exp_cnvwin_log')==1){data2$exp_cnvwin_log=exp(data2$exp_cnvwin_log)-1}
 		prop2=startprop
-            	prop1=1-prop0-prop2
+            	prop1=1-prop2
 		t=rq(formula, tau=1-prop2, data=data2, method='pfn')
 		priorCOUNTweight=rep(10^-10, length(Y))      
 		priorCOUNTweight[as.double(which(t$residuals>quantile(t$residuals,1-prop2)))]=1-10^-10
 		rm(data2)
   	   }else if(initmethod=='count'){
 		    if(i == 1){
-	                    prop2=startenrichment(c(.15, .001), data, formula, formulaE,initmethod)
+	                    startprop=startenrichment(c(.15, .001), data, formula, formulaE,initmethod)
 	            }
-	            prop1=1-prop0-prop2
+	            prop1=1-prop2
 	            n1  = round(length(Y) * (1 - prop2))
 		    priorCOUNTweight=rep(1-10^-10, length(Y))
                     odY = order(Y)
@@ -139,7 +139,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             	    fdr=qvalue(pval)
             	    peaks=which(fdr[[3]]<fdrlevel)
 		    prop2=length(peaks)/length(Y)
-		    prop1=1-prop0-prop2
+		    prop1=1-prop2
 	            param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
 		    priorCOUNTweight=rep(10^-10, length(Y))      
 		    priorCOUNTweight[peaks]=1-10^-10
@@ -166,11 +166,11 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             start <- list(count1 = model_count1$fitted, count2 = model_count2$fitted,zero = model_zero$fitted, zerocoef=model_zero$coefficients)
             start$theta1 <- 1
             start$theta2 <- 1
-            probi0=probi0/(probi0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+            probi0=probi0/(probi0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
             probi0[Y1]=0
             
-            probi1  <- prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
-            probi2  <- prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+            probi1  <- (1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+            probi2  <- (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
             
             NAs=which(probi1=='NaN'| probi2=='NaN')			
             if(length(NAs>0)){
@@ -189,10 +189,11 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             i=2
             
             while(abs((ll_old - ll_new)/ll_old) > tol) {
-#		    print(ll_new)
+		#print(ll_new)
                 ll_old <- ll[max(1, i-10)]
-                prop1=sum(probi1)/n
-                prop2=sum(probi2)/n
+                prop1=sum(probi1)/(sum(probi1)+sum(probi2))
+                prop2=sum(probi2)/(sum(probi1)+sum(probi2))
+		if(prop1<.5){stop(paste("There is too much estimated enrichment in ", chrm, " please check your data"))}
                 #updated values for parameters of component means
                  
                 model_zero <- .C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(probi0), prior=as.double(rep(1,n)), offset=as.double(rep(0,n)), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), Xb=double(n*ncol(XNB)), fitted=as.double((rep(1,n) * probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')  
@@ -207,10 +208,10 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
                 mui2  <- model_count2$fitted
                 probi0 <- model_zero$fitted
 
-                probi0=probi0/(probi0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
-                probi0[Y1]=0
-                probi1  <- prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
-                probi2  <- prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+                probi0=probi0/(probi0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+            	probi0[Y1]=0
+	        probi1  <- (1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+            	probi2  <- (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
                 NAs=which(probi1=='NaN'| probi2=='NaN')			
                 if(length(NAs>0)){
                         probi1[NAs]=0
@@ -243,7 +244,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             }else{
                 write.table(data,winfile,quote=F,sep="\t",row.names=F)
             }
-		rm(data); rm(Y); rm(X); rm(XNB); rm(XE);rm(XNBE);rm(probi0); rm(probi1); rm(probi2); rm(mui1); rm(mui2); rm(start); rm(prop1); rm(prop0);gc();
+		rm(data); rm(Y); rm(X); rm(XNB); rm(XE);rm(XNBE);rm(probi0); rm(probi1); rm(probi2); rm(mui1); rm(mui2); rm(start); rm(prop1);gc();
         }
         time.end <- Sys.time()
         print(difftime(time.end,time.start))
