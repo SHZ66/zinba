@@ -29,7 +29,7 @@ peakbound=function(bpprofile,output,pwinSize=200, winSize,quantile=.75){
 	    	#delete maxes lower than median
 	    	localMax[which(x<quantile(x,quantile, na.rm=TRUE))]=0
 	    	#ensure global max is always tagged
-	    	localMax[which.max(x)]=1
+	    	localMax[which.max(x[501:(length(x)-500)])+500]=1
 		#print out local maxes that are not in the flanking regions	
 		localMax[c(1:500, (len-500):len)]=0
 		#return local max indexes adjusting for flanking deletion

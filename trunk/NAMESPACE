@@ -19,7 +19,6 @@ export(startenrichment)
 export(residuals.zeroinfl)
 export(zcrosscorr)
 export(convertmappability)
-export(sbpc.histogram)
 export(collapsewindows)
 # ------------------------------------------
 # S3method declarations.  

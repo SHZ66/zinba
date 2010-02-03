@@ -54,7 +54,7 @@ double sig;
 //print headers to file
 sprintf(line, "PEAKID\tChrom\tStart\tStop\tStrand\tSig\tMaxloc\tMax\tpStart\tpStop\n");
 fputs(line, FO);
-
+Rprintf("Begin Peak Refinement\n"); 
 //read in a line, save the information in each, perform peakbounds, then print out, repeat for each line
  while(fgets(str_buf, MAX_LEN, FI) != NULL){
     i = 0;
