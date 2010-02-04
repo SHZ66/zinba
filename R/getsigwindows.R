@@ -6,6 +6,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
     options(scipen=999)
 
     winfile=NULL
+    printflag = 0
     if(method=='pscl'){
         files = unlist(strsplit(file,";"))
         for(i in 1:length(files)){
@@ -37,8 +38,9 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
 ### PRINT SIGNIFICANT WINDOWS
             print(paste('For ',files[i],', found ',as.character(numpeaks),' significant wins',sep=''))
             winfile = paste(winout,"_",chrm,".wins",sep="")
-            if(file.exists(winfile)){
+            if(printflag==0){
                 write.table(data,winfile,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+                printflag=1
             }else{
                 write.table(data,winfile,quote=F,sep="\t",row.names=F)
             }
@@ -240,8 +242,9 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
     ### PRINT SIGNIFICANT WINDOWS
             print(paste(c(line0,line2)))
             winfile = paste(winout,"_",chrm,".wins",sep="")
-            if(file.exists(winfile)){
+            if(printflag==0){
                 write.table(data,winfile,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+                printflag=1
             }else{
                 write.table(data,winfile,quote=F,sep="\t",row.names=F)
             }

@@ -43,6 +43,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 	unsigned char * gcContent = NULL;	
 	unsigned char * alignability = NULL;
 	int i;
+	int printflag = 0;
 
 	int readInput = 0;
 	const char* noneVal = "none";
@@ -434,7 +435,12 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		}
 		
 		cout << "\tGetting counts for zinba windows.........." << endl;
-		tempTB = fopen(flist,"a");
+		if(printflag==0){
+			tempTB = fopen(flist,"w");
+			printflag = 1;
+		}else{
+			tempTB = fopen(flist,"a");
+		}
 		numOffsets = 1;
 		if(zOffsetSize > 0){
 			numOffsets = (int) zWinSize/zOffsetSize;
