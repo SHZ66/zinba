@@ -233,7 +233,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
 	    }
 	    if(diff==0){
 		data$q25[Y-mui1<0]=0
-		if(sum(colnames(data)=='input_count')==1){data$q25[1.5*data$exp_count/(exp(data$input_count)-1)<1.5*sum(data$exp_count)/sum(exp(data$input_count)-1)]=0}
+		if(sum(colnames(data)=='input_count')==1){data$q25[data$exp_count/(exp(data$input_count)-1)<1.5*sum(data$exp_count)/sum(exp(data$input_count)-1)]=0}
             }
             line0 = paste("Processing ",files[fnum])
             line2=paste('Selected number of peaks: ', as.character(numpeaks),sep='')
