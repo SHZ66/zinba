@@ -38,11 +38,11 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
 ### PRINT SIGNIFICANT WINDOWS
             print(paste('For ',files[i],', found ',as.character(numpeaks),' significant wins',sep=''))
             winfile = paste(winout,"_",chrm,".wins",sep="")
-            if(printflag==0){
+            if(printflag==1){
                 write.table(data,winfile,quote=F,sep="\t",row.names=F,col.names=F,append=T)
-                printflag=1
             }else{
                 write.table(data,winfile,quote=F,sep="\t",row.names=F)
+		printflag=1
             }
         }
         time.end <- Sys.time()
@@ -242,11 +242,11 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
     ### PRINT SIGNIFICANT WINDOWS
             print(paste(c(line0,line2)))
             winfile = paste(winout,"_",chrm,".wins",sep="")
-            if(printflag==0){
+            if(printflag==1){
                 write.table(data,winfile,quote=F,sep="\t",row.names=F,col.names=F,append=T)
-                printflag=1
             }else{
                 write.table(data,winfile,quote=F,sep="\t",row.names=F)
+                printflag=1
             }
 		rm(data); rm(Y); rm(X); rm(XNB); rm(XE);rm(XNBE);rm(probi0); rm(probi1); rm(probi2); rm(mui1); rm(mui2); rm(start); rm(prop1);gc();
         }
