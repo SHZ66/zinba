@@ -121,6 +121,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
 		    if(i == 1){
 	                    startprop=startenrichment(c(.15, .001), data, formula, formulaE,initmethod)
 	            }
+		    prop2=startprop
 	            prop1=1-prop2
 	            n1  = round(length(Y) * (1 - prop2))
 		    priorCOUNTweight=rep(1-10^-10, length(Y))
