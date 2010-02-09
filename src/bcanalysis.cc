@@ -248,6 +248,8 @@ int bcanalysis::importTagAlign(const char * signalFile,int extension){
 					pos = stop - extension + 1;
 				else
 					pos = 1;
+			}else{
+				pos = start;
 			}
 			unsigned short int chromInt = getHashValue(cChrom);
 //			bwRead sig(chromInt,pos,sval);
@@ -285,6 +287,8 @@ int bcanalysis::importBed(const char * signalFile,int extension){
 					pos = stop - extension + 1;
 				else
 					pos = 1;
+			}else{
+				pos = start;
 			}
 			unsigned short int chromInt = getHashValue(cChrom);
 //			bwRead sig(chromInt,pos,sval);

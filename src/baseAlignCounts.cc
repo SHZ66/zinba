@@ -24,6 +24,7 @@ void baseAlignCounts(char **RinputFile,char **RoutputFile, char **Rtwobitfile,in
 	bcanalysis newAnalysis;// = new analysis;
 	Rprintf("\nImporting reads from file %s ....\n",inputFile);
 	Rprintf("Reads are formatted as %s ....\n",filetype);
+	Rprintf("Extending reads by %d bp....\n",extendLength);
 	int ret=newAnalysis.importRawSignal(inputFile,extendLength,filetype,twobitfile);
 	if(ret == 0){
 		Rprintf("Calculating counts at each base\nPrinting output to %s\n",outputFile);
