@@ -26,13 +26,11 @@ peakbound=function(bpprofile,output,pwinSize=200, winSize,quantile=.75){
 	        	localMax[selMaxInd1[temp <= 0]] <- 0
 		        localMax[selMaxInd2[temp > 0]] <- 0
 		    }
-	    	#delete maxes lower than median
+	    	#delete maxes lower than median and in flanking
 	    	localMax[which(x<quantile(x,quantile, na.rm=TRUE))]=0
+		localMax[c(1:500,(len-500+1):len)]=0
 	    	#ensure global max is always tagged
-	    	localMax[which.max(x[501:(length(x)-500)])+500]=1
-		#print out local maxes that are not in the flanking regions	
-		localMax[c(1:500, (len-500):len)]=0
-		#return local max indexes adjusting for flanking deletion
+	    	localMax[which.max(x[501:(len-500)])+500]=1
 		return(c(length(which(localMax>0)),which(localMax>0)))
 	} 
       peakbound2 <- function(f, bpprofile, output) {
