@@ -47,10 +47,10 @@ double sig;
   
   
 
-//skip the first line of the coordinate file
-//    if(fgets(str_buf, MAX_LEN, FI) == NULL){
-//      error("there are only %d lines in file %s\n", i, input);
-//    }
+skip the first line of the coordinate file
+    if(fgets(str_buf, MAX_LEN, FI) == NULL){
+      error("there are only %d lines in file %s\n", i, input);
+    }
 //print headers to file
 sprintf(line, "PEAKID\tChrom\tStart\tStop\tStrand\tSig\tMaxloc\tMax\tpStart\tpStop\n");
 fputs(line, FO);
