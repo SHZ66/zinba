@@ -57,9 +57,7 @@ fputs(line, FO);
 Rprintf("Begin Peak Refinement\n"); 
 //read in a line, save the information in each, perform peakbounds, then print out, repeat for each line
 int m=0;
-Rprintf("ok 1\n");
  while(fgets(str_buf, MAX_LEN, FI) != NULL){
-Rprintf("ok 2\n");
     i = 0;
      if ((ptr = strtok(str_buf, delim)) != NULL) {
     do {
