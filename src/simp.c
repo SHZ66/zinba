@@ -47,7 +47,7 @@ double sig;
   
   
 
-skip the first line of the coordinate file
+//skip the first line of the coordinate file
     if(fgets(str_buf, MAX_LEN, FI) == NULL){
       error("there are only %d lines in file %s\n", i, input);
     }
@@ -57,7 +57,9 @@ fputs(line, FO);
 Rprintf("Begin Peak Refinement\n"); 
 //read in a line, save the information in each, perform peakbounds, then print out, repeat for each line
 int m=0;
+Rprintf("ok 1\n");
  while(fgets(str_buf, MAX_LEN, FI) != NULL){
+Rprintf("ok 2\n");
     i = 0;
      if ((ptr = strtok(str_buf, delim)) != NULL) {
     do {
@@ -189,8 +191,7 @@ for(i=0; i<2*lmaxvec;i++){
 results[0]=maxvecbounds[0];
 results[1]=maxvecbounds[1];
 hmaxvec[0]=maxvec[0];
-i=0;
-Rprintf("i %d h %d \tmaxpos %d sep %d, dist %d\t maxvecleft %d maxvecright %d resultshleft %d resultshright %d hmaxvec[h] %d \n", i, h, maxvec[i],sep, dist, maxvecbounds[2*i], maxvecbounds[2*i+1], results[2*h], results[2*h+1], hmaxvec[h]);
+
 h=0;
 i=1;
 while(i<lmaxvec){
@@ -219,16 +220,12 @@ while(i<lmaxvec){
 		results[2*h]=maxvecbounds[2*i];
 		results[2*h+1]=maxvecbounds[2*i+1]	;
 	}
-	Rprintf("i %d h %d \tmaxpos %d sep %d, dist %d\t maxvecleft %d maxvecright %d resultshleft %d resultshright %d hmaxvec[h] %d \n", i, h, maxvec[i],sep, dist, maxvecbounds[2*i], maxvecbounds[2*i+1], results[2*h], results[2*h+1], hmaxvec[h]);
 	i=i+1;
 }
 /////////////////////////////////////////////////////////////////////////
 int pos=0;
 
-for(i=0;i<=h;i++){
-Rprintf("i %d hmaxvec[i] %d", i, hmaxvec[i]);
-Rprintf("%s\t%s\t%d\t%d\t%s\t%.14f\t%d\t%d\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,hmaxvec[i],basecount[hmaxvec[i]],results[2*i],results[2*i+1]);
-	
+for(i=0;i<=h;i++){	
 sprintf(line, "%s\t%s\t%d\t%d\t%s\t%.14f\t%d\t%d\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,pstart+maxvec[i],basecount[maxvec[i]],pstart+results[2*i],pstart+results[2*i+1]);
 fputs(line, FO);
 }
