@@ -48,9 +48,9 @@ double sig;
   
 
 //skip the first line of the coordinate file
-    if(fgets(str_buf, MAX_LEN, FI) == NULL){
-      error("there are only %d lines in file %s\n", i, input);
-    }
+//    if(fgets(str_buf, MAX_LEN, FI) == NULL){
+//      error("there are only %d lines in file %s\n", i, input);
+//    }
 //print headers to file
 sprintf(line, "PEAKID\tChrom\tStart\tStop\tStrand\tSig\tMaxloc\tMax\tpStart\tpStop\n");
 fputs(line, FO);
@@ -98,7 +98,7 @@ int m=0;
 int lmaxvec = l;
 int results[lmaxvec*2];
 int max;
-int searchlength=500;
+int searchlength=0;
 int  peakstart=0;
 int  peakend=0;
 int  fit=0;
@@ -112,9 +112,7 @@ for(j=0; j<lmaxvec; j++){
 	for(i=0; i<lbasecount; i++){
 		hold[i]=0;
 	}
-	if(min(searchlength, max)<50){
-		peakstart=1;
-	}else{		
+	searchlength=max-1;		
 		for(bound=50; bound<=min(searchlength, max); bound++){
 			sumxy=0;
 			sumx=0;
@@ -142,12 +140,8 @@ for(j=0; j<lmaxvec; j++){
 			hold[i]=0;
     		}
 		peakstart=fit+1;
-	}
 	//right bound
-	if(min(searchlength, lbasecount-max)<50){
-		peakend=lbasecount;
-	}else{		
-
+	searchlength=lbasecount-max-1;
 		for(bound=50; bound<=min(searchlength, lbasecount-max); bound++){
 			sumxy=0;
 			sumx=0;			
@@ -179,13 +173,13 @@ for(j=0; j<lmaxvec; j++){
 		//	hold[i]=0;
     		}
 		peakend=fit;
-	}
 //save boundaries, adjust back to R index start at 1 
 maxvecbounds[2*j]=peakstart;
 maxvecbounds[2*j+1]=peakend;
 }	
 
-int dist, mingap, indexmingap, sep;
+int dist, sep;
+int hmaxvec[lmaxvec];
 
 //final outputted vector of bounds after merging, contains zeros
 //intialize results vector
@@ -194,53 +188,47 @@ for(i=0; i<2*lmaxvec;i++){
 }
 results[0]=maxvecbounds[0];
 results[1]=maxvecbounds[1];
-
+hmaxvec[0]=maxvec[0];
+i=0;
+Rprintf("i %d h %d \tmaxpos %d sep %d, dist %d\t maxvecleft %d maxvecright %d resultshleft %d resultshright %d hmaxvec[h] %d \n", i, h, maxvec[i],sep, dist, maxvecbounds[2*i], maxvecbounds[2*i+1], results[2*h], results[2*h+1], hmaxvec[h]);
 h=0;
 i=1;
 while(i<lmaxvec){
 	//calculate metrics per round
 	dist=maxvec[i]-maxvec[i-1];
-	val=10000000;
-	fit=0;
-	for(l=maxvec[i-1]-1;l<maxvec[i]; l++){
-      		if(basecount[l] < val){
-       			val = basecount[l];
-			fit=l;
-		}
-	}
-	mingap=val;
-	indexmingap=fit;
 	sep=maxvecbounds[2*i]-results[2*h+1];
-
-	if(dist<=100){
+	
+	if(dist<=250){
 	//merge if too close
 		results[2*h]=min(results[2*h],maxvecbounds[2*i]);
-		results[2*h+1]=maxx(results[2*h+1],maxvecbounds[2*i+1]);		
-	}else if(dist>100 & mingap>1.0*basecount[maxvec[i-1]]/2 & sep<40){
+		results[2*h+1]=maxx(results[2*h+1],maxvecbounds[2*i+1]);			if(basecount[hmaxvec[h]]<basecount[maxvec[i]]){		
+			hmaxvec[h]=maxvec[i];
+		}
+	}else if(dist>250 & sep<100){
 		//merge if not close enough but if bound overlap and no valley inbetween 
 		//need to normalize with respect to min of whole basecount?
 		results[2*h]=min(results[2*h],maxvecbounds[2*i]);
 		results[2*h+1]=maxx(results[2*h+1],maxvecbounds[2*i+1])	;
-	}else if(dist>100 & mingap<=1.0*basecount[maxvec[i-1]]/2 & sep<40){
-		//separate if not close enough with some bound overlap with valley inbetween 
-		//set new boundary in between at the site of the min in between
-		results[2*h+1]=indexmingap;
-		h=h+1;
-		results[2*h]=indexmingap +1 ;
-		results[2*h+1]=maxvecbounds[2*i+1];
-		}else if(dist>100 & sep>=40){
+		if(basecount[hmaxvec[h]]<basecount[maxvec[i]]){		
+			hmaxvec[h]=maxvec[i];
+		}
+	}else if(dist>250 & sep>=100){
 		//separate peak here, no boundary overlap and too far 
 		h=h+1;
+		hmaxvec[h]=maxvec[i];
 		results[2*h]=maxvecbounds[2*i];
 		results[2*h+1]=maxvecbounds[2*i+1]	;
 	}
+	Rprintf("i %d h %d \tmaxpos %d sep %d, dist %d\t maxvecleft %d maxvecright %d resultshleft %d resultshright %d hmaxvec[h] %d \n", i, h, maxvec[i],sep, dist, maxvecbounds[2*i], maxvecbounds[2*i+1], results[2*h], results[2*h+1], hmaxvec[h]);
 	i=i+1;
 }
 /////////////////////////////////////////////////////////////////////////
 int pos=0;
 
-for(i=0;i<lmaxvec;i++){
-if(results[2*i]==0){break;}	
+for(i=0;i<=h;i++){
+Rprintf("i %d hmaxvec[i] %d", i, hmaxvec[i]);
+Rprintf("%s\t%s\t%d\t%d\t%s\t%.14f\t%d\t%d\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,hmaxvec[i],basecount[hmaxvec[i]],results[2*i],results[2*i+1]);
+	
 sprintf(line, "%s\t%s\t%d\t%d\t%s\t%.14f\t%d\t%d\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,pstart+maxvec[i],basecount[maxvec[i]],pstart+results[2*i],pstart+results[2*i+1]);
 fputs(line, FO);
 }
