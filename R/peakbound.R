@@ -28,9 +28,9 @@ peakbound=function(bpprofile,output,pwinSize=200, winSize,quantile=.75){
 		    }
 	    	#delete maxes lower than median and in flanking
 	    	localMax[which(x<quantile(x,quantile, na.rm=TRUE))]=0
-		localMax[c(1:500,(len-500+1):len)]=0
+		localMax[c(1:250,(len-250+1):len)]=0
 	    	#ensure global max is always tagged
-	    	localMax[which.max(x[501:(len-500)])+500]=1
+	    	localMax[which.max(x[251:(len-250)])+250]=1
 		return(c(length(which(localMax>0)),which(localMax>0)))
 	} 
       peakbound2 <- function(f, bpprofile, output) {
