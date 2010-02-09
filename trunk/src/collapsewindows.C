@@ -106,7 +106,7 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 					}
 				}else if(strcmp(method,mixture) == 0){
 					if(wformat == 0){
-						rwline = fscanf(fh,"%s%lu%lu%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
+						rwline = fscanf(fh,"%s%lu%lu%hu%f",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
 						if(sigVal >= highThresh && rwline == 5)
 							readResult = 1;
 					}else if(wformat == 1){
