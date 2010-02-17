@@ -3,7 +3,13 @@
           \alias{run.zinba}
           \title{Run Analysis pipeline}
           \description{
-            This is the main function in Zinba where one either starts with a set of mapped reads or an existing set up built data (can reference to these already built files by specifying the path to their filelist). If specified, the first step is taking the raw mapped sample reads, raw mapped input reads (if available), and current build of the human genome and building the datasets needed to run the analysis to detect enriched regions.  After the data is built, the locations of each built file (one for each chromsome and offset) is placed in filelist.  The next step uses the locations in filelist to import this built data and runs getsigwidnows on it to find windows that are likely to be neriched for counts.  The posterior probabilities for each window are saved, and the locations of these files are placed in the outfile.winlist file, where outfile is the name cosen to enote the output files of this current run.  The winlist is then fed to getrefinedregions is peak refinement is desired, and the overlapping signficant windows are merged and the SBPC for these merged windows are imported and exact peak boundaries are determined and outputted to outfile.peaks.   
+            This is the main function in Zinba where one starts with a set of mapped reads or an existing set of processed data (can reference to these already built files by specifying the path to their corresponding filelist). 
+
+If specified, the first step is taking the raw mapped sample reads, raw mapped input reads (if available), alignability directory, and current build of the human genome and building the datasets needed to run the analysis to detect enriched regions.  
+
+After the data is built, the locations of each built file (one for each chromsome and offset) is placed in filelist.  The next step uses the locations in filelist to import this built data and runs getsigwidnows on it to find windows that are likely to be neriched for counts.  
+
+The posterior probabilities for each window are saved, and the locations of these files are placed in the outfile.winlist file, where outfile is the name chosen to denote the output files of this current run.  The winlist is then fed to getrefinedpeaks if peak refinement is desired. The overlapping signficant windows are merged and the SBPC for these merged windows are imported and exact peak boundaries are determined and outputted to outfile.peaks.   
           }
           \usage{run.zinba(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,numProc=1,buildwin=0,pWinSize=200,pquant=0.75,refinepeaks=1,printFullOut=0,method='pscl',initmethod='count',diff=0,filetype="bowtie",extension)}
           \arguments{
