@@ -3,7 +3,7 @@ basealigncount=function(inputfile,outputfile,twoBitFile,extension=NULL,filetype=
     	stop(paste("Input file not found,",inputfile,sep=" "))
     }
     if(!file.exists(twoBitFile)){
-        stop(paste("twoBit file not found,",twoBit,sep=" "))
+        stop(paste("twoBit file not found,",twoBitFile,sep=" "))
     }
     if(filetype != "bowtie" && filetype != "tagAlign" && filetype != "bed"){
         stop(paste("Incorrect filetype:",filetype,"[bowtie|tagAlign|bed]",sep=" "))
