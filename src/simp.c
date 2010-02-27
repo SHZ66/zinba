@@ -192,18 +192,24 @@ hmaxvec[0]=maxvec[0];
 
 h=0;
 i=1;
+	 
+int dthresh = 100;
+int sthresh = 100;
+	 
 while(i<lmaxvec){
 	//calculate metrics per round
 	dist=maxvec[i]-maxvec[i-1];
 	sep=maxvecbounds[2*i]-results[2*h+1];
 	
-	if(dist<=250){
+	//	if(dist<=250){
+	if(dist<=dthresh){
 	//merge if too close
 		results[2*h]=min(results[2*h],maxvecbounds[2*i]);
 		results[2*h+1]=maxx(results[2*h+1],maxvecbounds[2*i+1]);			if(basecount[hmaxvec[h]]<basecount[maxvec[i]]){		
 			hmaxvec[h]=maxvec[i];
 		}
-	}else if(dist>250 & sep<100){
+		//	}else if(dist>250 & sep<100){
+	}else if(dist>dthresh & sep<sthresh){
 		//merge if not close enough but if bound overlap and no valley inbetween 
 		//need to normalize with respect to min of whole basecount?
 		results[2*h]=min(results[2*h],maxvecbounds[2*i]);
@@ -211,7 +217,8 @@ while(i<lmaxvec){
 		if(basecount[hmaxvec[h]]<basecount[maxvec[i]]){		
 			hmaxvec[h]=maxvec[i];
 		}
-	}else if(dist>250 & sep>=100){
+		//	}else if(dist>250 & sep>=100){
+	}else if(dist>dthresh & sep>=sthresh){
 		//separate peak here, no boundary overlap and too far 
 		h=h+1;
 		hmaxvec[h]=maxvec[i];

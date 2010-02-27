@@ -1,4 +1,4 @@
-peakbound=function(bpprofile,output,pwinSize=200, winSize,quantile=.75){
+peakbound=function(bpprofile,output,pwinSize=200, winSize,quantile=.75,minscore=0){
 	    localMaximum=function(x) {
 		    #from MassSpecWavelet Package in BioConductor, written by Pan Du and Simon Lin, modified by Naim Rashid	
 		    len <- length(x)
@@ -28,6 +28,7 @@ peakbound=function(bpprofile,output,pwinSize=200, winSize,quantile=.75){
 		    }
 	    	#delete maxes lower than median and in flanking
 	    	localMax[which(x<quantile(x,quantile, na.rm=TRUE))]=0
+localMax[which(x<minscore)]=0
 		localMax[c(1:250,(len-250+1):len)]=0
 	    	#ensure global max is always tagged
 	    	localMax[which.max(x[251:(len-250)])+250]=1

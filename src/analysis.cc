@@ -308,13 +308,13 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 					tempCoord.sigVal = back->sigVal;
 				coordIN_slist.erase(back++);
 			}else{
-				if((tempCoord.end-tempCoord.start) <= winSizeThresh){
+//				if((tempCoord.end-tempCoord.start) <= winSizeThresh){
 					coordOUT_slist.push_back(tempCoord);
-				}else{
+//				}else{
 					//REMOVE ONCE C PEAKBOUND IS RUNNING
-					const char * cName = getKey(tempCoord.chrom);
-					cout << "Excluding " << cName << ":" << tempCoord.start << "-" << tempCoord.end << " SIZE=" << (tempCoord.end-tempCoord.start) << endl;
-				}
+//					const char * cName = getKey(tempCoord.chrom);
+//					cout << "Excluding " << cName << ":" << tempCoord.start << "-" << tempCoord.end << " SIZE=" << (tempCoord.end-tempCoord.start) << endl;
+//				}
 
 				if(flagFinish == 0){
 					tempCoord = *back;

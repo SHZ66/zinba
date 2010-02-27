@@ -159,6 +159,46 @@ int histsbpc::hist_data(const char * sbpcFile,const char * outfile,const char* t
 	}
 	seqfile.close();
 
+	if(countBases > 0){
+		sort(sbpc_count, sbpc_count+(chr_size[chromInt]+1));
+		
+		int nonzeroInd = 0;
+		while(sbpc_count[nonzeroInd] == 0)
+			nonzeroInd++;
+		
+		int sInd = 0;
+		int bMin = min;
+		int bMax = bMin + binSize;
+		for(int b = 0; b < numBin; b++){
+			if(b > 0){
+				bMin = bMax + 1;
+				bMax = bMin + binSize - 1;
+			}
+			while (sbpc_count[sInd] < min && sInd <= chr_size[chromInt]){
+				ltMin++;
+				sInd++;
+			}
+			while(sbpc_count[sInd] >= bMin && sbpc_count[sInd] <= bMax && sInd <= chr_size[chromInt]){
+				sbpc_hist[b]++;
+				sInd++;
+			}
+			while(sbpc_count[sInd] > max && sInd <= chr_size[chromInt]){
+				gtMax++;
+				sInd++;
+			}
+		}
+		
+		int nzlength = chr_size[chromInt] - nonzeroInd;
+		int medInd = (int) nzlength/2;
+		int sfInd = (int) nzlength * 0.75;
+		int nInd = (int) nzlength * 0.9;
+		int nfInd = (int) nzlength * 0.95;
+		cout << chrom << "\t" << sbpc_count[nonzeroInd+medInd] << "\t" << sbpc_count[nonzeroInd+sfInd] << "\t" << sbpc_count[nonzeroInd+nInd] << "\t" << sbpc_count[nonzeroInd+nfInd] << "\t" << sbpc_count[chr_size[chromInt]] << endl;
+		delete [] sbpc_count;
+		sbpc_count = NULL;
+	}
+	
+	
 	cout << "\n\n" << ltMin << " bp less than " << min << endl;
 	cout << gtMax << " bp greater than " << max << endl;
 	
