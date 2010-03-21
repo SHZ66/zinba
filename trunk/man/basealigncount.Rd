@@ -1,9 +1,9 @@
     \name{basealigncount}
           \Rdversion{1.0}
           \alias{basealigncount}
-          \title{Get SBPC (basecount) for Mapped Sample Reads}
+          \title{Get SBC (basecount) for Mapped Sample Reads}
           \description{
-            This function creates the SBPC (basecount) file required by run.zinba that is later used in the peak refinement step.  This should be generated prior to running run.zinba.   
+            This function creates the SBC (basecount) file required by run.zinba that is later used in the peak refinement step.  This should be generated prior to running run.zinba.   
           }
           \usage{basealigncount(inputfile,outputfile,twoBitFile,extension,filetype="bowtie")}
           \arguments{
