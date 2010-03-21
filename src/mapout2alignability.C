@@ -16,6 +16,10 @@ using namespace std;
 
 extern "C" {
 void mapout2alignability(char **Rfilelist,char **Routfile){
+/*problems: 1) processes chrY twice at the end for some reason when running
+		2) if you're not running the code in the directory the files are in
+		the track name will put name=*directory/chr* instead of chr, leading
+		to a seqfault in alignadjust.  Works when you cd to b.out directory*/
 	const char * filelist = Rfilelist[0];
 	const char * outfile = Routfile[0];
 
