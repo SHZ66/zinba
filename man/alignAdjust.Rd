@@ -1,9 +1,9 @@
     \name{alignAdjust}
           \Rdversion{1.0}
           \alias{alignAdjust}
-          \title{Generate Alignability Track from Peakseq Mappability}
+          \title{Custom Alignability Track Generation}
           \description{
-            Generates a score for every base pair in the genome specifying whether it is mappable. To generate this information every base is thresholded based on the degree of uniqueness required during the alignment (absolute unique would require a count of 1) and shifts it by the same amount used to shift the sequenced reads.
+            Part of generateAlignability.  Generates a score for every base pair in the genome specifying whether it is mappable. To generate this information every base is thresholded based on the degree of uniqueness required during the alignment (absolute unique would require a count of 1) and shifts it by the same amount used to shift the sequenced reads.
           }
           \usage{alignAdjust(inputfile, outDir="",twoBitFile,athresh=1,adjustsize=0)}
           \arguments{
