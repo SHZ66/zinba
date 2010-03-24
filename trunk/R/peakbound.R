@@ -32,7 +32,8 @@ localMax[which(x<minscore)]=0
 		localMax[c(1:250,(len-250+1):len)]=0
 	    	#ensure global max is always tagged
 	    	localMax[which.max(x[251:(len-250)])+250]=1
-		return(c(length(which(localMax>0)),which(localMax>0)))
+		med=median(x[251:(len-250)][x[251:(len-250)]>0])
+		return(c(length(which(localMax>0)),med,which(localMax>0)))
 	} 
       peakbound2 <- function(f, bpprofile, output) {
        f.check <- function(x) {
