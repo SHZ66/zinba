@@ -16,7 +16,7 @@ SEXP mkans(int *, int);
 
 SEXP peakboundc(SEXP f, SEXP bpprofile, SEXP outputfile, SEXP rho){
 
-  int i, j, lbasecount, pstart, pstop;
+  int i, j, lbasecount, pstart, pstop, med;
   int basecount[MAX_LEN];
   FILE *FI, *FO;
   char str_buf[MAX_LEN], line[MAX_LEN];
@@ -52,7 +52,7 @@ double sig;
       error("there are only %d lines in file %s\n", i, input);
     }
 //print headers to file
-sprintf(line, "PEAKID\tChrom\tStart\tStop\tStrand\tSig\tMaxloc\tMax\tpStart\tpStop\n");
+sprintf(line, "PEAKID\tChrom\tStart\tStop\tStrand\tSig\tMaxloc\tMax\tpStart\tpStop\tMedian\n");
 fputs(line, FO);
 Rprintf("Begin Peak Refinement\n"); 
 //read in a line, save the information in each, perform peakbounds, then print out, repeat for each line
@@ -88,10 +88,14 @@ int m=0;
  
   defineVar(install("x"), mkans(basecount, lbasecount), rho);
     int l=round(INTEGER(eval(f, rho))[0]);
-    int maxvec[l];
+
+  defineVar(install("x"), mkans(basecount, lbasecount), rho);
+    med=round(INTEGER(eval(f, rho))[1]);
+  int maxvec[l];
   for(i=1;i<=l;i++){
   	defineVar(install("x"), mkans(basecount, lbasecount), rho);
-  	maxvec[i-1]=INTEGER(eval(f, rho))[i];
+  	maxvec[i-1]=INTEGER(eval(f, rho))[i+1];
+
   }
 ////////////////////////////////////////////////////////////////////////
 
@@ -231,7 +235,7 @@ while(i<lmaxvec){
 int pos=0;
 
 for(i=0;i<=h;i++){
-sprintf(line, "%s\t%s\t%d\t%d\t%s\t%.14f\t%d\t%d\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,pstart+hmaxvec[i],basecount[hmaxvec[i]],pstart+results[2*i],pstart+results[2*i+1]);
+sprintf(line, "%s\t%s\t%d\t%d\t%s\t%.14f\t%d\t%d\t%d\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,pstart+hmaxvec[i],basecount[hmaxvec[i]],pstart+results[2*i],pstart+results[2*i+1], med);
 fputs(line, FO);
 }
 
