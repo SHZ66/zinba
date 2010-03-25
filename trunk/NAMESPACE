@@ -23,6 +23,7 @@ export(residuals.zeroinfl)
 export(zcrosscorr)
 export(convertmappability)
 export(collapsewindows)
+export(zinbagui)
 # ------------------------------------------
 # S3method declarations.  
 # ------------------------------------------

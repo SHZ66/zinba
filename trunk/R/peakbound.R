@@ -1,4 +1,5 @@
 peakbound=function(bpprofile,output,pwinSize=200, winSize,quantile=.75,minscore=0){
+	    if(!file.exists(bpprofile)){stop("Error, file pertaining to SBP for merged regions does not exist.  Check .winlist file for errors.")}
 	    localMaximum=function(x) {
 		    #from MassSpecWavelet Package in BioConductor, written by Pan Du and Simon Lin, modified by Naim Rashid	
 		    len <- length(x)
