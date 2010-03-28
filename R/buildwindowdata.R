@@ -1,4 +1,10 @@
 buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,filelist,filetype="bowtie",extension){
+	if(!file.exists(align)){
+		stop(paste("Specified Alignability directory not found,",align,sep=" "))
+	}else{
+		#if alignability path does not end in /, then put it in
+		if( strsplit(align,"")[[1]][length(strsplit(align,"")[[1]])]!='/') align=paste(align, '/', sep='')
+	}	
 	if(!file.exists(seq)){
 		stop(paste("Seq file not found,",seq,sep=" "))
 	}

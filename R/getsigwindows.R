@@ -1,6 +1,5 @@
 getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,winout,printFullOut=0,tol=10^-5,method='pscl',initmethod, diff=0){
     time.start <- Sys.time()
-    suppressPackageStartupMessages(library(qvalue))
     suppressPackageStartupMessages(library(quantreg))
     library(MASS)
     options(scipen=999)
@@ -8,6 +7,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
     winfile=NULL
     printflag = 0
     if(method=='pscl'){
+        suppressPackageStartupMessages(library(qvalue))
         files = unlist(strsplit(file,";"))
         for(i in 1:length(files)){
             data=read.table(files[i], header=TRUE)
