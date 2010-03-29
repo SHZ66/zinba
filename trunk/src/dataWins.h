@@ -22,7 +22,7 @@ class dataWins {
 	
 	private:
 			
-};
+};/*
 class dataWinsCount {
 	
 	public:
@@ -38,5 +38,5 @@ class dataWinsCount {
 	private:
 			
 };
-
+*/
 #endif /*DATAWINS_H_*/

@@ -36,7 +36,7 @@ bool dataWins::operator <(dataWins other) const{
 		return (chrom<other.chrom);	
 	}
 }
-
+/*
 dataWinsCount::~dataWinsCount(){}
 
 dataWinsCount::dataWinsCount(){}
@@ -67,4 +67,4 @@ bool dataWinsCount::operator <(dataWinsCount other) const{
 		return (chrom<other.chrom);	
 	}
 }
-
+*/
