@@ -24,6 +24,7 @@ export(zcrosscorr)
 export(convertmappability)
 export(collapsewindows)
 export(zinbagui)
+export(getwindowcounts)
 # ------------------------------------------
 # S3method declarations.  
 # ------------------------------------------

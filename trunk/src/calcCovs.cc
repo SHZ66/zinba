@@ -541,6 +541,20 @@ int calcCovs::outputData(const char * outputFile, unsigned short int currChr){
 	fclose (fh);
 	return 0;
 }
+int calcCovs::outputDataWinCount(const char * outputFile, unsigned short int currChr){
+	FILE * fh;
+	fh = fopen(outputFile,"w");
+	fprintf(fh,"chromosome\tstart\tstop\texp_count\n");
+	const char * chrom = getKey(currChr);
+	slist<dataWinsCount>::iterator c = peak_wins.begin();
+	while(c != peak_wins.end()){
+		fprintf(fh,"%s\t%lu\t%lu\t%i\n",chrom,c->start,c->stop,c->eCount);
+		peak_wins.erase(c++);
+	}
+	cout << "\t\tOk here" << endl;
+	fclose (fh);
+	return 0;
+}
 
 unsigned short int calcCovs::getHashValue(char *currChrom){
 	map<const char*, int>::iterator i;
@@ -783,6 +797,83 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 		}
 	}
 	fclose(fh);
+	return 0;
+}
+
+
+int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBitFile,string outfile,int extension,const char * filetype){
+
+	time_t rtime;
+	struct tm *timeinfo;
+	char tInfo[128];// = "tempInfo.txt";
+	char sysCall[256];
+	
+	unsigned short int currchr = 999;
+	unsigned short int * basepair = NULL;
+	unsigned short int * ibasepair = NULL;
+	unsigned char * gcContent = NULL;	
+	unsigned char * alignability = NULL;
+	int i;
+	int printflag = 0;
+
+	int readInput = 0;
+	const char* noneVal = "none";
+	
+	while(!signal_slist.empty()){
+		i = 0;
+		currchr = signal_slist[0].chrom;
+		const char * chromReport = getKey(currchr);
+		cout << "\nProcessing " << chromReport << endl;
+		basepair = new unsigned short int[chr_size[currchr]+1];
+		for(int ch = chr_size[currchr]; ch--;)
+			basepair[ch] = 0;
+
+		cout << "\tMapping reads to chromosome......" << endl;
+		while(signal_slist[i].chrom==currchr && i < (int) signal_slist.size()){
+			basepair[signal_slist[i].pos]++;
+			i++;
+		}
+		signal_slist.erase(signal_slist.begin(),signal_slist.begin()+i);
+
+		
+
+		cout << "\tGetting counts for zinba windows.........." << endl;
+		int numOffsets = 1;
+		if(zOffsetSize > 0){
+			numOffsets = (int) zWinSize/zOffsetSize;
+		}
+		string outfileDATA;
+		slist<dataWinsCount>::iterator z;
+		for(int o = 0; o < numOffsets; o++){
+			z = peak_wins.previous(peak_wins.end());
+			cout << "\t\tOffset " << (zOffsetSize * o) << "bp......" << endl;
+			char offset[128];
+			sprintf(offset,"%d",(zOffsetSize * o));
+			char winsize[128];
+			sprintf(winsize,"%d",zWinSize);
+			outfileDATA = outfile + "_" + chromReport + "_win" + string(winsize) + "bp_offset" + string(offset) + "bp.txt";
+			unsigned long int zWinStart = (zOffsetSize * o) + 1;
+			unsigned long int zWinStop = zWinStart + zWinSize - 1;
+			while(zWinStop <= chr_size[currchr]){
+				int peakCount = 0;
+				for(int b = zWinStart; b <= zWinStop; b++){
+					peakCount += basepair[b];
+				}
+				dataWinsCount zwin(currchr,zWinStart,zWinStop,peakCount);
+				z = peak_wins.insert_after(z,zwin);
+				zWinStart += zWinSize;
+				zWinStop += zWinSize;
+			}
+			
+			if(outputDataWinCount(outfileDATA.c_str(),currchr) != 0){
+				cout << "Error printing output to file, exiting" << endl;
+				exit(1);
+			}
+			
+		}
+		delete [] basepair;
+		basepair = NULL;
+		}
 	return 0;
 }
 

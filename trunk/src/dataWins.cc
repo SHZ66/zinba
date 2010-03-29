@@ -25,7 +25,6 @@ dataWins::dataWins(unsigned short int _chrom, unsigned long int _start, unsigned
 	alignPerc = _alignPerc;
 	cnvScore = _cnvScore;
 }
-
 bool dataWins::operator <(dataWins other) const{
 	if(chrom==other.chrom){
 		if( start < other.start ){
@@ -37,3 +36,35 @@ bool dataWins::operator <(dataWins other) const{
 		return (chrom<other.chrom);	
 	}
 }
+
+dataWinsCount::~dataWinsCount(){}
+
+dataWinsCount::dataWinsCount(){}
+
+dataWinsCount::dataWinsCount(const dataWinsCount& s){
+	chrom = s.chrom;
+	start = s.start;
+	stop = s.stop;
+	eCount = s.eCount;
+
+}
+
+dataWinsCount::dataWinsCount(unsigned short int _chrom, unsigned long int _start, unsigned long int _stop,int _eCount, double _iCount, double _gcPerc, double _alignPerc, double _cnvScore){
+	chrom = _chrom;
+	start = _start;
+	stop = _stop;
+	eCount = _eCount;
+
+}
+bool dataWinsCount::operator <(dataWinsCount other) const{
+	if(chrom==other.chrom){
+		if( start < other.start ){
+			return true;
+		}else{
+			return false;	
+		}
+	}else{
+		return (chrom<other.chrom);	
+	}
+}
+
