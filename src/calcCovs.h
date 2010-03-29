@@ -26,10 +26,11 @@ class calcCovs{
 		int importRawSignal(const char *,int,const char *,int,const char *);//Implemented
 		int processSignals(int,int,int,int,string,const char *,const char *,string,const char *,int,const char *);//Implemented
 		int outputData(const char *, unsigned short int);//Implemented
+		int outputDataWinCount(const char *, unsigned short int);
 		int importBowtie(const char *,int,int);
 		int importTagAlign(const char *,int,int);
 		int importBed(const char *,int,int);
-
+		int processWinSignal(int , int ,const char * ,string outfile,int ,const char *);
 		struct ltstr{
 			bool operator()(const char* s1, const char* s2) const
 			{
