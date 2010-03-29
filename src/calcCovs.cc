@@ -540,7 +540,7 @@ int calcCovs::outputData(const char * outputFile, unsigned short int currChr){
 	}
 	fclose (fh);
 	return 0;
-}
+}/*
 int calcCovs::outputDataWinCount(const char * outputFile, unsigned short int currChr){
 	FILE * fh;
 	fh = fopen(outputFile,"w");
@@ -554,7 +554,7 @@ int calcCovs::outputDataWinCount(const char * outputFile, unsigned short int cur
 	cout << "\t\tOk here" << endl;
 	fclose (fh);
 	return 0;
-}
+}*/
 
 unsigned short int calcCovs::getHashValue(char *currChrom){
 	map<const char*, int>::iterator i;
@@ -800,7 +800,7 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 	return 0;
 }
 
-
+/*
 int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBitFile,string outfile,int extension,const char * filetype){
 
 	time_t rtime;
@@ -876,4 +876,4 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 		}
 	return 0;
 }
-
+*/
