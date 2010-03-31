@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <Rmath.h>
+#include <R.h>
 #include <algorithm>
 #include <time.h>
 
@@ -57,7 +58,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			basepair[ch] = 0;
 
 		cout << "\tMapping reads to chromosome......" << endl;
-		while(signal_slist[i].chrom==currchr && i < (int) signal_slist.size()){
+		while(signal_slist[i].chrom==currchr && i < (int) signal_slist.size()){		
 			basepair[signal_slist[i].pos]++;
 			i++;
 		}
@@ -445,8 +446,8 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		}
 		string outfileDATA;
 		slist<dataWins>::iterator z;
-		for(int o = 0; o < numOffsets; o++){
-			z = peak_wins.previous(peak_wins.end());
+		for(int o = 0; o < numOffsets; o++){		
+			z = peak_wins.previous(peak_wins.end());	
 			list<cnvWins>::iterator cnvBegin = cnv_wins.begin();
 			list<cnvWins>::iterator cnvEnd = cnv_wins.begin();
 			cout << "\t\tOffset " << (zOffsetSize * o) << "bp......" << endl;
@@ -462,6 +463,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				fprintf(tempTB,"%s;",outfileDATA.c_str());
 			unsigned long int zWinStart = (zOffsetSize * o) + 1;
 			unsigned long int zWinStop = zWinStart + zWinSize - 1;
+			cout << zWinStart<< endl;
 			while(zWinStop <= chr_size[currchr]){
 				int peakCount = 0;
 				double alignCount = 0;
@@ -805,6 +807,7 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 
 	time_t rtime;
 	struct tm *timeinfo;
+	FILE * tempTB;
 	char tInfo[128];// = "tempInfo.txt";
 	char sysCall[256];
 	
@@ -832,10 +835,61 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 		while(signal_slist[i].chrom==currchr && i < (int) signal_slist.size()){
 			basepair[signal_slist[i].pos]++;
 			i++;
-		}
+		}	
 		signal_slist.erase(signal_slist.begin(),signal_slist.begin()+i);
 
+		cout << "\tGetting sequence from .2bit file:\n\t\t" << twoBitFile << endl;
+		gcContent = new unsigned char[chr_size[currchr] + 1];
+		for(int ch = chr_size[currchr]; ch--;)
+			gcContent[ch] = (unsigned char) 0;
+
+		char tSeq[128];
+		time(&rtime);
+		timeinfo=localtime(&rtime);
+		strftime(tInfo,128,"tempInfo_%H_%M_%S.txt",timeinfo);
+		strftime(tSeq,128,"tempSeq_%H_%M_%S.txt",timeinfo);
+
+		tempTB = fopen(tInfo,"w");
+		fprintf(tempTB,"library(zinba);\ntwobittofa(chrm=\"%s\",start=1,end=%lu,twoBitFile=\"%s\",gcSeq=\"%s\");\n",chromReport,chr_size[currchr],twoBitFile,tSeq);
+		fclose (tempTB);
+		sprintf(sysCall,"R CMD BATCH %s /dev/null",tInfo);
+		int s = 1;
+		int twobitCount = 0;
+		while(s != 0){
+			s = system(sysCall);
+			twobitCount++;
+			if(twobitCount < 5 && s != 0){
+				cout << "Trying twoBitToFa again, s is" << s << endl;
+			}else if(twobitCount >= 5 && s != 0){
+				cout << "twoBitToFa failed, exiting" << endl;
+				return 1;
+			}
+		}
+		remove(tInfo);
 		
+		ifstream seqfile(tSeq);
+		string line;
+		int pos = 1;
+		unsigned long int nStart = 0;
+		unsigned long int nStop = 0;
+		unsigned short int prevEnt = 0;
+		while(getline(seqfile,line)){
+			if(line[0] != '>'){
+				for(int s = 0; s < line.length();s++){
+					if(line[s] == 'G' || line[s] == 'C'){
+						gcContent[pos] = (unsigned char) 1;
+					}else if (line[s] == 'N'){
+						gcContent[pos] = (unsigned char) 2;
+					}else{
+						gcContent[pos] = (unsigned char) 0;
+					}
+					pos++;
+				}
+			}
+		}
+		seqfile.close();
+		remove(tSeq);
+
 
 		cout << "\tGetting counts for zinba windows.........." << endl;
 		int numOffsets = 1;
@@ -856,11 +910,20 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 			unsigned long int zWinStop = zWinStart + zWinSize - 1;
 			while(zWinStop <= chr_size[currchr]){
 				int peakCount = 0;
+				double gcCount = 0;
+				double nCount = 0;
+				
 				for(int b = zWinStart; b <= zWinStop; b++){
 					peakCount += basepair[b];
+					if((int) gcContent[b] == 1)
+						gcCount++;
+					else if((int) gcContent[b] == 2)
+						nCount++;
 				}
-				dataWinsCount zwin(currchr,zWinStart,zWinStop,peakCount);
-				z = peak_wins2.insert_after(z,zwin);
+				if((nCount/zWinSize) < 0.1){
+					dataWinsCount zwin(currchr,zWinStart,zWinStop,peakCount);
+					z = peak_wins2.insert_after(z,zwin);
+				}
 				zWinStart += zWinSize;
 				zWinStop += zWinSize;
 			}
