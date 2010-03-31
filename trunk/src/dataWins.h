@@ -22,13 +22,18 @@ class dataWins {
 	
 	private:
 			
-};/*
+};
+
+#ifndef DATAWINSC_H_
+#define DATAWINSC_H_
+
+#include <iostream>
 class dataWinsCount {
 	
 	public:
 			dataWinsCount();
 			~dataWinsCount();
-			dataWinsCount(unsigned short int, unsigned long int, unsigned long int,int,double,double,double,double);
+			dataWinsCount(unsigned short int, unsigned long int, unsigned long int,int);
 			dataWinsCount(const dataWinsCount&);
 			bool operator <(dataWinsCount) const;
 			unsigned short int chrom;//2
@@ -38,5 +43,7 @@ class dataWinsCount {
 	private:
 			
 };
-*/
+#endif /*DATAWINSC_H_*/
+
 #endif /*DATAWINS_H_*/
+

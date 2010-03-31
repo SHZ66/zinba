@@ -53,7 +53,7 @@ class calcCovs{
 //		slist<bwRead> input_slist;
 		list<cnvWins> cnv_wins;
 		slist<dataWins> peak_wins;
-	
+		slist<dataWinsCount> peak_wins2;
 		unsigned short int tbSizeFlag;
 	
 		unsigned short int chromCounter;//Implemented

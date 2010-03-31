@@ -36,7 +36,7 @@ bool dataWins::operator <(dataWins other) const{
 		return (chrom<other.chrom);	
 	}
 }
-/*
+
 dataWinsCount::~dataWinsCount(){}
 
 dataWinsCount::dataWinsCount(){}
@@ -49,7 +49,7 @@ dataWinsCount::dataWinsCount(const dataWinsCount& s){
 
 }
 
-dataWinsCount::dataWinsCount(unsigned short int _chrom, unsigned long int _start, unsigned long int _stop,int _eCount, double _iCount, double _gcPerc, double _alignPerc, double _cnvScore){
+dataWinsCount::dataWinsCount(unsigned short int _chrom, unsigned long int _start, unsigned long int _stop,int _eCount){
 	chrom = _chrom;
 	start = _start;
 	stop = _stop;
@@ -67,4 +67,4 @@ bool dataWinsCount::operator <(dataWinsCount other) const{
 		return (chrom<other.chrom);	
 	}
 }
-*/
+

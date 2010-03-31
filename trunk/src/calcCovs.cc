@@ -11,7 +11,6 @@
 #include <cstdlib>
 #include <ctime>
 #include <Rmath.h>
-
 #include <algorithm>
 #include <time.h>
 
@@ -540,21 +539,8 @@ int calcCovs::outputData(const char * outputFile, unsigned short int currChr){
 	}
 	fclose (fh);
 	return 0;
-}/*
-int calcCovs::outputDataWinCount(const char * outputFile, unsigned short int currChr){
-	FILE * fh;
-	fh = fopen(outputFile,"w");
-	fprintf(fh,"chromosome\tstart\tstop\texp_count\n");
-	const char * chrom = getKey(currChr);
-	slist<dataWinsCount>::iterator c = peak_wins.begin();
-	while(c != peak_wins.end()){
-		fprintf(fh,"%s\t%lu\t%lu\t%i\n",chrom,c->start,c->stop,c->eCount);
-		peak_wins.erase(c++);
-	}
-	cout << "\t\tOk here" << endl;
-	fclose (fh);
-	return 0;
-}*/
+}
+
 
 unsigned short int calcCovs::getHashValue(char *currChrom){
 	map<const char*, int>::iterator i;
@@ -800,7 +786,21 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 	return 0;
 }
 
-/*
+
+int calcCovs::outputDataWinCount(const char * outputFile, unsigned short int currChr){
+	FILE * fh;
+	fh = fopen(outputFile,"w");
+	fprintf(fh,"chromosome\tstart\tstop\texp_count\n");
+	const char * chrom = getKey(currChr);
+	slist<dataWinsCount>::iterator c = peak_wins2.begin();
+	while(c != peak_wins2.end()){
+		fprintf(fh,"%s\t%lu\t%lu\t%i\n",chrom,c->start,c->stop,c->eCount);
+		peak_wins2.erase(c++);
+	}
+	fclose (fh);
+	return 0;
+}
+
 int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBitFile,string outfile,int extension,const char * filetype){
 
 	time_t rtime;
@@ -845,7 +845,7 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 		string outfileDATA;
 		slist<dataWinsCount>::iterator z;
 		for(int o = 0; o < numOffsets; o++){
-			z = peak_wins.previous(peak_wins.end());
+			z = peak_wins2.previous(peak_wins2.end());
 			cout << "\t\tOffset " << (zOffsetSize * o) << "bp......" << endl;
 			char offset[128];
 			sprintf(offset,"%d",(zOffsetSize * o));
@@ -860,7 +860,7 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 					peakCount += basepair[b];
 				}
 				dataWinsCount zwin(currchr,zWinStart,zWinStop,peakCount);
-				z = peak_wins.insert_after(z,zwin);
+				z = peak_wins2.insert_after(z,zwin);
 				zWinStart += zWinSize;
 				zWinStop += zWinSize;
 			}
@@ -876,4 +876,4 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 		}
 	return 0;
 }
-*/
+
