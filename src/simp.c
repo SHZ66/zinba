@@ -48,9 +48,12 @@ double sig;
   
 
 //skip the first line of the coordinate file
-    if(fgets(str_buf, MAX_LEN, FI) == NULL){
+
+
+   if(fgets(str_buf, MAX_LEN, FI) == NULL){
       error("there are only %d lines in file %s\n", i, input);
     }
+
 //print headers to file
 sprintf(line, "PEAKID\tChrom\tStart\tStop\tStrand\tSig\tMaxloc\tMax\tpStart\tpStop\tMedian\n");
 fputs(line, FO);
@@ -128,10 +131,10 @@ for(j=0; j<lmaxvec; j++){
 				sumxy=sumxy+(h+1)*basecount[h];
 				sumx=sumx+h+1;
 				sumy=sumy+basecount[h];
-				sumx2=sumx2+(h+1)*(h+1);
-				sumy2=sumy2+basecount[h]*basecount[h];						
+				sumx2=sumx2+pow(h+1,2);
+				sumy2=sumy2+pow(basecount[h],2);						
 			}
-			hold[max-bound]=pow(sumxy-sumy*sumx/n,2)/((sumy2-sumy*sumy/n)*(sumx2-sumx*sumx/n))	;
+			hold[max-bound]=pow(sumxy-sumy*sumx/n,2)/((sumy2-sumy*sumy/n)*(sumx2-sumx*sumx/n));
 		}
 		//find max R2 position
 		val=0;
@@ -157,8 +160,8 @@ for(j=0; j<lmaxvec; j++){
 				sumxy=sumxy+(h+1)*basecount[h];
 				sumx=sumx+h+1;
 				sumy=sumy+basecount[h];
-				sumx2=sumx2+(h+1)*(h+1);
-				sumy2=sumy2+basecount[h]*basecount[h];
+				sumx2=sumx2+pow(h+1,2);
+				sumy2=sumy2+pow(basecount[h],2);	
 					
 			}
 			hold[max-1+bound]=pow(sumxy-sumy*sumx/n,2)/((sumy2-sumy*sumy/n)*(sumx2-sumx*sumx/n));
