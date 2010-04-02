@@ -25,6 +25,7 @@ export(convertmappability)
 export(collapsewindows)
 export(zinbagui)
 export(getwindowcounts)
+export(run)
 # ------------------------------------------
 # S3method declarations.  
 # ------------------------------------------

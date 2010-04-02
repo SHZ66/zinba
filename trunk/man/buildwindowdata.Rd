@@ -23,11 +23,33 @@
             \code{\link{save}}.
           }
           \examples{
-	   #Chip-Seq with recommended parameters
-	   buildwindowdata(filelist='filelist.list',seq='ctcf.taf' ,align='align/',input= 'ctcfinput.taf' ,twoBit='hg18.2bit',winSize=500,offset=125,cnvWinSize=100000,cnvOffset=2500,filetype='bed', extension=200)
-		
-	   #FAIRE-seq with recommended parameters, no input.  
-	   buildwindowdata(filelist='faire.list',seq='faire.taf',input='none', align='align/',twoBit='hg18.2bit',winSize=250,offset=50,cnvWinSize=100000,cnvOffset=2500,filetype='tagAlign', extension=134)
+#Chip-Seq with recommended parameters
+buildwindowdata(
+   filelist='data/ctcf.list',
+   seq='data/ctcfGM12878rep3chr22.taf' 
+   align='align1/',
+   input='data/inputGM12878rep3chr22.taf',
+   twoBit='hg18.2bit',
+   winSize=500,
+   offset=125,
+   cnvWinSize=100000,
+   cnvOffset=2500,
+   filetype='tagAlign',    
+   extension=200)
+
+#FAIRE-seq with recommended parameters, no input.  
+buildwindowdata(
+   filelist='data/faire.list',
+   seq='data/faireGM12878rep1chr22.taf',
+   align='align4/',
+   input='none',
+   twoBit='hg18.2bit',
+   winSize=250,
+   offset=50,
+   cnvWinSize=100000,
+   cnvOffset=2500,
+   filetype='tagAlign',    
+   extension=134)
 
 
    

@@ -9,7 +9,7 @@
 
 #define min(a,b)  ((a) < (b) ? (a) : (b))
 #define maxx(x,y) ((x) > (y) ? (x) : (y))
-#define MAX_LEN 50000
+#define MAX_LEN 500000
 
 SEXP mkans(int *, int);
 //int feval(int *, SEXP ,SEXP );
@@ -45,13 +45,9 @@ double sig;
     error("cannot open file %s\n", output);
   }
   
-  
-
 //skip the first line of the coordinate file
-
-
-   if(fgets(str_buf, MAX_LEN, FI) == NULL){
-      error("there are only %d lines in file %s\n", i, input);
+    if(fgets(str_buf, MAX_LEN, FI) == NULL){
+      error("there are no lines in file\n");
     }
 
 //print headers to file
@@ -61,6 +57,7 @@ Rprintf("Begin Peak Refinement\n");
 //read in a line, save the information in each, perform peakbounds, then print out, repeat for each line
 int m=0;
  while(fgets(str_buf, MAX_LEN, FI) != NULL){
+
     i = 0;
      if ((ptr = strtok(str_buf, delim)) != NULL) {
     do {

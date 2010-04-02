@@ -463,7 +463,6 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				fprintf(tempTB,"%s;",outfileDATA.c_str());
 			unsigned long int zWinStart = (zOffsetSize * o) + 1;
 			unsigned long int zWinStop = zWinStart + zWinSize - 1;
-			cout << zWinStart<< endl;
 			while(zWinStop <= chr_size[currchr]){
 				int peakCount = 0;
 				double alignCount = 0;
