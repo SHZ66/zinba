@@ -7,9 +7,9 @@
           }
           \usage{basealigncount(inputfile,outputfile,twoBitFile,extension,filetype="bowtie")}
           \arguments{
-	    \item{inputfile}{path to mapped sample reads if buildwin=1, formatted as either 'bed', 'tagAlign', or 'bowtie'}
+	    \item{inputfile}{path to mapped sample reads, formatted as either 'bed', 'tagAlign', or 'bowtie'}
 	    \item{outputfile}{path to file where basecount file will be outputted}
-	    \item{twobitfile}{path to current build of human genome in .2bit format}
+	    \item{twobitfile}{path to current build of the genome your reads where mapped to, in .2bit format}
 	    \item{extension}{average length of fragments in fragment library used, typically around 200}
 	    \item{filetype}{format of mapped sample and input reads.  'bed' is files in the standard .bed format, 'tagAlign' signifies those in .taf format, and 'bowtie' signifies mapped reads directly outputted from bowtie.  Default is 'bowtie'}
 	  }
@@ -18,7 +18,13 @@
           }
           \examples{
 	   #Corresponding to FAIRE example in run.zinba:
-	   basealigncount(extension=134,   filetype='tagAlign', inputfile='faire.taf', outputfile='faire.basecount' , twoBitFile='hg18.2bit' )
+
+basealigncount(
+   inputfile='data/faireGM12878rep1chr22.taf', 
+   outputfile='data/faireGM12878rep1chr22.basecount', 
+   extension=134, 
+   filetype='tagAlign', 
+   twoBitFile='hg18.2bit' )
    
           }
           \keyword{file}

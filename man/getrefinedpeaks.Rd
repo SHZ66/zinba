@@ -26,7 +26,20 @@
           }
           \examples{
 	   #FAIRE-seq with recommended parameters, no input.  
-	   getrefinedpeaks(winlist='FAIRE/faireresults.winlist', bpout='FAIRE/faireresults.bpout',peakout='FAIRE/faireresults.peaks',twoBit='hg18.2bit',winSize=250,basecountfile='faire.basecount' ,peakconfidence=.95,pWinSize=200,pquant=1,printFullOut=1,method='mixture', minscore=5)
+run.zinba(
+   winlist='data/faire.winlist',
+   bpout='data/faire.bpout',
+   peakout='data/faire.peaks',
+   twoBit='hg18.2bit',
+   peakconfidence=.95,
+   method='mixture', 
+   printFullOut=1,
+   pWinSize=200,
+   pquant=1,
+   winsize=250,
+   basecountfile='data/faireGM12878rep1chr22.basecount',
+   minscore=5
+   )
    
           }
           \keyword{file}
