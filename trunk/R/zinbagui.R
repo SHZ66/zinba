@@ -20,7 +20,7 @@ run=function(util){
 	genalign$OK_handler <- function(.) {
 		genalignvar=.$to_R()
 		.$close_gui()
-		do.call("generateAlignability",list(mapdir=genalignvar$mapdir, outdir=genalignvar$outdir, athresh=genalignvar$athresh, extension=genalignvar$extension, twoBitFile=genalignvar$twoBitFile)) 
+		do.call("Generate Alignability Directory",list(mapdir=genalignvar$mapdir, outdir=genalignvar$outdir, athresh=genalignvar$athresh, extension=genalignvar$extension, twoBitFile=genalignvar$twoBitFile)) 
 	}
 		genalign$visible(TRUE)
 	}
@@ -49,11 +49,72 @@ run=function(util){
 	basecount$make_gui(gui_layout=view_basecount, visible=FALSE) 
 	basecount$OK_handler <- function(.) {
 		basecountvar=.$to_R()
-		do.call("basealigncount",list(inputfile=basecountvar$seq,outputfile=paste(basecountvar$basecount, "/",basecountvar$filename,sep="") ,twoBitFile=basecountvar$twoBitFile,extension=basecountvar$extension,filetype=basecountvar$filetype))
+		do.call("Generate SBC (Basecount) File",list(inputfile=basecountvar$seq,outputfile=paste(basecountvar$basecount, "/",basecountvar$filename,sep="") ,twoBitFile=basecountvar$twoBitFile,extension=basecountvar$extension,filetype=basecountvar$filetype))
 		.$close_gui()
 	}
 		basecount$visible(TRUE)
 	}
+	
+	if(util=="twobittofa"){	
+	twobittofa <- aDialog(items=list(
+		twoBitFile=fileItem("", attr=list(
+                                     filter=list(
+				       "2bit" = list(patterns=c("*.2bit")),
+                                       "All files" = list(patterns=c("*"))
+                                       )), tooltip="Select .2bit file for Conversion to fasta format"),
+		chrm=stringItem("all", tooltip="Name of chromosome where sequence will be converted from, or all if convering an entire directory of fasta files", label="chromosome"),
+		outdir=fileItem(attr=c(type="selectdir"), tooltip="Path to directory where converted fasta files will be placed"), 
+		start=numericItem(0, tooltip="Base Start Position if chromosome!=all for sequence to be extracted to fasta format"),  
+		end=numericItem(0, tooltip="Base Stop Position if chromosome!=all for sequence to be extracted to fasta format"),
+		gcSeq=stringItem("path to output file", tooltip="Path to file where extracted fasta sequence will be placed", label="chromosome")
+		), title="Convert .2bit to fasta format")
+	g <- aFrame()                           
+	view_twobittofa <- aContainer("twoBitFile","chrm","outdir",
+					aContext("start", context=twobittofa, 
+						enabled_when=function(.) {
+						val <- .$to_R()$chrm
+						val !="all"}),
+					aContext("end", context=twobittofa, 
+								enabled_when=function(.) {
+  								val <- .$to_R()$chrm
+  								val !="all"
+							}),
+					aContext("gcSeq", context=twobittofa, 
+								enabled_when=function(.) {
+  								val <- .$to_R()$chrm
+  								val !="all"
+							}),
+					g)
+	twobittofa$make_gui(gui_layout=view_twobittofa, visible=FALSE) 
+	twobittofa$OK_handler <- function(.) {
+		twobittofavar=.$to_R()
+		do.call("twobittofa",list(twoBitFile=twobittofavar$twoBitFile,chrm=twobittofavar$chrm,outdir=twobittofavar$outdir, start=twobittofavar$start,end=twobittofavar$end,gcSeq=twobittofavar$gcSeq))
+		.$close_gui()
+	}
+		twobittofa$visible(TRUE)
+	}
+
+	if(util=="fatotwobit"){	
+		fatotwobit <- aDialog(items=list(
+			outFile=stringItem("path to outputted .2bit file", tooltip="if a directory is not selected, path to file where resulting .2bit file will be outputted", label="outfile"),
+			fadir=fileItem(" ",attr=c(type="selectdir"), tooltip="Path to directory where fasta files to be converted are stored", label="fasta directory"), 
+			faFile=stringItem(" ", tooltip="path to specific fasta file if not specifying a directory", label="chromosome")
+			), title="Convert fasta file to to .2bit format")
+		g <- aFrame()                           
+		view_fatotwobit <- aContainer("fadir",
+						aContext("faFile", context=fatotwobit, 
+							enabled_when=function(.) {
+							val <- .$to_R()$fadir
+							val ==" "}),
+						"outFile",g)
+		fatotwobit$make_gui(gui_layout=view_fatotwobit, visible=FALSE) 
+		fatotwobit$OK_handler <- function(.) {
+			fatotwobitvar=.$to_R()
+			do.call("fatotwobit",list(fadir=fatotwobitvar$fadir,faFile=fatotwobitvar$faFile,outFile=fatotwobitvar$outFile))
+			.$close_gui()
+		}
+			fatotwobit$visible(TRUE)
+		}
 	###################################################################
 	###################################################################
 	
@@ -102,7 +163,7 @@ run=function(util){
                                      filter=list(
 				       "basecount" = list(patterns=c("*.basecount")),
                                        "All files" = list(patterns=c("*"))
-                                       )), tooltip="Path to SBC (basecountfile) generated from basealigncount()"),
+                                       )), tooltip="Path to SBC (basecountfile) generated from Generate SBC (Basecount) File()"),
 		 winlist=fileItem("Path to.winlist from previous window analysis", attr=list(
                                      filter=list(
 				       "winlist" = list(patterns=c("*.winlist")),
@@ -250,7 +311,7 @@ if(util=="Run Zinba Preset"){
                                      filter=list(
 				       "basecount" = list(patterns=c("*.basecount")),
                                        "All files" = list(patterns=c("*"))
-                                       )), tooltip="Path to SBC (basecountfile) generated from basealigncount()")
+                                       )), tooltip="Path to SBC (basecountfile) generated from Generate SBC (Basecount) File()")
 
   ),
 title="Run Zinba Pipeline With Data Presets",
@@ -323,15 +384,15 @@ dlg$OK_handler <- function(.) {
 	}
 }
 
-zinbagui=function(){
 
+zinbagui=function(){
 require(traitr)
 require(gWidgets)
 require(zinba)
 options(guiToolkit="RGtk2")
 
 dlg <- aDialog(items=list(
-	util=choiceItem("Select a utility", values=c("Select a utility","generateAlignability", "basealigncount"), tooltip="Various utilities to compute files needed for ZINBA",editor_type="gcombobox", label="Utilities"),
+	util=choiceItem("Select a utility", values=c("Select a utility","Generate Alignability Directory", "Generate SBC (Basecount) File", "Convert .2bit to .fa","Convert .fa to .2bit"), tooltip="Various utilities to compute files needed for ZINBA",editor_type="gcombobox", label="Utilities"),
 	align=choiceItem("Yes", values=c("Yes", "No"), tooltip="If no, then will open a dialog to generate your alignability directory for you",editor_type="gcombobox", label="Have you generated your alignability directory?"),
 	basecount=choiceItem("Yes", values=c("Yes", "No"), tooltip="If no, then will open a dialog to generate your SBC (basecount) file",editor_type="gcombobox",label="Have you generated your SBC (basecount) track?"),
 	runzinba=choiceItem("?", values=c("?","Run Zinba Data Preset","Run Zinba Custom Parameters"), tooltip="Open Zinba Dialog Window",editor_type="gcombobox", label="Zinba Options")
@@ -339,16 +400,22 @@ dlg <- aDialog(items=list(
 	title=" Zinba GUI ",
 	model_value_changed=function(.) {
                  l <- .$to_R()
-		 if(l$align=="No" | l$util=="generateAlignability"){
+		 if(l$util=="Convert .2bit to .fa"){
+			do.call("run", list("twobittofa"))
+		}else if(l$util=="Generate Alignability Directory"){
 			do.call("run", list("Generate Alignability"))
-			l$align="Yes"
-			l$util="Select a utility"
-		 }			
-		 if(l$basecount=="No" | l$util=="basealigncount"){
+		}else if(l$util=="Generate SBC (Basecount) File"){
 			do.call("run", list("Generate SBC file (basecount)"))
-		 	l$basecount="Yes"
-			l$util="Select a utility"
-		 }
+		}else if(l$util=="Convert .fa to .2bit"){
+			do.call("run", list("fatotwobit"))
+		}
+		
+		if(l$align=="No"){
+			do.call("run", list("Generate Alignability"))
+		}			
+		if(l$basecount=="No"){
+			do.call("run", list("Generate SBC file (basecount)"))		
+	 	}
 		 if(l$runzinba =="Run Zinba Custom Parameters"){
 			do.call("run", list("Run Zinba"))
 		 }else if(l$runzinba =="Run Zinba Data Preset") do.call("run", list("Run Zinba Preset"))
