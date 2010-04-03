@@ -1,4 +1,4 @@
-    \name{alignAdjust}
+    \name{zalignAdjust}
           \Rdversion{1.0}
           \alias{alignAdjust}
           \title{Custom Alignability Track Generation}

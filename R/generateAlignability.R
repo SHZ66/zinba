@@ -14,6 +14,7 @@ generateAlignability=function(mapdir, outdir="", athresh=1, extension=0, twoBitF
 	
 	currdir=getwd()
 	setwd(mapdir)
+	write.table(dir("." ,pattern="\\.out"), "map.list", quote=F, row.names=F, col.names=F)
 	convertmappability(inputfile='map.list', outputfile='temp.wig')
 	setwd(currdir)
 	alignAdjust(inputfile=paste(mapdir,'temp.wig',sep=''), outDir=outdir,twoBitFile=twoBitFile,athresh=athresh,adjustsize=round(extension/2))
