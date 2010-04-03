@@ -115,6 +115,37 @@ run=function(util){
 		}
 			fatotwobit$visible(TRUE)
 		}
+	if(util=="getwindowcounts"){	
+		getwindowcounts <- aDialog(items=list(
+		 	seq=fileItem("", attr=list(
+                 	                    filter=list("Bed"=list(
+                 	                                  patterns=c("*.bed")
+                 	                                  ),
+					       "tagAlign" = list(patterns=c("*.taf","*.tagAlign")),
+                 	                      "All files" = list(patterns=c("*"))
+                 	                      )),tooltip="Select mapped sample reads file for analysis", label="Sample Reads"),
+		 	filetype=choiceItem("bed", values=c("bed","tagAlign", "bowtie"), editor_type="gcombobox",tooltip="Select format of sample and input mapped read file",label="File Type"),
+	         	twoBit=fileItem("", attr=list(
+                 	                    filter=list(
+					       "2bit" = list(patterns=c("*.2bit")),
+                 	                      "All files" = list(patterns=c("*"))
+                 	                      )), tooltip="Select .2bit file corresponding on build of genome reads were mapped to",label=".2bit file"),	
+                 winSize=integerItem(500, tooltip="Window Size for data, smaller is better for low signal to noise, high background data", label="Window Size"),
+                 offset=integerItem(0, tooltip="BP offset to shift windows, window size must be a multiple of this number.  Yields better sensitivity", label="Window Offset"),
+                 extension=integerItem(200, tooltip="average fragment length in sample library used for sequencing reads, usually 150bp-200bp", label="Extension")
+		))
+                 
+		g <- aFrame()                           
+		view_getwindowcounts <- aContainer("seq","filetype","twoBit","winSize","offset", "extension",g)
+		getwindowcounts$make_gui(gui_layout=view_getwindowcounts, visible=FALSE) 
+		getwindowcounts$OK_handler <- function(.) {
+			getwindowcountsvar=.$to_R()
+			do.call("getwindowcounts",list(seq=getwindowcountsvar$seq,filetype=getwindowcountsvar$filetype,twoBit=getwindowcountsvar$twoBit,winSize=getwindowcountsvar$winSize, offset=getwindowcountsvar$offset, extension=getwindowcountsvar$extension))
+			.$close_gui()
+		}
+			getwindowcounts$visible(TRUE)
+		}
+
 	###################################################################
 	###################################################################
 	
@@ -184,11 +215,11 @@ help_string="Select a file, then adjust parameters.")
 
 view <- aNotebook(
                   aNotebookPage( aFrame(
-					aFrame(aContainer("RunChoice" ,"printFullOut","method",aContext("threshold", context=dlg, visible_when=function(.) {
+					aFrame(aContainer("RunChoice" ,"printFullOut","method",aContext("threshold", context=dlg, enabled_when=function(.) {
   								val <- .$to_R()$method
   								val =="pscl"
 							}),aContext("peakconfidence", context=dlg, 
-								visible_when=function(.) {
+								enabled_when=function(.) {
   								val <- .$to_R()$method
   								val =="mixture"
 							}),"outfile","numProc","twoBit"),label='General Options'
@@ -392,7 +423,7 @@ require(zinba)
 options(guiToolkit="RGtk2")
 
 dlg <- aDialog(items=list(
-	util=choiceItem("Select a utility", values=c("Select a utility","Generate Alignability Directory", "Generate SBC (Basecount) File", "Convert .2bit to .fa","Convert .fa to .2bit"), tooltip="Various utilities to compute files needed for ZINBA",editor_type="gcombobox", label="Utilities"),
+	util=choiceItem("Select a utility", values=c("Select a utility","Generate Alignability Directory", "Generate SBC (Basecount) File", "Convert .2bit to .fa","Convert .fa to .2bit", "Get Window Counts"), tooltip="Various utilities to compute files needed for ZINBA",editor_type="gcombobox", label="Utilities"),
 	align=choiceItem("Yes", values=c("Yes", "No"), tooltip="If no, then will open a dialog to generate your alignability directory for you",editor_type="gcombobox", label="Have you generated your alignability directory?"),
 	basecount=choiceItem("Yes", values=c("Yes", "No"), tooltip="If no, then will open a dialog to generate your SBC (basecount) file",editor_type="gcombobox",label="Have you generated your SBC (basecount) track?"),
 	runzinba=choiceItem("?", values=c("?","Run Zinba Data Preset","Run Zinba Custom Parameters"), tooltip="Open Zinba Dialog Window",editor_type="gcombobox", label="Zinba Options")
@@ -408,8 +439,10 @@ dlg <- aDialog(items=list(
 			do.call("run", list("Generate SBC file (basecount)"))
 		}else if(l$util=="Convert .fa to .2bit"){
 			do.call("run", list("fatotwobit"))
+		}else if(l$util=="Get Window Counts"){
+			do.call("run", list("getwindowcounts"))
 		}
-		
+
 		if(l$align=="No"){
 			do.call("run", list("Generate Alignability"))
 		}			
