@@ -421,7 +421,7 @@ require(traitr)
 require(gWidgets)
 require(zinba)
 options(guiToolkit="RGtk2")
-
+eval(parse(text="statusold=c('Select a utility','Yes','Yes', '?')"), envir=.GlobalEnv)
 dlg <- aDialog(items=list(
 	util=choiceItem("Select a utility", values=c("Select a utility","Generate Alignability Directory", "Generate SBC (Basecount) File", "Convert .2bit to .fa","Convert .fa to .2bit", "Get Window Counts"), tooltip="Various utilities to compute files needed for ZINBA",editor_type="gcombobox", label="Utilities"),
 	align=choiceItem("Yes", values=c("Yes", "No"), tooltip="If no, then will open a dialog to generate your alignability directory for you",editor_type="gcombobox", label="Have you generated your alignability directory?"),
@@ -431,27 +431,37 @@ dlg <- aDialog(items=list(
 	title=" Zinba GUI ",
 	model_value_changed=function(.) {
                  l <- .$to_R()
-		 if(l$util=="Convert .2bit to .fa"){
+		 if(l$util=="Convert .2bit to .fa" & l$util!=statusold[1]){
 			do.call("run", list("twobittofa"))
-		}else if(l$util=="Generate Alignability Directory"){
+			eval(parse(text=paste("statusold[1]='",l$util,"'", sep="")), envir=.GlobalEnv)
+		}else if(l$util=="Generate Alignability Directory" & l$util!=statusold[1]){
 			do.call("run", list("Generate Alignability"))
-		}else if(l$util=="Generate SBC (Basecount) File"){
+			eval(parse(text=paste("statusold[1]='",l$util,"'", sep="")), envir=.GlobalEnv)
+		}else if(l$util=="Generate SBC (Basecount) File" & l$util!=statusold[1]){
 			do.call("run", list("Generate SBC file (basecount)"))
-		}else if(l$util=="Convert .fa to .2bit"){
+			eval(parse(text=paste("statusold[1]='",l$util,"'", sep="")), envir=.GlobalEnv)
+		}else if(l$util=="Convert .fa to .2bit" & l$util!=statusold[1]){
 			do.call("run", list("fatotwobit"))
-		}else if(l$util=="Get Window Counts"){
+			eval(parse(text=paste("statusold[1]='",l$util,"'", sep="")), envir=.GlobalEnv)
+		}else if(l$util=="Get Window Counts" & l$util!=statusold[1]){
 			do.call("run", list("getwindowcounts"))
+			eval(parse(text=paste("statusold[1]='",l$util,"'", sep="")), envir=.GlobalEnv)
 		}
 
-		if(l$align=="No"){
+		if(l$align=="No" & l$align!=statusold[2]){
 			do.call("run", list("Generate Alignability"))
+			eval(parse(text=paste("statusold[2]='",l$align,"'", sep="")), envir=.GlobalEnv)
 		}			
-		if(l$basecount=="No"){
-			do.call("run", list("Generate SBC file (basecount)"))		
+		if(l$basecount=="No" & l$basecount!=statusold[3]){
+			do.call("run", list("Generate SBC file (basecount)"))	
+			eval(parse(text=paste("statusold[3]='",l$basecount,"'", sep="")), envir=.GlobalEnv)	
 	 	}
-		 if(l$runzinba =="Run Zinba Custom Parameters"){
+		if(l$runzinba =="Run Zinba Custom Parameters" & l$runzinba!=statusold[4]){
 			do.call("run", list("Run Zinba"))
-		 }else if(l$runzinba =="Run Zinba Data Preset") do.call("run", list("Run Zinba Preset"))
+			eval(parse(text=paste("statusold[4]='",l$runzinba,"'", sep="")), envir=.GlobalEnv)
+		 }else if(l$runzinba =="Run Zinba Data Preset"& l$runzinba!=statusold[4]) 
+			do.call("run", list("Run Zinba Preset"))
+			eval(parse(text=paste("statusold[4]='",l$runzinba,"'", sep="")), envir=.GlobalEnv)				
                }
 )
 
