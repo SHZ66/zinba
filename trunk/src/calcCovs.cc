@@ -802,7 +802,7 @@ int calcCovs::outputDataWinCount(const char * outputFile, unsigned short int cur
 	return 0;
 }
 
-int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBitFile,string outfile,int extension,const char * filetype){
+int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBitFile,string outfile,int extension,const char * filetype, double Nthresh){
 
 	time_t rtime;
 	struct tm *timeinfo;
@@ -919,7 +919,7 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 					else if((int) gcContent[b] == 2)
 						nCount++;
 				}
-				if((nCount/zWinSize) < 0.1){
+				if((nCount/zWinSize) < Nthresh | Nthresh==0){
 					dataWinsCount zwin(currchr,zWinStart,zWinStop,peakCount);
 					z = peak_wins2.insert_after(z,zwin);
 				}

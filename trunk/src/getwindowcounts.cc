@@ -13,7 +13,7 @@ using namespace sgi;
 using namespace std;
 
 extern "C" {
-void getWindowCounts(char **RexpSeqFile,char **RtwoBitFile,int *RzWinSize,int *RzOffsetSize, char **Rfiletype,int *Rextension){
+void getWindowCounts(char **RexpSeqFile,char **RtwoBitFile,int *RzWinSize,int *RzOffsetSize, char **Rfiletype,int *Rextension, double *RNthresh){
 
 	string expSeqFile = RexpSeqFile[0];
 	const char * twoBitFile = RtwoBitFile[0];
@@ -21,6 +21,7 @@ void getWindowCounts(char **RexpSeqFile,char **RtwoBitFile,int *RzWinSize,int *R
 	int zOffsetSize = RzOffsetSize[0];
 	const char * filetype = Rfiletype[0];
 	int extension = Rextension[0];
+	double Nthresh = *RNthresh;
 	
 	int ret;
 	calcCovs newAnalysis;// = new analysis;
@@ -33,7 +34,7 @@ void getWindowCounts(char **RexpSeqFile,char **RtwoBitFile,int *RzWinSize,int *R
 		Rprintf("\nBuilding window data\n");
 		size_t found = expSeqFile.find_last_of(".");
 		string outfile_prefix = expSeqFile.substr(0,found);
-		ret = newAnalysis.processWinSignal(zWinSize,zOffsetSize,twoBitFile,outfile_prefix,extension,filetype);
+		ret = newAnalysis.processWinSignal(zWinSize,zOffsetSize,twoBitFile,outfile_prefix,extension,filetype, Nthresh);
 		if(ret == 1){
 			Rprintf("ERROR: building windows was unsuccssful\n");
 		}
