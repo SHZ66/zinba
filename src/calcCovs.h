@@ -30,7 +30,7 @@ class calcCovs{
 		int importBowtie(const char *,int,int);
 		int importTagAlign(const char *,int,int);
 		int importBed(const char *,int,int);
-		int processWinSignal(int , int ,const char * ,string outfile,int ,const char *);
+		int processWinSignal(int , int ,const char * ,string outfile,int ,const char *, double);
 		struct ltstr{
 			bool operator()(const char* s1, const char* s2) const
 			{

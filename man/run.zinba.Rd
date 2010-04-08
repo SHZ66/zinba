@@ -26,8 +26,8 @@ the winlist is then fed to getrefinedpeaks() if peak refinement is desired. The 
 	    \item{buildwin}{A value of 1 specifies that you would like to build the data from the raw mapped data, with the locations of the built data files being places in the filelist file.  Raw data corresponds to the mapped sample reads, raw mapped input reads (if available), and the current build of the human genome and the alignabilty files.  A value of 0 specifies you would like to skip this step and use an existing filelist (corresponding to a previously built set of data)}
             \item{refinepeaks}{Whether exact boundaries of peaks within merged significantly enriched regions is requested (default), otherwise  set to 0.  Helps to isolate punctuate, sharp peaks.}
 	    \item{method}{If 'mixture' is selected, the mixture regression model approach is used (must specify formula and formulaE). If 'pscl' is specified, then only needs to specify formula.  Pscl is an adhoc method that is used on FAIRE data}
-	    \item{peakconfidence}{Must be specified if method=mixture.  Posterior probability threshold for signfificant windows if the mixture regression model is used.  Higher is more stringent, must be between 0 and 1.}
-	    \item{threshold}{Must be specified if method='pscl'.  FDR threshold for significant windows, lower is more stringent}
+	    \item{peakconfidence}{Posterior probability threshold for signfificant windows if method='mixture'.  Higher is more stringent, must be between 0 and 1. Must be specified if method=mixture, if method='pscl' then can leave blank.  }
+	    \item{threshold}{FDR threshold for significant windows for pscl method, lower is more stringent.  Must be specified if method='pscl'.  If method='mixture' then can leave blank.  }
 	    \item{outfile}{Prefix used to denote the .wins, .winlist and .peaks files that are outputted by zinba}
 	    \item{twoBit}{Path to build of the genome your reads were mapped to, in .2bit format}
 	    \item{numProc}{Number of concurrent jobs to run in parallel, default is 1, recommended to use more if more computing cores are available.  More memory is needed however when more processes are run in parallel.  If using winSize of 500, 4 cores is sufficient for a desktop with 4 GB of memory, smaller winSizes require more memory}
@@ -82,7 +82,7 @@ run.zinba(
    pWinSize=200,
    pquant=1,
    basecountfile='ctcfGM12878rep3chr22.basecount',
-   diff=0,
+   diff=0
    )	   
 		
 #FAIRE-seq with recommended parameters, no input.  
@@ -112,7 +112,7 @@ run.zinba(
    pWinSize=200,
    pquant=1,
    basecountfile='data/faireGM12878rep1chr22.basecount',
-   diff=0,
+   diff=0
    )
 
 

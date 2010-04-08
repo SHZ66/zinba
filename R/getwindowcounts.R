@@ -1,4 +1,4 @@
-getwindowcounts=function(seq,twoBit,winSize=500,offset=0,filetype="bowtie",extension){	
+getwindowcounts=function(seq,twoBit,winSize=500,offset=0,filetype="bowtie",extension, Nthresh=.1){	
 	if(!file.exists(seq)){
 		stop(paste("Seq file not found,",seq,sep=" "))
 	}
@@ -11,6 +11,6 @@ getwindowcounts=function(seq,twoBit,winSize=500,offset=0,filetype="bowtie",exten
 	if(is.null(extension)){
 		stop(paste("extension was not specified"))
 	}
-	cReturn <- .C("getWindowCounts",as.character(seq),as.character(twoBit),as.integer(winSize),as.integer(offset),as.character(filetype),as.integer(extension),PACKAGE="zinba")
+	cReturn <- .C("getWindowCounts",as.character(seq),as.character(twoBit),as.integer(winSize),as.integer(offset),as.character(filetype),as.integer(extension), as.double(Nthresh),PACKAGE="zinba")
 	gc()
 }
