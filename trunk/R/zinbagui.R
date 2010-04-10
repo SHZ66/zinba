@@ -49,7 +49,7 @@ run=function(util){
 	basecount$make_gui(gui_layout=view_basecount, visible=FALSE) 
 	basecount$OK_handler <- function(.) {
 		basecountvar=.$to_R()
-		do.call("Generate SBC (Basecount) File",list(inputfile=basecountvar$seq,outputfile=paste(basecountvar$basecount, "/",basecountvar$filename,sep="") ,twoBitFile=basecountvar$twoBitFile,extension=basecountvar$extension,filetype=basecountvar$filetype))
+		do.call("basealigncount",list(inputfile=basecountvar$seq,outputfile=paste(basecountvar$basecount, "/",basecountvar$filename,sep="") ,twoBitFile=basecountvar$twoBitFile,extension=basecountvar$extension,filetype=basecountvar$filetype))
 		.$close_gui()
 	}
 		basecount$visible(TRUE)
