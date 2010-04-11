@@ -19,8 +19,8 @@ void signalnoise(char **Rinput, char **Routput,char **Rtwobitfile, int *RnBin){
 	histsbpc newHist;
 	int ret = newHist.signalnoise(input,output,twoBit,numBin);
 	if(ret != 0)
-		Rprintf("\n---------------- ALIGN ADJUST EXITING WITH ERRORS ----------------\n");
+		Rprintf("\n---------------- SIGNAL TO NOISE ANALYSIS EXITING WITH ERRORS ----------------\n");
 	else
-		Rprintf("\n---------------- ALIGN ADJUST COMPLETED SUCCESSFULLY ----------------\n");
+		Rprintf("\n---------------- SIGNAL TO NOISE ANALYSIS COMPLETED SUCCESSFULLY ----------------\n");
 }
 }
