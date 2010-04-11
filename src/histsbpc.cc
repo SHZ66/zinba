@@ -223,6 +223,7 @@ int histsbpc::hist_data(const char * sbpcFile,const char * outfile,const char* t
 	return 0;
 }
 
+
 unsigned short int histsbpc::getHashValue(const char *currChrom){
 	map<const char*, int>::iterator i;
 	i = chroms.find(currChrom);
@@ -248,3 +249,214 @@ const char * histsbpc::getKey(unsigned short int chrom){
 		return i->second;	
 	}
 }
+
+
+int histsbpc::signalnoise(const char * sbpcFile,const char * outfile,const char* twoBitFile,int binSize){
+
+	FILE * tempTB;
+	time_t rtime;
+	struct tm *timeinfo;
+	int max=500;
+	int min=0;
+	char tInfo[128];// = "tempInfo.txt";
+	char tChrSize[128];// = "tempChromSize.txt";
+	char sysCall[256];
+	time(&rtime);
+	timeinfo=localtime(&rtime);
+	strftime(tInfo,128,"tempInfo_%H_%M_%S.txt",timeinfo);
+	strftime(tChrSize,128,"tempChromSize_%H_%M_%S.txt",timeinfo);
+	
+	tempTB = fopen(tInfo,"w");
+	fprintf(tempTB,"library(zinba);\ntwobitinfo(infile=\"%s\",outfile=\"%s\");\n",twoBitFile,tChrSize);
+	fclose (tempTB);
+	
+	cout << "\nGetting chromosome lengths from .2bit file: " << twoBitFile << endl;
+	int s = 1;
+	sprintf(sysCall,"R CMD BATCH %s /dev/null",tInfo);
+	while(s != 0){
+		s = system(sysCall);
+		if(s != 0)
+			cout << "Trying twoBitInfo again, s is" << s << endl;
+	}
+	remove(tInfo);
+	
+	tempTB = fopen(tChrSize,"r");
+	char tbChrom[128];
+	unsigned long int tbStart;
+	while(!feof(tempTB)){
+		int ret = fscanf(tempTB,"%s%lu",tbChrom,&tbStart);
+		if(ret == 2){
+			string sChr(tbChrom);
+			unsigned short int chromIntTB = getHashValue(sChr.c_str());
+			chr_size[chromIntTB] = tbStart;
+		}
+	}
+	fclose(tempTB);
+	remove(tChrSize);
+	
+	int dataRange = max - min;
+	//int binSize;
+	//if((dataRange % numBin) != 0)
+	int numBin=1;
+
+	//if(dataRange > numBin)
+	//	binSize = (int)dataRange/numBin;
+	//else
+	//	binSize = 1;
+
+	
+	
+	int ltMin = 0;
+	int gtMax = 0;
+	FILE * fh;
+	fh = fopen(outfile,"w");
+	if(fh==NULL){
+		cout << "Unable to open output file: " << outfile << endl;
+		return 1;
+	}
+	fclose (fh);
+	fprintf(fh,"Median\tMax\n");
+	unsigned short int * sbpc_count = NULL;
+	string line;string field;
+	string chrom;int chromInt;
+	int countBases = 0;
+	cout << "Getting data for signal to noise analysis  from " << sbpcFile << endl;
+	ifstream seqfile(sbpcFile);
+	while (getline(seqfile, line)){
+		if (line[0] != 't' && line[0] != 'f'){
+			countBases++;
+			sbpc_count[countBases] = atoi(line.c_str());
+		}else if (line[0] == 'f'){
+			if(countBases > 0){
+				//sort(sbpc_count, sbpc_count+(chr_size[chromInt]+1));
+				
+				//int nonzeroInd = 0;
+				//while(sbpc_count[nonzeroInd] == 0)
+				//	nonzeroInd++;
+				
+				int sInd = 0;
+				int bMin = min;
+				int bMax = bMin + binSize;
+				int window[binSize];
+				int binNum=(int) chr_size[chromInt]/binSize;
+				unsigned long int * sbpc_hist = NULL;
+				unsigned long int * sbpc_hist2 = NULL;
+				sbpc_hist = new unsigned long int [binNum];
+				for(int b = binNum;b--;)
+					sbpc_hist[b] = 0;
+				sbpc_hist2 = new unsigned long int [binNum];
+				for(int b = binNum;b--;)
+					sbpc_hist2[b] = 0;
+				//for(int b = 0; b < numBin; b++){
+				while(bMax<countBases && bMax <= chr_size[chromInt]){
+					for(int i=bMin;i<bMax;i++){
+						window[i-bMin]=sbpc_count[i];
+					}	
+					sort(window, window+binSize);				
+					int nonzeroInd = 0;
+					while(window[nonzeroInd] == 0) nonzeroInd++;
+					
+					int nzlength = binSize - nonzeroInd;
+					int medInd = (int) nzlength/2;
+					sbpc_hist[sInd]=window[nonzeroInd+medInd-1];					
+					sbpc_hist2[sInd]=window[binSize-1];
+					sInd++;
+					bMin = bMax ;
+					bMax = bMin + binSize;
+					
+				}
+				
+				fh = fopen(outfile,"a");
+				if(fh==NULL){
+					cout << "Unable to open output file: " << outfile << endl;
+					return 1;
+				}
+				for(int b = 0; b < binNum; b++){
+					fprintf(fh,"%lu\t%lu\n",sbpc_hist[b],sbpc_hist2[b]);
+				}
+				fclose (fh);
+				delete [] sbpc_count;
+				sbpc_count = NULL;
+			}
+			
+			istringstream iss(line);
+			while(iss >> field){
+				if (field[0] == 'c'){
+					chrom = "";
+					for (int it= 6; it < field.length(); it++ )
+						chrom += field.at(it);
+					chromInt = getHashValue(chrom.c_str());
+					sbpc_count = new unsigned short int[chr_size[chromInt]+1];
+					for(int c = chr_size[chromInt]; c--;)
+						sbpc_count[c] = 0;
+				}else if (field[0] == 's' && field[2] == 'a'){
+					string startVal;
+					for (int it= 6; it < field.length(); it++)
+						startVal += field.at(it);
+					int startOffset = atoi(startVal.c_str());
+					countBases = startOffset - 1;
+				}
+			}
+		}
+	}
+	seqfile.close();
+
+	if(countBases > 0){
+				//sort(sbpc_count, sbpc_count+(chr_size[chromInt]+1));
+				
+				//int nonzeroInd = 0;
+				//while(sbpc_count[nonzeroInd] == 0)
+				//	nonzeroInd++;
+				
+				int sInd = 0;
+				int bMin = min;
+				int bMax = bMin + binSize;
+				int window[binSize];
+				int binNum=(int) chr_size[chromInt]/binSize;
+				unsigned long int * sbpc_hist = NULL;
+				unsigned long int * sbpc_hist2 = NULL;
+				sbpc_hist = new unsigned long int [binNum];
+				for(int b = binNum;b--;)
+					sbpc_hist[b] = 0;
+				sbpc_hist2 = new unsigned long int [binNum];
+				for(int b = binNum;b--;)
+					sbpc_hist2[b] = 0;
+				//for(int b = 0; b < numBin; b++){
+				while(bMax<countBases && bMax <= chr_size[chromInt]){
+					for(int i=bMin;i<bMax;i++){
+						window[i-bMin]=sbpc_count[i];
+					}	
+					sort(window, window+binSize);				
+					int nonzeroInd = 0;
+					while(window[nonzeroInd] == 0) nonzeroInd++;
+					
+					int nzlength = binSize - nonzeroInd;
+					int medInd = (int) nzlength/2;					
+					sbpc_hist[sInd]=window[nonzeroInd+medInd-1];					
+					sbpc_hist2[sInd]=window[binSize-1];
+					sInd++;
+					bMin = bMax ;
+					bMax = bMin + binSize;
+					
+				}
+				
+				fh = fopen(outfile,"a");
+				if(fh==NULL){
+					cout << "Unable to open output file: " << outfile << endl;
+					return 1;
+				}
+				for(int b = 0; b < binNum; b++){
+					fprintf(fh,"%lu\t%lu\n",sbpc_hist[b],sbpc_hist2[b]);
+				}
+				fclose (fh);
+				delete [] sbpc_count;
+				sbpc_count = NULL;
+			}
+	
+	
+
+	
+	
+	return 0;
+}
+
