@@ -8,10 +8,10 @@ signalnoise=function(inputfile,twoBitFile,winSize=2000){
 	output='tempsignalnoise.out'
 	c=.C("signalnoise",as.character(inputfile),as.character(output),as.character(twoBitFile),as.integer(winSize),PACKAGE="zinba")
 	a=read.table(output)
+	unlink(output)
 	median=a[,1]
 	max=a[,2]	
 	print("Summary Information of log ratio of Max Window Count vs Median Window Count")
-	summary(log(max/median)[median>0])
-	unlink(output)
+	print(summary(log(max/median)[median>0]))
 }
 	
