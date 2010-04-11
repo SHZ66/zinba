@@ -1,9 +1,17 @@
-signalnoise=function(inputfile,output,twoBitFile,binSize=2000){
-	c=.C("signalnoise",as.character(inputfile),as.character(output),as.character(twoBitFile),as.integer(binSize),PACKAGE="zinba")
+signalnoise=function(inputfile,twoBitFile,winSize=2000){
+	if(!file.exists(inputfile)){
+    		stop(paste("Input file not found,",inputfile,sep=" "))
+    	}
+    	if(!file.exists(twoBitFile)){
+        	stop(paste("twoBit file not found,",twoBitFile,sep=" "))
+    	}
+	output='tempsignalnoise.out'
+	c=.C("signalnoise",as.character(inputfile),as.character(output),as.character(twoBitFile),as.integer(winSize),PACKAGE="zinba")
 	a=read.table(output)
 	median=a[,1]
 	max=a[,2]	
 	print("Summary Information of log ratio of Max Window Count vs Median Window Count")
 	summary(log(max/median)[median>0])
+	unlink(output)
 }
 	
