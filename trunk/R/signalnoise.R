@@ -1,4 +1,4 @@
-signalnoise=function(basecountfile, outfile, winsize){
-	.C("signalnoise",as.character(basecountfile), as.character(outfile), as.integer(winsize),PACKAGE="zinba")
+signalnoise=function(inputfile,output,twoBitFile,binSize=500){
+	c=.C("signalnoise",as.character(inputfile),as.character(output),as.character(twoBitFile),as.integer(binSize),PACKAGE="zinba")
 }
 	

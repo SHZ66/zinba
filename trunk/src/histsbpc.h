@@ -17,7 +17,7 @@ class histsbpc{
 		histsbpc(); //Implemented
 		~histsbpc(); //Implemented
 		int hist_data(const char *,const char *,const char *,int,int,int);//Implemented
-	
+		int signalnoise(const char *,const char *,const char *,int);//Implemented	
 		struct ltstr{
 			bool operator()(const char* s1, const char* s2) const
 			{
