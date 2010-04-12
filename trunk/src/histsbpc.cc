@@ -273,14 +273,17 @@ int histsbpc::signalnoise(const char * sbpcFile,const char * outfile,const char*
 	cout << "\nGetting chromosome lengths from .2bit file: " << twoBitFile << endl;
 	int s = 1;
 	sprintf(sysCall,"R CMD BATCH %s /dev/null",tInfo);
+	cout << "OK1"<< endl;
 	while(s != 0){
 		s = system(sysCall);
 		if(s != 0)
 			cout << "Trying twoBitInfo again, s is" << s << endl;
 	}
+	cout << "OK2"<< endl;
 	remove(tInfo);
-	
+	cout << "OK3"<< endl;
 	tempTB = fopen(tChrSize,"r");
+	cout << "OK4"<< endl;
 	char tbChrom[128];
 	unsigned long int tbStart;
 	while(!feof(tempTB)){
@@ -293,11 +296,12 @@ int histsbpc::signalnoise(const char * sbpcFile,const char * outfile,const char*
 	}
 	fclose(tempTB);
 	remove(tChrSize);
-	
+	cout << "OK5"<< endl;
 	int dataRange = max - min;
 	//int binSize;
 	//if((dataRange % numBin) != 0)
 	int numBin=1;
+
 
 	//if(dataRange > numBin)
 	//	binSize = (int)dataRange/numBin;
@@ -315,8 +319,9 @@ int histsbpc::signalnoise(const char * sbpcFile,const char * outfile,const char*
 		return 1;
 	}
 	fclose (fh);
-	fprintf(fh,"Median\tMax\n");
+	cout << "OK6"<< endl;
 	unsigned short int * sbpc_count = NULL;
+	cout << "OK7"<< endl;
 	string line;string field;
 	string chrom;int chromInt;
 	int countBases = 0;
