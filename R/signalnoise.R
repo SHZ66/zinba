@@ -1,4 +1,4 @@
-signalnoise=function(inputfile,twoBitFile,winSize=2000){
+signalnoise=function(inputfile,twoBitFile,winSize=100000){
 	if(!file.exists(inputfile)){
     		stop(paste("Input file not found,",inputfile,sep=" "))
     	}
@@ -11,6 +11,8 @@ signalnoise=function(inputfile,twoBitFile,winSize=2000){
 	unlink(output)
 	median=a[,1]
 	max=a[,2]	
+	print("Summary Information of ratio of Max Window Count vs Median Window Count")
+	print(summary((max/median)[median>0]))
 	print("Summary Information of log ratio of Max Window Count vs Median Window Count")
 	print(summary(log(max/median)[median>0]))
 }
