@@ -307,8 +307,6 @@ int histsbpc::signalnoise(const char * sbpcFile,const char * outfile,const char*
 	//	binSize = (int)dataRange/numBin;
 	//else
 	//	binSize = 1;
-
-	
 	
 	int ltMin = 0;
 	int gtMax = 0;
@@ -380,8 +378,10 @@ int histsbpc::signalnoise(const char * sbpcFile,const char * outfile,const char*
 					fprintf(fh,"%lu\t%lu\n",sbpc_hist[b],sbpc_hist2[b]);
 				}
 				fclose (fh);
-				delete [] sbpc_count;
-				sbpc_count = NULL;
+				delete [] sbpc_hist;
+				delete [] sbpc_hist2;
+				sbpc_hist = NULL;
+				sbpc_hist2 = NULL;
 			}
 			
 			istringstream iss(line);
@@ -436,7 +436,7 @@ int histsbpc::signalnoise(const char * sbpcFile,const char * outfile,const char*
 					while(window[nonzeroInd] == 0) nonzeroInd++;
 					
 					int nzlength = binSize - nonzeroInd;
-					int medInd = (int) nzlength/2;					
+					int medInd = (int) nzlength/2;
 					sbpc_hist[sInd]=window[nonzeroInd+medInd-1];					
 					sbpc_hist2[sInd]=window[binSize-1];
 					sInd++;
@@ -454,14 +454,17 @@ int histsbpc::signalnoise(const char * sbpcFile,const char * outfile,const char*
 					fprintf(fh,"%lu\t%lu\n",sbpc_hist[b],sbpc_hist2[b]);
 				}
 				fclose (fh);
-				delete [] sbpc_count;
-				sbpc_count = NULL;
+				delete [] sbpc_hist;
+				delete [] sbpc_hist2;
+				sbpc_hist = NULL;
+				sbpc_hist2 = NULL;
 			}
 	
 	
 
 	
-	
+	delete [] sbpc_count;
+	sbpc_count = NULL;
 	return 0;
 }
 
