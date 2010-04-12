@@ -13,7 +13,5 @@ signalnoise=function(inputfile,twoBitFile,winSize=100000){
 	max=a[,2]	
 	print("Summary Information of ratio of Max Window Count vs Median Window Count")
 	print(summary((max/median)[median>0]))
-	print("Summary Information of log ratio of Max Window Count vs Median Window Count")
-	print(summary(log(max/median)[median>0]))
 }
 	
