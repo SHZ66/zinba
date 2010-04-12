@@ -318,6 +318,7 @@ int histsbpc::signalnoise(const char * sbpcFile,const char * outfile,const char*
 	}
 	fclose (fh);
 	cout << "OK6"<< endl;
+	unsigned short int * sbpc_count = NULL;
 	cout << "OK7"<< endl;
 	string line;string field;
 	string chrom;int chromInt;
@@ -325,7 +326,7 @@ int histsbpc::signalnoise(const char * sbpcFile,const char * outfile,const char*
 	cout << "Getting data for signal to noise analysis  from " << sbpcFile << endl;
 	ifstream seqfile(sbpcFile);
 	while (getline(seqfile, line)){
-		unsigned short int * sbpc_count = NULL;
+		new unsigned short int * sbpc_count = NULL;
 		if (line[0] != 't' && line[0] != 'f'){
 			countBases++;
 			sbpc_count[countBases] = atoi(line.c_str());
