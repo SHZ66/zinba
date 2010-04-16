@@ -20,7 +20,7 @@ run=function(util){
 	genalign$OK_handler <- function(.) {
 		genalignvar=.$to_R()
 		.$close_gui()
-		do.call("Generate Alignability Directory",list(mapdir=genalignvar$mapdir, outdir=genalignvar$outdir, athresh=genalignvar$athresh, extension=genalignvar$extension, twoBitFile=genalignvar$twoBitFile)) 
+		do.call("generateAlignability",list(mapdir=genalignvar$mapdir, outdir=genalignvar$outdir, athresh=genalignvar$athresh, extension=genalignvar$extension, twoBitFile=genalignvar$twoBitFile)) 
 	}
 		genalign$visible(TRUE)
 	}
