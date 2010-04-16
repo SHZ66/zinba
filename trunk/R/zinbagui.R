@@ -19,8 +19,8 @@ run=function(util){
 	genalign$make_gui(gui_layout=view_genalign, visible=FALSE) 
 	genalign$OK_handler <- function(.) {
 		genalignvar=.$to_R()
+		do.call("generateAlignability",list(mapdir=genalignvar$mapdir, outdir=genalignvar$outdir, athresh=genalignvar$athresh, extension=genalignvar$extension, twoBitFile=genalignvar$twoBitFile)) 		
 		.$close_gui()
-		do.call("generateAlignability",list(mapdir=genalignvar$mapdir, outdir=genalignvar$outdir, athresh=genalignvar$athresh, extension=genalignvar$extension, twoBitFile=genalignvar$twoBitFile)) 
 	}
 		genalign$visible(TRUE)
 	}
