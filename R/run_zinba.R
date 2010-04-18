@@ -41,6 +41,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NUL
 	}
         #####################################################################################################
 	if(buildwin==1){
+	    if(is.null(filelist)) filelist=paste(outfile_subpath,".list",sep="")	
 	    cat(paste("\n--------BEGIN BUILDING WINDOW DATA--------",as.character(Sys.time()),"\n"))
             buildwindowdata(seq=seq,align=align,input=input,twoBit=twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset,filelist=filelist,filetype=filetype,extension=extension, outdir=outfile_subdir)
 	}
@@ -52,9 +53,9 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NUL
 		stop(paste("Method should be either pscl or mixture, currently",method))
 	}else{
             params=scan(filelist,what=character(0),quiet=T)
-	    winlist=paste(outfile,".winlist",sep="")
+	    winlist=paste(outfile_subpath,".winlist",sep="")
             peakout=paste(outfile,".peaks",sep="")
-            bpout=paste(outfile,".bpcount",sep="")
+            bpout=paste(outfile_subpath,".bpcount",sep="")
 
             if(rmc == TRUE && rdmc == TRUE && rfor == TRUE){
 	    cat(paste("--------GETTING ENRICHED WINDOWS--------",as.character(Sys.time()),"\n\n")) 		

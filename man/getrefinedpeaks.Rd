@@ -26,7 +26,7 @@
           }
           \examples{
 	   #FAIRE-seq with recommended parameters, no input.  
-run.zinba(
+getrefinedpeaks(
    winlist='data/faire.winlist',
    bpout='data/faire.bpout',
    peakout='data/faire.peaks',
@@ -36,7 +36,7 @@ run.zinba(
    printFullOut=1,
    pWinSize=200,
    pquant=1,
-   winsize=250,
+   winSize=250,
    basecountfile='data/faireGM12878rep1chr22.basecount',
    minscore=5
    )

@@ -3,19 +3,19 @@ run=function(util){
 	###################################################################
 	if(util=="Generate Alignability"){
 	genalign <- aDialog(items=list(
-		mapdir=fileItem(attr=c(type="selectdir"), tooltip="Path to unpacked mappability directory"),	
-		outdir=fileItem(attr=c(type="selectdir"), tooltip="Path to alignability directory where output files will be placed"), 
-		athresh=numericItem(1, tooltip="Alignability threshold used to filter mapped reads, 1 corresponding that reads only mapping to one place in genome were used", label="Align Threshold"), 
+		mapdir=fileItem(attr=c(type="selectdir"), tooltip="Path to unpacked mappability directory", label="Mappability\nDirectory"),	
+		outdir=fileItem(attr=c(type="selectdir"), tooltip="Path to alignability directory where output files will be placed",label="Output\nDirectory"), 
+		athresh=numericItem(1, tooltip="Alignability threshold used to filter mapped reads, 1 corresponding that reads only mapping to one place in genome were used", label="Alignability\nThreshold"), 
 		extension=numericItem(200, tooltip="Average length in fragment library used in preparing sample/input reads for sequencing", label="Extension"),  
 		twoBitFile=fileItem("", attr=list(
         	                             filter=list(
 					       "2bit" = list(patterns=c("*.2bit")),
         	                               "All files" = list(patterns=c("*"))
-        	                               )), tooltip="Select .2bit file for analysis")
+        	                               )), tooltip="Select .2bit file for analysis", label=".2bit file")
 		), title="Generate Alignability Directory")
 
-	g <- aFrame()                           
-	view_genalign <- aContainer("mapdir", "outdir", "athresh", "extension", "twoBitFile",g)
+	                           
+	view_genalign <- aContainer("mapdir", "outdir", "athresh", "extension", "twoBitFile")
 	genalign$make_gui(gui_layout=view_genalign, visible=FALSE) 
 	genalign$OK_handler <- function(.) {
 		genalignvar=.$to_R()
@@ -34,18 +34,18 @@ run=function(util){
 				       "tagAlign" = list(patterns=c("*.taf","*.tagAlign")),
                                        "All files" = list(patterns=c("*"))
                                        )),tooltip="Select mapped sample reads file for analysis",  label="Sample Reads"),	
-		basecountdir=fileItem(attr=c(type="selectdir"), tooltip="Directory where basecountfile will be placed", label="Output Dir"),			
+		basecountdir=fileItem(attr=c(type="selectdir"), tooltip="Directory where basecountfile will be placed", label="Output\nDirectory"),			
 		filename=stringItem("name of SBC (basecount) file to be created", tooltip="Name of SBC (basecount) file, for example ctcf.basecount", label="SBC file"),
 		twoBitFile=fileItem("", attr=list(
                                      filter=list(
 				       "2bit" = list(patterns=c("*.2bit")),
                                        "All files" = list(patterns=c("*"))
-                                       )), tooltip="Select .2bit file for analysis"),
+                                       )), tooltip="Select .2bit file for analysis", label=".2bit file"),
 		extension=numericItem(200, tooltip="Average length in fragment library used in preparing sample/input reads for sequencing", label="Extension"),  
 		filetype=choiceItem("bed", values=c("bed","tagAlign", "bowtie"), editor_type="gcombobox",tooltip="Select format of mapped sample read file", label="File Type")
 		), title="Generate SBC (basecount) File")
-	g <- aFrame()                           
-	view_basecount <- aContainer("seq","filetype","basecountdir","filename","twoBitFile","extension",g)
+	                           
+	view_basecount <- aContainer("seq","filetype","basecountdir","filename","twoBitFile","extension")
 	basecount$make_gui(gui_layout=view_basecount, visible=FALSE) 
 	basecount$OK_handler <- function(.) {
 		basecountvar=.$to_R()
@@ -61,14 +61,14 @@ run=function(util){
                                      filter=list(
 				       "2bit" = list(patterns=c("*.2bit")),
                                        "All files" = list(patterns=c("*"))
-                                       )), tooltip="Select .2bit file for Conversion to fasta format"),
+                                       )), tooltip="Select .2bit file for Conversion to fasta format",label=".2bit file"),
 		chrm=stringItem("all", tooltip="Name of chromosome where sequence will be converted from, or all if convering an entire directory of fasta files", label="chromosome"),
-		outdir=fileItem(attr=c(type="selectdir"), tooltip="Path to directory where converted fasta files will be placed"), 
-		start=numericItem(0, tooltip="Base Start Position if chromosome!=all for sequence to be extracted to fasta format"),  
-		end=numericItem(0, tooltip="Base Stop Position if chromosome!=all for sequence to be extracted to fasta format"),
+		outdir=fileItem(attr=c(type="selectdir"), tooltip="Path to directory where converted fasta files will be placed",label="Output\nDirectory"), 
+		start=numericItem(0, tooltip="Base Start Position (if chromosome != all) of sequence to be extracted to fasta format",label="Sequence Start"),  
+		end=numericItem(0, tooltip="Base Stop Position (if chromosome != all) of sequence to be extracted to fasta format",label="Sequence End"),
 		gcSeq=stringItem("path to output file", tooltip="Path to file where extracted fasta sequence will be placed", label="chromosome")
 		), title="Convert .2bit to fasta format")
-	g <- aFrame()                           
+	                           
 	view_twobittofa <- aContainer("twoBitFile","chrm","outdir",
 					aContext("start", context=twobittofa, 
 						enabled_when=function(.) {
@@ -83,8 +83,8 @@ run=function(util){
 								enabled_when=function(.) {
   								val <- .$to_R()$chrm
   								val !="all"
-							}),
-					g)
+							})
+					)
 	twobittofa$make_gui(gui_layout=view_twobittofa, visible=FALSE) 
 	twobittofa$OK_handler <- function(.) {
 		twobittofavar=.$to_R()
@@ -96,17 +96,17 @@ run=function(util){
 
 	if(util=="fatotwobit"){	
 		fatotwobit <- aDialog(items=list(
-			outFile=stringItem("path to outputted .2bit file", tooltip="if a directory is not selected, path to file where resulting .2bit file will be outputted", label="outfile"),
+			outFile=stringItem("/home/data/genome.2bit", tooltip="if a directory is not selected, path to file where resulting .2bit file will be outputted", label="Path to\nOutput File"),
 			fadir=fileItem(" ",attr=c(type="selectdir"), tooltip="Path to directory where fasta files to be converted are stored", label="fasta directory"), 
 			faFile=stringItem(" ", tooltip="path to specific fasta file if not specifying a directory", label="chromosome")
 			), title="Convert fasta file to to .2bit format")
-		g <- aFrame()                           
+		                        
 		view_fatotwobit <- aContainer("fadir",
 						aContext("faFile", context=fatotwobit, 
 							enabled_when=function(.) {
 							val <- .$to_R()$fadir
 							val ==" "}),
-						"outFile",g)
+						"outFile")
 		fatotwobit$make_gui(gui_layout=view_fatotwobit, visible=FALSE) 
 		fatotwobit$OK_handler <- function(.) {
 			fatotwobitvar=.$to_R()
@@ -133,10 +133,10 @@ run=function(util){
                  winSize=integerItem(500, tooltip="Window Size for data, smaller is better for low signal to noise, high background data", label="Window Size"),
                  offset=integerItem(0, tooltip="BP offset to shift windows, window size must be a multiple of this number.  Yields better sensitivity", label="Window Offset"),
                  extension=integerItem(200, tooltip="average fragment length in sample library used for sequencing reads, usually 150bp-200bp", label="Extension")
-		))
+		),title="Get Window Read Counts for data")
                  
-		g <- aFrame()                           
-		view_getwindowcounts <- aContainer("seq","filetype","twoBit","winSize","offset", "extension",g)
+		                           
+		view_getwindowcounts <- aContainer("seq","filetype","twoBit","winSize","offset", "extension")
 		getwindowcounts$make_gui(gui_layout=view_getwindowcounts, visible=FALSE) 
 		getwindowcounts$OK_handler <- function(.) {
 			getwindowcountsvar=.$to_R()
@@ -145,7 +145,31 @@ run=function(util){
 		}
 			getwindowcounts$visible(TRUE)
 		}
-
+if(util=="Signal to Noise Analysis"){	
+		signalnoise <- aDialog(items=list(
+		 	inputfile=fileItem("", attr=list(
+                 	                    filter=list("Bed"=list(
+                 	                                  patterns=c("*.bed")
+                 	                                  ),
+					       "basecount" = list(patterns=c("*.basecount")),
+                 	                      "All files" = list(patterns=c("*"))
+                 	                      )),tooltip="Select basecount file for analysis", label="SBC (basecount) File"),
+		 	twoBit=fileItem("", attr=list(
+                 	                    filter=list(
+					       "2bit" = list(patterns=c("*.2bit")),
+                 	                      "All files" = list(patterns=c("*"))
+                 	                      )), tooltip="Select .2bit file corresponding on build of genome reads were mapped to",label=".2bit file"),	
+                winSize=integerItem(100000, tooltip="Window Size for analysis, larger, 100kb suggested", label="Window Size")), title="Signal to Noise Analysis")
+                
+		view_signalnoise <- aContainer("inputfile","twoBit","winSize")
+		signalnoise$make_gui(gui_layout=view_signalnoise, visible=FALSE) 
+		signalnoise$OK_handler <- function(.) {
+			signalnoisevar=.$to_R()
+			do.call("signalnoise",list(inputfile=signalnoisevar$inputfile,twoBit=signalnoisevar$twoBit,winSize=signalnoisevar$winSize))
+			.$close_gui()
+		}
+			signalnoise$visible(TRUE)
+		}
 	###################################################################
 	###################################################################
 	
@@ -423,7 +447,7 @@ require(zinba)
 options(guiToolkit="RGtk2")
 eval(parse(text="statusold=c('Select a utility','Yes','Yes', '?')"), envir=.GlobalEnv)
 dlg <- aDialog(items=list(
-	util=choiceItem("Select a utility", values=c("Select a utility","Generate Alignability Directory", "Generate SBC (Basecount) File", "Convert .2bit to .fa","Convert .fa to .2bit", "Get Window Counts"), tooltip="Various utilities to compute files needed for ZINBA",editor_type="gcombobox", label="Utilities"),
+	util=choiceItem("Select a utility", values=c("Select a utility","Generate Alignability Directory", "Generate SBC (Basecount) File", "Convert .2bit to .fa","Convert .fa to .2bit", "Get Window Counts","Signal to Noise Analysis"), tooltip="Various utilities to compute files needed for ZINBA",editor_type="gcombobox", label="Utilities"),
 	align=choiceItem("Yes", values=c("Yes", "No"), tooltip="If no, then will open a dialog to generate your alignability directory for you",editor_type="gcombobox", label="Have you generated your alignability directory?"),
 	basecount=choiceItem("Yes", values=c("Yes", "No"), tooltip="If no, then will open a dialog to generate your SBC (basecount) file",editor_type="gcombobox",label="Have you generated your SBC (basecount) track?"),
 	runzinba=choiceItem("?", values=c("?","Run Zinba Data Preset","Run Zinba Custom Parameters"), tooltip="Open Zinba Dialog Window",editor_type="gcombobox", label="Zinba Options")
@@ -445,6 +469,11 @@ dlg <- aDialog(items=list(
 			eval(parse(text=paste("statusold[1]='",l$util,"'", sep="")), envir=.GlobalEnv)
 		}else if(l$util=="Get Window Counts" & l$util!=statusold[1]){
 			do.call("run", list("getwindowcounts"))
+			eval(parse(text=paste("statusold[1]='",l$util,"'", sep="")), envir=.GlobalEnv)
+		}else if(l$util=="Signal to Noise Analysis" & l$util!=statusold[1]){
+			do.call("run", list("Signal to Noise Analysis"))
+			eval(parse(text=paste("statusold[1]='",l$util,"'", sep="")), envir=.GlobalEnv)
+		}else if(l$util=="Select a utility" & l$util!=statusold[1]){
 			eval(parse(text=paste("statusold[1]='",l$util,"'", sep="")), envir=.GlobalEnv)
 		}
 

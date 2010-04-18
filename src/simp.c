@@ -26,6 +26,7 @@ SEXP peakboundc(SEXP f, SEXP bpprofile, SEXP outputfile, SEXP rho){
   const char *input =CHAR(STRING_ELT(bpprofile,0));
   const char *output=CHAR(STRING_ELT(outputfile,0));
 
+
 /////////////////
 double sig;
 /////////////////
@@ -34,7 +35,6 @@ double sig;
 	basecount[j]=0;
   }
 
-  
   FI = fopen(input, "r");	
   if(FI == NULL){		
     error("cannot open file %s\n", input);
@@ -45,6 +45,7 @@ double sig;
     error("cannot open file %s\n", output);
   }
   
+
 //skip the first line of the coordinate file
     if(fgets(str_buf, MAX_LEN, FI) == NULL){
       error("there are no lines in file\n");
@@ -53,6 +54,8 @@ double sig;
 //print headers to file
 sprintf(line, "PEAKID\tChrom\tStart\tStop\tStrand\tSig\tMaxloc\tMax\tpStart\tpStop\tMedian\n");
 fputs(line, FO);
+
+
 Rprintf("Begin Peak Refinement\n"); 
 //read in a line, save the information in each, perform peakbounds, then print out, repeat for each line
 int m=0;
@@ -235,16 +238,66 @@ while(i<lmaxvec){
 int pos=0;
 
 for(i=0;i<=h;i++){
-sprintf(line, "%s\t%s\t%d\t%d\t%s\t%.14f\t%d\t%d\t%d\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,pstart+hmaxvec[i],basecount[hmaxvec[i]],pstart+results[2*i],pstart+results[2*i+1], med);
-fputs(line, FO);
+	sprintf(line, "%s\t%s\t%d\t%d\t%s\t%.14f\t%d\t%d\t%d\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,pstart+hmaxvec[i],basecount[hmaxvec[i]],pstart+results[2*i],pstart+results[2*i+1], med);
+	fputs(line, FO);
 }
 
 
 
 }
-Rprintf("Peak Refinement Complete\n"); 
+
  fclose(FO);
  fclose(FI);
+
+  FILE *FI2,*FO2;
+  FI2 = fopen(output, "r");	
+  if(FI2 == NULL){
+    error("cannot open file %s\n", output);
+  }
+  
+  const char *outputbed=CHAR(STRING_ELT(outputfile,0));
+  strcat(outputbed,".bed");
+
+  FO2 = fopen(outputbed, "w");	
+  if(FO2 == NULL){
+    error("cannot open file %s\n", outputbed);
+  }
+
+
+if(fgets(str_buf, MAX_LEN, FI2) == NULL){
+      error("there are no lines in file\n");
+    }
+
+ while(fgets(str_buf, MAX_LEN, FI2) != NULL){
+    i = 0;
+     if ((ptr = strtok(str_buf, delim)) != NULL) {
+    do {
+      i++;
+      if(i==1){
+        strcpy(ID, ptr);
+      }else if(i==2){
+        strcpy(chr, ptr);
+      }else if(i==9){
+        pstart = atol(ptr);
+      }else if(i==10){
+        pstop = atol(ptr);
+      }else if(i==5){
+        strcpy(strand, ptr);
+      }else if(i==6){
+		  sig = atof(ptr);
+	 }
+    } while ((ptr = strtok(NULL, delim)) != NULL);
+  }else{
+    error("%s is not tab-delimated\n", input);
+  }
+  sprintf(line, "%s\t%d\t%d\t%s\t%.14f\t%s\n", chr, pstart, pstop, ID,sig ,strand);
+  fputs(line, FO2);
+}
+
+  fclose(FO2);
+  fclose(FI2);
+  
+ Rprintf("Peak Refinement Complete\n"); 
  return(bpprofile);
 }
 
