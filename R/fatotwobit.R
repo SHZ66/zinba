@@ -9,13 +9,16 @@ fatotwobit=function(faFile=" ",fadir = " ",outFile=NULL){
 		fafiles=dir(fadir, pattern="\\.fa")
 		for(i in 1:length(fafiles)){
 			print(paste("processing",paste(fadir,fafiles[i],sep="")))
-			.C("faToTwoBit",as.character(paste(fadir,fafiles[i],sep="")),as.character(outFile),PACKAGE="zinba")
+			.C("faToTwoBit",as.character(paste(fadir,fafiles[i],sep="")),as.character(outFile),PACKAGE="zinba")		
 		}
+		cat("Conversion of fasta files in specified directory to .2bit complete\n")  
 	}else if(faFile!=" " & fadir==" "){
 		.C("faToTwoBit",as.character(faFile),as.character(outFile),PACKAGE="zinba")
+		cat("Conversion of specified fasta file to .2bit complete\n")
 	}else{
 		stop("Either need to specify a directory containing .fa files to be converted or specify a specific faFile")
 	}
+
 	
 }
 

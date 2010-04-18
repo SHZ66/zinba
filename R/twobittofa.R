@@ -15,11 +15,11 @@ twobittofa=function(chrm,start=NULL,end=NULL,twoBitFile,gcSeq=NULL, outdir=" "){
 			print(paste("printing", info[i,1]))
 			.C("twoBitToFa",as.character(info[i,1]),as.integer(1),as.integer(info[i,2]),as.character(twoBitFile),as.character(paste(outdir, info[i,1], ".fa", sep="")),PACKAGE="zinba")
 		}
-		print("twobittofa complete")
+		cat("\ntwobittofa complete\n")
 		unlink("twobit.temp")
 	}else{
 		.C("twoBitToFa",as.character(chrm),as.integer(start),as.integer(end),as.character(twoBitFile),as.character(gcSeq),PACKAGE="zinba")
-		print("twobittofa complete")
+		cat("\ntwobittofa complete\n")
 	}
 }
 	

@@ -7,13 +7,14 @@
 #include <R.h>
 #include <Rmath.h>
 #define MAX_LEN 1025
+#define max(x,y) ((x) > (y) ? (x) : (y))
 
 namespace sgi = ::__gnu_cxx;
 using namespace sgi;
 using namespace std;
 
 extern "C" {
-void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **RtwoBitFile,int *RzWinSize,int *RzOffsetSize,int *RcWinSize,int *RcOffsetSize,char **Rfiletype,char **Rfilelist,int *Rextension){
+void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **RtwoBitFile,int *RzWinSize,int *RzOffsetSize,int *RcWinSize,int *RcOffsetSize,char **Rfiletype,char **Rfilelist,int *Rextension,char **Routdir){
 
 	string expSeqFile = RexpSeqFile[0];
 	const char * inSeqFile = RinSeqFile[0];
@@ -25,6 +26,8 @@ void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **R
 	int cOffsetSize = RcOffsetSize[0];
 	const char * filetype = Rfiletype[0];
 	const char * filelist = Rfilelist[0];
+	const char * outdir = Routdir[0];
+	const char * defaultdir = "default";
 	int extension = Rextension[0];
 	
 	int ret;
@@ -35,9 +38,18 @@ void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **R
 	if(ret == 1){
 		Rprintf("ERROR opening file %s \n",expSeqFile.c_str());
 	}else{
+		size_t found;
+		size_t found2;
+		string outfile_prefix;
 		Rprintf("\nBuilding window data\n");
-		size_t found = expSeqFile.find_last_of(".");
-		string outfile_prefix = expSeqFile.substr(0,found);
+		if(strcmp(defaultdir,outdir)==0){
+			found = expSeqFile.find_last_of(".");
+			outfile_prefix = expSeqFile.substr(0,found);
+		}else{
+			found = expSeqFile.find_last_of(".");
+			found2 = expSeqFile.find_last_of("/");
+			outfile_prefix = outdir+expSeqFile.substr(found2+1,found-found2-1);
+		}		
 		ret = newAnalysis.processSignals(zWinSize,zOffsetSize,cWinSize,cOffsetSize,alignDir,twoBitFile,inSeqFile,outfile_prefix,filelist,extension,filetype);
 		if(ret == 1){
 			Rprintf("ERROR: building windows was unsuccssful\n");
