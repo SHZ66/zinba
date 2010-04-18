@@ -320,6 +320,7 @@ zeroinfl <- function(formula, data, subset, na.action, weights, offset,
         probi <- probi/(probi + (1-probi) * dnbinom(0, size = start$theta, mu = mui))
         probi[Y1] <- 0
         ll_new <- loglikfun(c(start$count, start$zero, log(start$theta)))
+	cat(".")
       }
     }
 

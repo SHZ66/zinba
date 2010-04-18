@@ -36,7 +36,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
 
 ### PRINT SIGNIFICANT WINDOWS
-            print(paste('For ',files[i],', found ',as.character(numpeaks),' significant wins',sep=''))
+            print(paste('\nFor ',files[i],', found ',as.character(numpeaks),' significant wins',sep=''))
             winfile = paste(winout,"_",chrm,".wins",sep="")
             if(printflag==1){
                 write.table(data,winfile,quote=F,sep="\t",row.names=F,col.names=F,append=T)
@@ -225,6 +225,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
                 ll[i]=ll_new
                 i=i+1 
 		if(i>300){break}
+		cat(".")
             }
             numpeaks=length(which(probi2>peakconfidence))
 	    if(printFullOut == 1){
@@ -238,10 +239,9 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
 		data$q25[Y-mui1<0]=0
 		if(sum(colnames(data)=='input_count')==1){data$q25[data$exp_count/(exp(data$input_count)-1)<1.5*sum(data$exp_count)/sum(exp(data$input_count)-1)]=0}
             }
-            line0 = paste("Processing ",files[fnum])
-            line2=paste('Selected number of peaks: ', as.character(numpeaks),sep='')
+            line = paste("\nProcessed ",files[fnum],"\n\t","Selected number of peaks: ",as.character(numpeaks),"\n\t",as.character(Sys.time()),"\n",sep='')
     ### PRINT SIGNIFICANT WINDOWS
-            print(paste(c(line0,line2)))
+            cat(line)
             winfile = paste(winout,"_",chrm,".wins",sep="")
             if(printflag==1){
                 write.table(data,winfile,quote=F,sep="\t",row.names=F,col.names=F,append=T)
@@ -252,6 +252,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
 		rm(data); rm(Y); rm(X); rm(XNB); rm(XE);rm(XNBE);rm(probi0); rm(probi1); rm(probi2); rm(mui1); rm(mui2); rm(start); rm(prop1);gc();
         }
         time.end <- Sys.time()
+	cat("\n")
         print(difftime(time.end,time.start))
         return(winfile)
     }

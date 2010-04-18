@@ -137,6 +137,7 @@ ll_old <- ll[max(1, i-10)]
                 ll_new <- loglikfun(list(start=start, prop1=prop1, prop2=prop2))
                 ll[i]=ll_new
                 i=i+1 
+		cat(".")
 		}
 		result[k]=ll_new
 	}

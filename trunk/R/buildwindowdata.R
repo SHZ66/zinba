@@ -1,4 +1,4 @@
-buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,filelist,filetype="bowtie",extension){
+buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,filelist,filetype="bowtie",extension, outdir="default"){
 	if(!file.exists(align)){
 		stop(paste("Specified Alignability directory not found,",align,sep=" "))
 	}else{
@@ -23,6 +23,9 @@ buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvW
 	if(is.null(filelist)){
 		stop(paste("filelist was not specified"))
 	}
+	if(!file.exists(outdir) && outdir!="default"){
+		stop(paste("buildwindowdata: pecified output directory to place built datafiles doesnt exist"))
+	}
 	wigfiles <- file.access(dir(align,pattern="wig",full.names=T))
 	twigfiles <- table(wigfiles)
 	for(i in 1:length(twigfiles)){
@@ -30,6 +33,6 @@ buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvW
 			print(paste("Unable to access some wig files in align directory:",align,sep=" "))
 		}
 	}
-	cReturn <- .C("buildWindows",as.character(seq),as.character(input),as.character(align),as.character(twoBit),as.integer(winSize),as.integer(offset),as.integer(cnvWinSize),as.integer(cnvOffset),as.character(filetype),as.character(filelist),as.integer(extension),PACKAGE="zinba")
+	cReturn <- .C("buildWindows",as.character(seq),as.character(input),as.character(align),as.character(twoBit),as.integer(winSize),as.integer(offset),as.integer(cnvWinSize),as.integer(cnvOffset),as.character(filetype),as.character(filelist),as.integer(extension), as.character(outdir),PACKAGE="zinba")
 	gc()
 }
