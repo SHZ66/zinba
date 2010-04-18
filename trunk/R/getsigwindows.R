@@ -239,7 +239,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
 		data$q25[Y-mui1<0]=0
 		if(sum(colnames(data)=='input_count')==1){data$q25[data$exp_count/(exp(data$input_count)-1)<1.5*sum(data$exp_count)/sum(exp(data$input_count)-1)]=0}
             }
-            line = paste("\nProcessed ",files[fnum],"\n\t","Selected number of peaks: ",as.character(numpeaks),"\n\t",as.character(Sys.time()),"\n",sep='')
+            line = paste("\nProcessed ",files[fnum],"\n\t","Selected number of peaks: ",as.character(numpeaks),"\n\t",as.character(Sys.time()),"\t",sep='')
     ### PRINT SIGNIFICANT WINDOWS
             cat(line)
             winfile = paste(winout,"_",chrm,".wins",sep="")
