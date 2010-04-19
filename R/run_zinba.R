@@ -1,4 +1,4 @@
-run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,numProc=1,buildwin=0,pWinSize=200,pquant=0.75,refinepeaks=1,printFullOut=0,method='pscl',initmethod='count',diff=0,filetype="bowtie",extension){
+run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,numProc=1,buildwin=1,pWinSize=200,pquant=0.75,refinepeaks=1,printFullOut=0,method='pscl',initmethod='count',diff=0,filetype="bowtie",extension, cleanup=FALSE){
         rmc <- require(multicore)
         rdmc <- require(doMC)
         rfor <- require(foreach)
@@ -83,6 +83,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NUL
 	}
         #####################################################################################################
 	cat(paste("\n--------ZINBA COMPLETE--------",as.character(Sys.time()),"\n\n"))
+	if(cleanup==TRUE) unlink(outfile_subdir, recursive=T)
 	time.end <- Sys.time()
 	print(difftime(time.end,time.start))
 }

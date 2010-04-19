@@ -14,10 +14,12 @@
 	    \item{extension}{average length of fragments in fragment library used, typically around 200}
 	    \item{twobit}{path to current build of human genome in .2bit format}
 	    \item{winSize}{window size, default=500bp}
-	    \item{offset}{bp offset, default is none.  If one's winSize is 500 and would like 4 equally spaced offsets, then specifying offset=125 would achieve this}
+	    \item{offset}{OPTIONAL. bp offset, default is none.  If one's winSize is 500 and would like 4 equally spaced offsets, then specifying offset=125 would achieve this}
 	    \item{filetype}{format of mapped sample and input reads.  'bed' is files in the standard .bed format, 'tagAlign' signifies those in .taf format, and 'bowtie' signifies mapped reads directly outputted from bowtie.  Default is 'bowtie'}
-	    \item{cnvWinSize}{Size of windows used to calculate CNV activity in sample, default size is 100000}
-	    \item{cnvOffset}{Offset for CNV windows, typically 2500bp is suffcient, although default is no offsets}
+	    \item{cnvWinSize}{OPTIONAL. Size of windows used to calculate CNV activity in sample, default size is 100000}
+	    \item{cnvOffset}{OPTIONAL. Offset for CNV windows, typically 2500bp is suffcient, although default is no offsets}
+   	    \item{cnvOffset}{OPTIONAL.  Offset for CNV windows, typically 2500bp is suffcient, although default is no offsets}
+   	    \item{outdir}{OPTIONAL.  Path to output directory if desired, otherwise places built files in same directory as the sample reads.}
 	  }
           \seealso{
             \code{\link{save}}.
@@ -26,7 +28,7 @@
 #Chip-Seq with recommended parameters
 buildwindowdata(
    filelist='data/ctcf.list',
-   seq='data/ctcfGM12878rep3chr22.taf' 
+   seq='data/ctcfGM12878rep3chr22.taf' ,
    align='align1/',
    input='data/inputGM12878rep3chr22.taf',
    twoBit='hg18.2bit',

@@ -20,10 +20,10 @@ the winlist is then fed to getrefinedpeaks() if peak refinement is desired. The 
 	buildwin=1,refinepeaks=1,method='mixture',threshold=0.01,peakconfidence=.8,outfile=NULL,twoBit=NULL,numProc=1,			#general options
 	seq=NULL,filelist=NULL,input="none",filetype="bowtie",align=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,extension,	#build windows options
 	formula=NULL,formulaE=NULL,initmethod='count',printFullOut=0,tol=10^-5,								#analysis options
-	basecountfile=NULL,pWinSize=200,pquant=0.75,diff=0)										#peak refinement options
+	basecountfile=NULL,pWinSize=200,pquant=0.75,diff=0,cleanup=0)									#peak refinement options
 	}					
           \arguments{
-	    \item{buildwin}{A value of 1 specifies that you would like to build the data from the raw mapped data, with the locations of the built data files being places in the filelist file.  Raw data corresponds to the mapped sample reads, raw mapped input reads (if available), and the current build of the human genome and the alignabilty files.  A value of 0 specifies you would like to skip this step and use an existing filelist (corresponding to a previously built set of data)}
+	    \item{buildwin}{Default value is 1, specifying to build the window files from the raw data.  Raw data corresponds to the mapped sample reads, raw mapped input reads (if available), the current build of the human genome and the alignabilty directory.  A value of 0 specifies you would like to skip this step and use an existing filelist (corresponding to a previously built set of window data)}
             \item{refinepeaks}{Whether exact boundaries of peaks within merged significantly enriched regions is requested (default), otherwise  set to 0.  Helps to isolate punctuate, sharp peaks.}
 	    \item{method}{If 'mixture' is selected, the mixture regression model approach is used (must specify formula and formulaE). If 'pscl' is specified, then only needs to specify formula.  Pscl is an adhoc method that is used on FAIRE data}
 	    \item{peakconfidence}{Posterior probability threshold for signfificant windows if method='mixture'.  Higher is more stringent, must be between 0 and 1. Must be specified if method=mixture, if method='pscl' then can leave blank.  }
@@ -32,24 +32,25 @@ the winlist is then fed to getrefinedpeaks() if peak refinement is desired. The 
 	    \item{twoBit}{Path to build of the genome your reads were mapped to, in .2bit format}
 	    \item{numProc}{Number of concurrent jobs to run in parallel, default is 1, recommended to use more if more computing cores are available.  More memory is needed however when more processes are run in parallel.  If using winSize of 500, 4 cores is sufficient for a desktop with 4 GB of memory, smaller winSizes require more memory}
 	    \item{seq}{Path to mapped sample reads if buildwin=1, formatted as either 'bed', 'tagAlign', or 'bowtie'}
-	    \item{filelist}{If buildwin=1, a file will be created at path 'filelist' upon building of the processed data from the raw data. If buildwin=0 then this should be a path to an existing filelist corresponding to already built dataset}
-	    \item{input}{Path to mapped input reads if buildwin=1, formatted as either 'bed', 'tagAlign', or 'bowtie'.  If left blank, then defaults to 'none'}
+	    \item{filelist}{OPTIONAL. If buildwin=1, a file will be created at path 'filelist' upon building of the processed data from the raw data. If buildwin=0 then this should be a path to an existing filelist corresponding to already built dataset}
+	    \item{input}{OPTIONAL. Path to mapped input reads if buildwin=1, formatted as either 'bed', 'tagAlign', or 'bowtie'.  If left blank, then defaults to 'none'}
 	    \item{filetype}{Format of mapped sample and input reads.  'bed' is files in the standard .bed format, 'tagAlign' signifies those in .taf format, and 'bowtie' signifies mapped reads directly outputted from bowtie.  Default is 'bowtie'}
 	    \item{align}{Path to directory containing alignability files for each chromsome, obtained from alignAdjust (check how these files are generated) or downloadd from our respository.  Alignability information is specific to the uniquness threshold one used to initially filter their mapped reads and the length of the sequence tags used}
-	    \item{winSize}{Window size, default=500bp}
-	    \item{offset}{Bp offset, default is none.  If one's winSize is 500 and would like 4 equally spaced offsets, then specifying offset=125 would achieve this}
-	    \item{cnvWinSize}{Size of windows used to calculate CNV activity in sample, default size is 100000}
-	    \item{cnvOffset}{Offset for CNV windows, typically 2500bp is suffcient, although default is no offsets}
+	    \item{winSize}{OPTIONAL.  Window size for build window data, default=500bp}
+	    \item{offset}{OPTIONAL. Bp offset, default is no offset.  If one's winSize is 500 and would like 4 equally spaced offsets, then specifying offset=125 would achieve this}
+	    \item{cnvWinSize}{OPTIONAL. Size of windows used to calculate CNV activity in sample, default size is 100000}
+	    \item{cnvOffset}{OPTIONAL. Offset for CNV windows, typically 2500bp is suffcient, although default is no offsets}
 	    \item{extension}{Average length of fragments in fragment library used, typically around 200}
 	    \item{formula}{Specifies the formula desired to model the background component of counts.  Must begin with "exp_count~"  and end with a set of desired covariates separated by "+", where the covariates could be input_count (input), gcPerc (gc percentage), exp_cnvwin_log (cnv estimate), and align_perc (alignability estimate).  Examples:  If sufficiently sequenced input is present, exp_count~input_count.  If no input is present, exp_count~gcPerc+exp_cnvwin_log+align_perc is sufficient. }
-	    \item{formulaE}{Specifies the formula desired to model the enriched component.  If one is unsure about making assumptions about the relationship with covarites and enriched signal, use exp_count~1}	    
-	    \item{initmethod}{Method of intial partitioning of windows into each component prior to mixture regression model run.  usually does nto make a difference. 'count' is default, specifies taking the windows with largest counts and classifying them intially as enriched.  'quantile' runs a quantile regression onthe data using the background covariates, takes the top residuals and assigns them as enriched.  'pscl' uses the pscl method to find likely enriched regions and assigns these windows to the enriched component. } 
-	    \item{printFullOut}{If set to 1, prints out the original dataset along with the posterior probabilities (default).  Otherwise, prints out only window coordinates and posterior probabilites}
-	    \item{tol}{Relative tolerance for convergence, default  is 10^-5}
-	    \item{basecountfile}{Path to basecount track containing SBPC information for the entire genome, generated by basealigncount}
-	    \item{pWinSize}{In the peak refinement step, reduce this parameter to get more sensitivity to detect local Maximums, default is 200.  This may increase false positives}
-	    \item{pquant}{In the peak refinement step, filters out local maximums whose height is lower than the 'pquant' quantile in the window. Use pquant=1 for selecting only the global max in a collapsed region, god for ChIP-seq datasets.  Default is .75}
-	   \item{diff}{Unimplemented parameter, pertains to differential peak expression analysis accross samples}	
+	    \item{formulaE}{Only used if method is "mixture".  Specifies the formula desired to model the enriched component.  If one is unsure about making assumptions about the relationship with covarites and enriched signal, use exp_count~1}	    
+	    \item{initmethod}{OPTIONAL.  Used only if method is "mixture".  Method of intial partitioning of windows into each component prior to mixture regression model run.  usually does nto make a difference. 'count' is default, specifies taking the windows with largest counts and classifying them intially as enriched.  'quantile' runs a quantile regression onthe data using the background covariates, takes the top residuals and assigns them as enriched.  'pscl' uses the pscl method to find likely enriched regions and assigns these windows to the enriched component. } 
+	    \item{printFullOut}{OPTIONAL. If set to 1, prints out the original dataset along with the posterior probabilities.  Otherwise, prints out only window coordinates and significance score (default)}
+	    \item{tol}{OPTIONAL. Relative tolerance for convergence, default  is 10^-5}
+	    \item{basecountfile}{Must be specified if refinepeaks is 1.  Path to basecount track containing SBPC information for the entire genome, generated by basealigncount}
+	    \item{pWinSize}{OPTIONAL. In the peak refinement step, reduce this parameter to get more sensitivity to detect local Maximums, default is 200.  This may increase false positives}
+	    \item{pquant}{OPTIONAL. In the peak refinement step, filters out local maximums whose height is lower than the 'pquant' quantile in the window. Use pquant=1 for selecting only the global max in a collapsed region, god for ChIP-seq datasets.  Default is .75}
+	   \item{diff}{OPTIONAL.  Unimplemented parameter, pertains to differential peak expression analysis accross samples}	
+   	   \item{cleanup}{OPTIONAL. If set equal to TRUE, will delete intermediate output file folder.  Default value is FALSE.}
 }
           \seealso{
             \code{\link{save}}.
@@ -82,7 +83,8 @@ run.zinba(
    pWinSize=200,
    pquant=1,
    basecountfile='ctcfGM12878rep3chr22.basecount',
-   diff=0
+   diff=0,
+   cleanup=0
    )	   
 		
 #FAIRE-seq with recommended parameters, no input.  
@@ -112,7 +114,8 @@ run.zinba(
    pWinSize=200,
    pquant=1,
    basecountfile='data/faireGM12878rep1chr22.basecount',
-   diff=0
+   diff=0,
+   cleanup=0
    )
 
 
