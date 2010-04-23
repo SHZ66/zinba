@@ -230,7 +230,8 @@ if(util=="Signal to Noise Analysis"){
 		 cnvWinSize=integerItem(100000, tooltip="Window size for estimating cnv activity"),
                  cnvOffset=integerItem(2500, tooltip="BP offset to shift CNV windows, CNV window size must be a multiple of this number"),
 		 tol=numericItem(.00001, tooltip='mixture regression convergence relative tolerance level'),
-		 initmethod=choiceItem("count", values=c("count","quantile", "pscl"),editor_type="gcombobox")          
+		 initmethod=choiceItem("count", values=c("count","quantile", "pscl"),editor_type="gcombobox") 
+ 		cleanup=trueFalseItem(FALSE, tooltip=paste("If true, then intermediate files are deleted once zinba is complete"))         
                  
 
   ),
@@ -246,7 +247,7 @@ view <- aNotebook(
 								enabled_when=function(.) {
   								val <- .$to_R()$method
   								val =="mixture"
-							}),"outfile","numProc","twoBit"),label='General Options'
+							}),"outfile","numProc","twoBit", "cleanup"),label='General Options'
 					), 
 
                                         aFrame(aContainer("seq","input","filetype","align","createfilelist","winSize","offset", "extension"),label='Build Window Data',
@@ -327,7 +328,7 @@ view <- aNotebook(
 		}else if(build==0 & analysis==0 & refine==1){
 			do.call("getrefinedpeaks",list(winlist=var$winlist,basecountfile=var$basecountfile,bpout=paste(var$outfile,'.temp', sep=''),peakout=var$peaksfilename,twoBit=var$twoBit,winSize=500,pWinSize=var$pWinSize,pquant=var$pquant,printFullOut=var$printFullOut,peakconfidence=var$peakconfidence,threshold=var$threshold,method=var$method))
 		}else{
-			do.call("run.zinba",list(filelist=listvar,formula=as.formula(var$formula),formulaE=as.formula(var$formulaE), outfile=var$outfile, seq=var$seq,align=var$align,input=var$input,twoBit=var$twoBit,winSize=var$winSize,offset=var$offset,cnvWinSize=var$cnvWinSize,cnvOffset=var$cnvOffset, basecountfile=var$basecountfile, threshold=var$threshold,peakconfidence=var$peakconfidence,tol=var$tol,numProc=var$numProc, buildwin=build, pWinSize=var$pWinSize,pquant=var$pquant,refinepeaks=refine, printFullOut=var$printFullOut,method=var$method,initmethod=var$initmethod, diff=0, filetype=var$filetype,extension=var$extension ))
+			do.call("run.zinba",list(filelist=listvar,formula=as.formula(var$formula),formulaE=as.formula(var$formulaE), outfile=var$outfile, seq=var$seq,align=var$align,input=var$input,twoBit=var$twoBit,winSize=var$winSize,offset=var$offset,cnvWinSize=var$cnvWinSize,cnvOffset=var$cnvOffset, basecountfile=var$basecountfile, threshold=var$threshold,peakconfidence=var$peakconfidence,tol=var$tol,numProc=var$numProc, buildwin=build, pWinSize=var$pWinSize,pquant=var$pquant,refinepeaks=refine, printFullOut=var$printFullOut,method=var$method,initmethod=var$initmethod, diff=0, filetype=var$filetype,extension=var$extension, cleanup=var$cleanup ))
 		}
  	}
 	dlg$make_gui(gui_layout=view)
@@ -366,8 +367,8 @@ if(util=="Run Zinba Preset"){
                                      filter=list(
 				       "basecount" = list(patterns=c("*.basecount")),
                                        "All files" = list(patterns=c("*"))
-                                       )), tooltip="Path to SBC (basecountfile) generated from Generate SBC (Basecount) File()")
-
+                                       )), tooltip="Path to SBC (basecountfile) generated from Generate SBC (Basecount) File()"),
+		cleanup=trueFalseItem(FALSE, tooltip=paste("If true, then intermediate files are deleted once zinba is complete"))
   ),
 title="Run Zinba Pipeline With Data Presets",
 help_string="Select a file, then adjust parameters.")
@@ -377,7 +378,7 @@ view <- aFrame(aContainer("preset" ,"method","outfile","numProc","twoBit","seq",
 				  								val <- .$to_R()$preset
   												sum(val ==c("High Signal-to-Noise","Moderate STN/Broad-Sharp Mix"))>0
 											}),
-			"filetype","align","extension","basecountfile"), 
+			"filetype","align","extension","basecountfile", "cleanup"), 
 			label='', horizontal=TRUE)
 		       
 		
@@ -386,7 +387,6 @@ dlg$OK_handler <- function(.) {
 	var=.$to_R()		
 	if(var$preset=="High Signal-to-Noise"){
 		printFullOut=1;
-		 createfilelist=paste(var$outfile,".list",sep="");
 		 winSize=500;
                  offset=125;
                  formula="exp_count~input_count";
@@ -401,7 +401,6 @@ dlg$OK_handler <- function(.) {
 		 initmethod="count"
 	}else if(var$preset=="Moderate STN/Broad-Sharp Mix"){
 		printFullOut=1;
-		 createfilelist=paste(var$outfile,".list",sep="");
 		 winSize=1000;
                  offset=250;
                  formula="exp_count~input_count";
@@ -416,7 +415,6 @@ dlg$OK_handler <- function(.) {
 		 initmethod="count"
 	}else if(var$preset=="Low STN/Broad"){
 		printFullOut=1;
-		 createfilelist=paste(var$outfile,".list",sep="");
 		 winSize=250;
                  offset=125;
                  formula="exp_count~gcPerc+align_perc+exp_cnvwin_log";
@@ -430,7 +428,7 @@ dlg$OK_handler <- function(.) {
 		 tol=.00001;
 		 initmethod="count"		
 		}
-		finalrunlist=list(filelist=createfilelist,formula=as.formula(formula),formulaE=as.formula(formulaE), outfile=var$outfile, seq=var$seq,align=var$align,input=var$input,twoBit=var$twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset, basecountfile=var$basecountfile, threshold=threshold,peakconfidence=peakconfidence,tol=tol,numProc=var$numProc, buildwin=1, pWinSize=pWinSize,pquant=pquant,refinepeaks=1, printFullOut=printFullOut,method=var$method,initmethod=initmethod, diff=0, filetype=var$filetype,extension=var$extension )
+		finalrunlist=list(filelist=NULL,formula=as.formula(formula),formulaE=as.formula(formulaE), outfile=var$outfile, seq=var$seq,align=var$align,input=var$input,twoBit=var$twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset, basecountfile=var$basecountfile, threshold=threshold,peakconfidence=peakconfidence,tol=tol,numProc=var$numProc, buildwin=1, pWinSize=pWinSize,pquant=pquant,refinepeaks=1, printFullOut=printFullOut,method=var$method,initmethod=initmethod, diff=0, filetype=var$filetype,extension=var$extension cleanup=var$cleanup)
 		print(finalrunlist)
 		do.call("run.zinba",finalrunlist)
 		

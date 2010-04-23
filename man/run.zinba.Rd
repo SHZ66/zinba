@@ -20,7 +20,7 @@ the winlist is then fed to getrefinedpeaks() if peak refinement is desired. The 
 	buildwin=1,refinepeaks=1,method='mixture',threshold=0.01,peakconfidence=.8,outfile=NULL,twoBit=NULL,numProc=1,			#general options
 	seq=NULL,filelist=NULL,input="none",filetype="bowtie",align=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,extension,	#build windows options
 	formula=NULL,formulaE=NULL,initmethod='count',printFullOut=0,tol=10^-5,								#analysis options
-	basecountfile=NULL,pWinSize=200,pquant=0.75,diff=0,cleanup=0)									#peak refinement options
+	basecountfile=NULL,pWinSize=200,pquant=0.75,diff=0,cleanup=FALSE)									#peak refinement options
 	}					
           \arguments{
 	    \item{buildwin}{Default value is 1, specifying to build the window files from the raw data.  Raw data corresponds to the mapped sample reads, raw mapped input reads (if available), the current build of the human genome and the alignabilty directory.  A value of 0 specifies you would like to skip this step and use an existing filelist (corresponding to a previously built set of window data)}
@@ -84,7 +84,7 @@ run.zinba(
    pquant=1,
    basecountfile='ctcfGM12878rep3chr22.basecount',
    diff=0,
-   cleanup=0
+   cleanup=FALSE
    )	   
 		
 #FAIRE-seq with recommended parameters, no input.  
@@ -115,7 +115,7 @@ run.zinba(
    pquant=1,
    basecountfile='data/faireGM12878rep1chr22.basecount',
    diff=0,
-   cleanup=0
+   cleanup=FALSE
    )
 
 
