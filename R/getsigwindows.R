@@ -36,7 +36,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             param=list(count=a$coefficients$count, zero=a$coefficients$zero, theta=a$theta)
 
 ### PRINT SIGNIFICANT WINDOWS
-            print(paste('\nFor ',files[i],', found ',as.character(numpeaks),' significant wins',sep=''))
+            print(paste("\nFor ",files[i],", found ",as.character(numpeaks)," significant wins",sep=''))
             winfile = paste(winout,"_",chrm,".wins",sep="")
             if(printflag==1){
                 write.table(data,winfile,quote=F,sep="\t",row.names=F,col.names=F,append=T)
