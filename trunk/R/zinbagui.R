@@ -230,7 +230,7 @@ if(util=="Signal to Noise Analysis"){
 		 cnvWinSize=integerItem(100000, tooltip="Window size for estimating cnv activity"),
                  cnvOffset=integerItem(2500, tooltip="BP offset to shift CNV windows, CNV window size must be a multiple of this number"),
 		 tol=numericItem(.00001, tooltip='mixture regression convergence relative tolerance level'),
-		 initmethod=choiceItem("count", values=c("count","quantile", "pscl"),editor_type="gcombobox") 
+		 initmethod=choiceItem("count", values=c("count","quantile", "pscl"),editor_type="gcombobox") ,
  		cleanup=trueFalseItem(FALSE, tooltip=paste("If true, then intermediate files are deleted once zinba is complete"))         
                  
 
