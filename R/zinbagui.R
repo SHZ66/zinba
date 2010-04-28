@@ -428,7 +428,7 @@ dlg$OK_handler <- function(.) {
 		 tol=.00001;
 		 initmethod="count"		
 		}
-		finalrunlist=list(filelist=NULL,formula=as.formula(formula),formulaE=as.formula(formulaE), outfile=var$outfile, seq=var$seq,align=var$align,input=var$input,twoBit=var$twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset, basecountfile=var$basecountfile, threshold=threshold,peakconfidence=peakconfidence,tol=tol,numProc=var$numProc, buildwin=1, pWinSize=pWinSize,pquant=pquant,refinepeaks=1, printFullOut=printFullOut,method=var$method,initmethod=initmethod, diff=0, filetype=var$filetype,extension=var$extension cleanup=var$cleanup)
+		finalrunlist=list(filelist=NULL,formula=as.formula(formula),formulaE=as.formula(formulaE), outfile=var$outfile, seq=var$seq,align=var$align,input=var$input,twoBit=var$twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset, basecountfile=var$basecountfile, threshold=threshold,peakconfidence=peakconfidence,tol=tol,numProc=var$numProc, buildwin=1, pWinSize=pWinSize,pquant=pquant,refinepeaks=1, printFullOut=printFullOut,method=var$method,initmethod=initmethod, diff=0, filetype=var$filetype,extension=var$extension, cleanup=var$cleanup)
 		print(finalrunlist)
 		do.call("run.zinba",finalrunlist)
 		
