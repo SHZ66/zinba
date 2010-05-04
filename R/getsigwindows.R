@@ -192,7 +192,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             i=2
             
             while(abs((ll_old - ll_new)/ll_old) > tol) {
-		#print(ll_new)
+		print(ll_new)
                 ll_old <- ll[max(1, i-10)]
                 prop1=sum(probi1)/(sum(probi1)+sum(probi2))
                 prop2=sum(probi2)/(sum(probi1)+sum(probi2))
