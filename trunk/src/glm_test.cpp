@@ -300,8 +300,8 @@ double linkfun(int link, double mu) {
 double invlink(int link, double eta) {
   switch (link) {
   case 1: {  /* Logit */
-    if (eta == HUGE_VAL) return (1); 
-    if (eta == -HUGE_VAL) return (0); 
+    if (eta > 30) return (2.220446049250313e-16); /*Following R for numerical stability*/
+    if (eta < -30) return (2.220446049250313e-16); 
     return(exp(eta)/(1.0+exp(eta))); 
   }
   case 2: return(exp(eta));                /* Log */
