@@ -192,11 +192,11 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             i=2
             
             while(abs((ll_old - ll_new)/ll_old) > tol) {
-		print(ll_new)
+		#print(ll_new)
                 ll_old <- ll[max(1, i-10)]
                 prop1=sum(probi1)/(sum(probi1)+sum(probi2))
                 prop2=sum(probi2)/(sum(probi1)+sum(probi2))
-		if(prop1<.5){stop(paste("There is too much estimated enrichment in ", chrm, " please check your data"))}
+		if(prop1<.5){stop(paste("The estimated proportion of enrichment for  ", files[fnum], " has exceeded 0.5.  This may suggest your need to 1) Swap your enrichment and background formulas or 2) check your data"))}
                 #updated values for parameters of component means
                  
                 model_zero <- .C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(probi0), prior=as.double(rep(1,n)), offset=as.double(rep(0,n)), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), Xb=double(n*ncol(XNB)), fitted=as.double((rep(1,n) * probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')  
