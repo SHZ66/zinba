@@ -84,7 +84,7 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
                     loglik1=log((1-prob0)*prop1*dnbinom(Y, size = theta1, mu = mu1)+(1-prob0)*prop2*dnbinom(Y, size = theta2, mu = mu2))
                     NAs=which(loglik1==-Inf)
                     if(length(NAs>0)){
-                            loglik1[NAs]=apply(cbind(log((1-prob0)*prop1)+dnbinom(Y[NAs], size = theta1, mu = mu1[NAs],log=TRUE),log((1-prob0)*prop2)+dnbinom(Y[NAs], size = theta2, mu = mu2[NAs], log=TRUE)), 1, logsumexp)
+                            loglik1[NAs]=apply(cbind(log((1-prob0[NAs])*prop1)+dnbinom(Y[NAs], size = theta1, mu = mu1[NAs],log=TRUE),log((1-prob0[NAs])*prop2)+dnbinom(Y[NAs], size = theta2, mu = mu2[NAs], log=TRUE)), 1, logsumexp)
                     }
                     loglik=sum(loglik0*Y0+loglik1*Y1)
                     loglik
