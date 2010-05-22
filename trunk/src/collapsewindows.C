@@ -175,13 +175,13 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 				else if(strcmp(method,mixture) == 0 && tempCoord.sigVal < back->sigVal)
 					tempCoord.sigVal = back->sigVal;
 			}else{
-				if((tempCoord.end-tempCoord.start) <= winSizeThresh){
+				//if((tempCoord.end-tempCoord.start) <= winSizeThresh){
 					coordOUT_slist.push_back(tempCoord);
-				}else{
+				//}else{
 					//REMOVE ONCE C PEAKBOUND IS RUNNING
-					string cName = cnames[tempCoord.chrom];
-					cout << "Excluding " << cName.c_str() << ":" << tempCoord.start << "-" << tempCoord.end << " SIZE=" << (tempCoord.end-tempCoord.start) << endl;
-				}
+				//	string cName = cnames[tempCoord.chrom];
+				//	cout << "Excluding " << cName.c_str() << ":" << tempCoord.start << "-" << tempCoord.end << " SIZE=" << (tempCoord.end-tempCoord.start) << endl;
+				//}
 				tempCoord = *back;
 			}
 			if(flagEnd == 0)
