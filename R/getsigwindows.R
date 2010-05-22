@@ -1,4 +1,4 @@
-getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,winout,printFullOut=0,tol=10^-5,method='pscl',initmethod, diff=0){
+getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfidence=.8,winout,printFullOut=0,tol=10^-5,method='pscl',initmethod, diff=0){
     time.start <- Sys.time()
     suppressPackageStartupMessages(library(quantreg))
     library(MASS)
@@ -57,10 +57,13 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             q25=quantile(data$exp_count, 0.25)
             mf <- model.frame(formula=formula, data=data)
 	    mfE <- model.frame(formula=formulaE, data=data)
+	    mfZ <- model.frame(formula=formulaZ, data=data)
             X <- model.matrix(attr(mf, "terms"), data=mf)
 	    XE <- model.matrix(attr(mfE, "terms"), data=mfE)
+	    XZ <- model.matrix(attr(mfZ, "terms"), data=mfZ)
 	    XNB=as.data.frame(X[,-c(1)])
 	    XNBE=as.data.frame(XE[,-c(1)])
+	    XNBZ=as.data.frame(XZ[,-c(1)])
             logsumexp=function(v){
                     if(any(is.infinite(v))){
                             stop("infinite value in v\n")
@@ -99,7 +102,9 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
             linkinv <- linkobj$linkinv
 
             #starting params for ze0 component
-            model_zero <-.C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y0), prior=as.double(rep(1,n)), offset=as.double(rep(0,n)), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), Xb=double(n*ncol(XNB)), fitted=as.double((rep(1,n) * Y0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
+           model_zero <-.C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(XNBZ)), y=as.double(Y0), prior=as.double(rep(1,n)), offset=as.double
+(rep(0,n)), X=as.double(unlist(XNBZ)),  stratum=as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), Xb=double(n*ncol(XNBZ)), fitted=as.double((rep(1,n) * Y0 + 0.5)/(rep
+(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
 
 
 
@@ -199,7 +204,9 @@ getsigwindows=function(file,formula,formulaE,threshold=.01,peakconfidence=.8,win
 		if(prop1<.5){stop(paste("The estimated proportion of enrichment for  ", files[fnum], " has exceeded 0.5.  This may suggest your need to 1) Swap your enrichment and background formulas or 2) check your data"))}
                 #updated values for parameters of component means
                  
-                model_zero <- .C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(probi0), prior=as.double(rep(1,n)), offset=as.double(rep(0,n)), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), Xb=double(n*ncol(XNB)), fitted=as.double((rep(1,n) * probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')  
+                model_zero <- .C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(XNBZ)), y=as.double(probi0), prior=as.double(rep(1,n)), 
+offset=as.double(rep(0,n)), X=as.double(unlist(XNBZ)),  stratum=as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), Xb=double(n*ncol(XNBZ)), fitted=as.double((rep(1,n)*
+probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')    
                 model_count1 <- .C("pglm_fit", family=as.integer(0), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(probi1), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(start$count1), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(start$theta1), package='zinba')  
                 model_count2 <- .C("pglm_fit", family=as.integer(0), N=as.integer(length(Y)), M=as.integer(ncol(XNBE)), y=as.double(Y), prior=as.double(probi2), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNBE)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNBE)), fitted=as.double(start$count2), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(start$theta2), package='zinba')  
 

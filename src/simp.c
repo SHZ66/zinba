@@ -9,7 +9,7 @@
 
 #define min(a,b)  ((a) < (b) ? (a) : (b))
 #define maxx(x,y) ((x) > (y) ? (x) : (y))
-#define MAX_LEN 500000
+#define MAX_LEN 1000000
 
 SEXP mkans(int *, int);
 //int feval(int *, SEXP ,SEXP );
@@ -119,7 +119,7 @@ for(j=0; j<lmaxvec; j++){
 	for(i=0; i<lbasecount; i++){
 		hold[i]=0;
 	}
-	searchlength=max-1;		
+	searchlength=3000;		
 		for(bound=50; bound<=min(searchlength, max); bound++){
 			sumxy=0;
 			sumx=0;
@@ -148,7 +148,7 @@ for(j=0; j<lmaxvec; j++){
     		}
 		peakstart=fit+1;
 	//right bound
-	searchlength=lbasecount-max-1;
+	searchlength=3000;
 		for(bound=50; bound<=min(searchlength, lbasecount-max); bound++){
 			sumxy=0;
 			sumx=0;			

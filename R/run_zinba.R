@@ -1,4 +1,4 @@
-run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,numProc=1,buildwin=1,pWinSize=200,pquant=0.75,refinepeaks=1,printFullOut=0,method='pscl',initmethod='count',diff=0,filetype="bowtie",extension, cleanup=FALSE){
+run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,numProc=1,buildwin=1,pWinSize=200,pquant=0.75,refinepeaks=1,printFullOut=0,method='pscl',initmethod='count',diff=0,filetype="bowtie",extension, cleanup=FALSE){
         rmc <- require(multicore)
         rdmc <- require(doMC)
         rfor <- require(foreach)
@@ -7,7 +7,10 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NUL
         }
 	time.start <- Sys.time()
 	if(is.null(formulaE)){
-		formulaE=formula
+		formulaE=exp_count~1
+	}
+	if(is.null(formulaE)){
+		formulaZ=formula
 	}
 
         #####################################################################################################
@@ -63,7 +66,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,outfile=NULL,seq=NUL
                 mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
                 getDoParWorkers()
                 winfiles <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,.errorhandling="remove",.options.multicore = mcoptions) %dopar%
-                    getsigwindows(file=params[i],formula=formula,formulaE=formulaE,threshold=threshold,winout=outfile_subpath,peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,initmethod=initmethod)
+                    getsigwindows(file=params[i],formula=formula,formulaE=formulaE,formulaZ=formulaZ,threshold=threshold,winout=outfile_subpath,peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,initmethod=initmethod)
             
                 write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)
 	    cat(paste("--------WINDOW ANALYSIS COMPLETE--------",as.character(Sys.time()),"\n\n"))		
