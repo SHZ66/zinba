@@ -4,6 +4,10 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
     library(MASS)
     options(scipen=999)
 
+    if(!inherits(formula, "formula")) cat("Check your background component formula, not entered as a formula object")
+    if(!inherits(formulaE, "formula")) cat("Check your enrichment component formula, not entered as a formula object")
+    if(!inherits(formulaZ, "formula")) cat("Check your zero-inflated component formula, not entered as a formula object")
+    
     winfile=NULL
     printflag = 0
     if(method=='pscl'){

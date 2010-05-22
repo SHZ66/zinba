@@ -3,7 +3,7 @@
           \alias{convertmappability}
           \title{Convert binary Mappability Files from Peakseq into Wig Format}
           \description{
-            Converts the binary output from the PeakSeq mappability script into a single wig file that can be input into the alignAdjust function.  The mappability directory that you have downloaded should contain a file called "map.list", which specifies the name of each file in the directory.  To run this function properly, you need to change your working directory to the mappability directory.  For example, if your mappability directory is 'map36/', you need to run setwd('map36') before runncing convert mappability.  
+            Converts the binary output from the PeakSeq mappability script into an ASCII-formatted wig file for the the alignAdjust function.  To run this function properly, you need to change your working directory to the mappability directory.  For example, if your mappability directory is 'map36/', you need to run the command setwd('map36/') before running convertmappability individually.  
 
           }
           \usage{convertmappability(inputfile, outputfile)}
