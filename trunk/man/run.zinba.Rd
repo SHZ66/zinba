@@ -4,13 +4,13 @@
           \title{Run Analysis pipeline}
           \description{
 This is the main function in Zinba consisting of three sequential steps:  
-	(1) Processing your mapped sample reads and calculating the correspoding covariate information, 
-	(2) determining regions significantly enriched for reads given a chosen set of covariates, and 
-	(3) merging adjacent and overlapping windows  and running a peak boundary refinement to get the exact boundaries of peak regions within these merged regions.  
+	(1) Processing mapped sample reads and calculating the correspoding covariate information, 
+	(2) determining regions significantly enriched for reads given a set of covariates, and 
+	(3) merging adjacent and overlapping windows and running a peak boundary refinement to get the exact boundaries of peak regions within these merged regions.  
 
-The first step, the buildwindow step, is optional as one can elect to start their analysis using existing set of processed data by referencing its corresponding filelist file, defined below.  Also, the peak refinement step is also optional, where one can elect just to option the regions that are enriched for counts rather than the exact boundaries.  
+The first step, the buildwindow step, is optional as one can elect to start their analysis using existing set of processed data by referencing its corresponding filelist file, defined below.  Also, the peak refinement step is also optional, where one can elect just to use the merged significant window coordinates instead of the refined boundaries (especially in the case of broader signal).  
 
-If specified, the first step is taking the raw mapped sample reads, raw mapped input reads (if available), alignability directory, and current build of the human genome and building the datasets needed to run the analysis to detect enriched regions.  The corresponding individual function to this is the buildwindowdata() function. After the data is built, the locations of each built file (one for each chromsome and offset) is placed in a filelist file.  
+If specified, the first step is taking the raw mapped sample reads, raw mapped input reads (if available), alignability directory, and current build of the genome and building the datasets needed to run the analysis to detect enriched regions.  The corresponding individual function to this is the buildwindowdata() function. After the data is built, the locations of each built file (one for each chromsome and offset) is placed in a filelist file.  
 
 The next step uses the locations in filelist to import this built data into the analysis step to find windows that are likely to be enriched for counts given a set of covariates.  The corresponding individual function to this is getsigwindows(). The posterior probabilities for each window are saved, and the locations of these files are placed in the outfile.winlist file, where outfile is the name chosen to denote the output files of this current run.  T
 
@@ -19,7 +19,7 @@ the winlist is then fed to getrefinedpeaks() if peak refinement is desired. The 
           \usage{run.zinba(
 	buildwin=1,refinepeaks=1,method='mixture',threshold=0.01,peakconfidence=.8,outfile=NULL,twoBit=NULL,numProc=1,			#general options
 	seq=NULL,filelist=NULL,input="none",filetype="bowtie",align=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,extension,	#build windows options
-	formula=NULL,formulaE=NULL,initmethod='count',printFullOut=0,tol=10^-5,								#analysis options
+	formula=NULL,formulaE=NULL,formulaZ=NULL,initmethod='count',printFullOut=0,tol=10^-5,								#analysis options
 	basecountfile=NULL,pWinSize=200,pquant=0.75,diff=0,cleanup=FALSE)									#peak refinement options
 	}					
           \arguments{
@@ -37,7 +37,7 @@ the winlist is then fed to getrefinedpeaks() if peak refinement is desired. The 
 	    \item{filetype}{Format of mapped sample and input reads.  'bed' is files in the standard .bed format, 'tagAlign' signifies those in .taf format, and 'bowtie' signifies mapped reads directly outputted from bowtie.  Default is 'bowtie'}
 	    \item{align}{Path to directory containing alignability files for each chromsome, obtained from alignAdjust (check how these files are generated) or downloadd from our respository.  Alignability information is specific to the uniquness threshold one used to initially filter their mapped reads and the length of the sequence tags used}
 	    \item{winSize}{OPTIONAL.  Window size for build window data, default=500bp}
-	    \item{offset}{OPTIONAL. Bp offset, default is no offset.  If one's winSize is 500 and would like 4 equally spaced offsets, then specifying offset=125 would achieve this}
+	    \item{offset}{OPTIONAL. Bp offset, default is no offsets (offset=0).  If one's winSize is 500 and would like 4 equally spaced offsets, then specifying offset=125 would achieve this}
 	    \item{cnvWinSize}{OPTIONAL. Size of windows used to calculate CNV activity in sample, default size is 100000}
 	    \item{cnvOffset}{OPTIONAL. Offset for CNV windows, typically 2500bp is suffcient, although default is no offsets}
 	    \item{extension}{Average length of fragments in fragment library used, typically around 200}
@@ -78,6 +78,7 @@ run.zinba(
    extension=200,
    formula=exp_count~input_count,
    formulaE=exp_count~1,
+   formulaZ=exp_count~1,
    initmethod='count', 
    printFullOut=1,
    tol=10^-5,
@@ -109,6 +110,7 @@ run.zinba(
    extension=134,
    formula=exp_count~exp_cnvwin_log+gcPerc+align_perc,
    formulaE=exp_count~1,
+   formulaZ=exp_count~exp_cnvwin_log+gcPerc+align_perc,
    initmethod='count', 
    printFullOut=1,
    tol=10^-5,

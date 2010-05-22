@@ -1,9 +1,9 @@
-    \name{zalignAdjust}
+    \name{alignAdjust}
           \Rdversion{1.0}
           \alias{alignAdjust}
           \title{Custom Alignability Track Generation}
           \description{
-            Part of generateAlignability.  Generates a score for every base pair in the genome specifying whether it meets the alignability threshold specified. To account for the average length of the fragments used in the sequence library used for sequencing, the average length of this library is requested.
+            Part of generateAlignability.  From the peakseq mappability file for a given sequence read length and genome, alignAdjust assigns a score of 0, 1, or 2 to every base pair location in the genome.  A score of 2 indicates that the length-n sequence read starting at that particular base meets the alignability threshold specified in either strand direction, 1 if it only meets this threshold for one strand direction, and 0 if the the length-n sequence in either strand direction meets this threshold. To account for the fact that reads are extended to estimated length of the fragments used in the sequence library, we shift the scores by this adjustment length as well so that a reads counted in a given window will have the same matching alignability criteria. 
           }
           \usage{alignAdjust(inputfile, outDir="",twoBitFile,athresh=1,adjustsize=0)}
           \arguments{
