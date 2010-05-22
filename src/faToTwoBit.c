@@ -65,48 +65,59 @@ struct hash *uniqHash = newHash(18);
 FILE *f;
 
 //int inFileCount = RinFileCount[0];
+char *inFiles=RinFiles[0];
 char *outFile = RoutFile[0];
-	
+char *delim = "@";
+char *ptr= NULL;	
+
 //for (i=0; i<inFileCount; ++i)
 //    {
-    char *fileName = RinFiles[0];
-    struct lineFile *lf = lineFileOpen(fileName, TRUE);
-    struct dnaSeq seq;
-    ZeroVar(&seq);
-    while (faMixedSpeedReadNext(lf, &seq.dna, &seq.size, &seq.name))
-        {
-	if (seq.size == 0)
-	    {
-	    warn("Skipping item %s which has no sequence.\n",seq.name);
-	    continue;
-	    }
-	    
-        /* strip off version number */
-        if (stripVersion)
-            {
-            char *sp = NULL;
-            sp = strchr(seq.name,'.');
-            if (sp != NULL)
+i = 0;
+if ((ptr = strtok(inFiles, delim)) != NULL) {
+	do {
+		i++;
+            char *fileName=ptr;
+	    struct lineFile *lf = lineFileOpen(fileName, TRUE);
+	    struct dnaSeq seq;
+	    ZeroVar(&seq);
+	    while (faMixedSpeedReadNext(lf, &seq.dna, &seq.size, &seq.name))
+	        {
+		if (seq.size == 0)
+		    {
+		    warn("Skipping item %s which has no sequence.\n",seq.name);
+		    continue;
+		    }
+		    
+	        /* strip off version number */
+	        if (stripVersion)
+	            {
+	            char *sp = NULL;
+	            sp = strchr(seq.name,'.');
+	            if (sp != NULL)
                 *sp = '\0';
-            }
-
-        if (hashLookup(uniqHash, seq.name))
-            {
-            if (!ignoreDups)
-                errAbort("Duplicate sequence name %s", seq.name);
-            else
-                continue;
-            }
-	hashAdd(uniqHash, seq.name, NULL);
-	if (noMaskFT)
-	    faToDna(seq.dna, seq.size);
-	else
-	    unknownToN(seq.dna, seq.size);
-	twoBit = twoBitFromDnaSeq(&seq, !noMaskFT);
-	slAddHead(&twoBitList, twoBit);
+	            }
+	
+	        if (hashLookup(uniqHash, seq.name))
+        	    {
+        	    if (!ignoreDups)
+        	        errAbort("Duplicate sequence name %s", seq.name);
+        	    else
+        	        continue;
+        	    }
+		hashAdd(uniqHash, seq.name, NULL);
+		if (noMaskFT)
+		    faToDna(seq.dna, seq.size);
+		else
+		    unknownToN(seq.dna, seq.size);
+		twoBit = twoBitFromDnaSeq(&seq, !noMaskFT);
+		slAddHead(&twoBitList, twoBit);
 	}
-    lineFileClose(&lf);
-//    }
+    lineFileClose(&lf);      
+
+
+	} while ((ptr = strtok(NULL, delim)) != NULL);
+}
+
 slReverse(&twoBitList);
 f = mustOpen(outFile, "wb");
 twoBitWriteHeader(twoBitList, f);
