@@ -9,7 +9,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 	if(is.null(formulaE)){
 		formulaE=exp_count~1
 	}
-	if(is.null(formulaE)){
+	if(is.null(formulaZ)){
 		formulaZ=formula
 	}
 	if(!inherits(formula, "formula")) stop("Check your background component formula, not entered as a formula object")
