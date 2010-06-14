@@ -271,7 +271,7 @@ int canalysisdouble::importCoords(const char *coordfile){
 		cout << "ERROR: opening window list file" << endl;
 		return 1;
 	}
-	
+
 //	fgets(firstline,256,cfile);
 	while(!feof(cfile)){
 		rwline = fscanf(cfile,"%s%s%lu%lu%s%lf",cid,cChrom,&iStart,&iEnd,strand,&score);
