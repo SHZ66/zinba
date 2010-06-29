@@ -143,6 +143,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		if(cOffsetSize > 0){
 			numOffsets = (int) cWinSize/cOffsetSize;
 		}
+
 		for(int o = 0; o < numOffsets; o++){
 			unsigned long int cWinStart = (cOffsetSize * o) + 1;
 			unsigned long int cWinStop = cWinStart + cWinSize - 1;
@@ -156,14 +157,30 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 					if((int) gcContent[b] == 2){
 						nCount++;						
 					}else{
-						cnvCount += basepair[b];
-						alignCount += (int) alignability[b];
+// NEED TO CREATE ARRAY TO HOUSE VALUES (SORTED), TRIM PERCENT OFF TOP, AND THEN SUM INTO cnvCount
+//						cnvCount += basepair[b];
+//						alignCount += (int) alignability[b];
+						abp aval(basepair[b],(unsigned short int) alignability[b]);
+						cnvwinvals.push_back(aval);
 					}
 				}
+				sort (cnvwinvals.begin(), cnvwinvals.end());
+double trim_perc = 0.02;
+				int num_cnvwins = (int) cnvwinvals.size() * trim_perc;
+				cnvwinvals.erase(cnvwinvals.end()-num_cnvwins,cnvwinvals.end());
+
+				int c = 0;
+				while(c < (int) cnvwinvals.size()){		
+					cnvCount += cnvwinvals[c].score;
+					alignCount += cnvwinvals[c].ascore;
+					c++;
+				}
+				cnvwinvals.erase(cnvwinvals.begin(),cnvwinvals.end());
+				
 				double cScore = 0.0;
 				if(alignCount > 0)
 					cScore = (double) cnvCount/alignCount;
-				double percGap = (double) nCount/cWinSize;
+				double percGap = (double) nCount/cWinSize;				
 				cnvWins cnv(cWinStart,cWinStop,cScore,0,0,percGap);
 				cnv_wins.push_back(cnv);
 				cWinStart += cWinSize;
@@ -391,11 +408,43 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				tpStop = *tp;
 			}
 			for(int b = tpStart; b <= tpStop; b++){
-				leftCnvCount += basepair[b];
-				leftAlignCount += (int) alignability[b];
-				rightCnvCount += basepair[b+cWinSize];
-				rightAlignCount += (int) alignability[b+cWinSize];
+
+				abp aval(basepair[b],(unsigned short int) alignability[b]);
+				cnvwinvals.push_back(aval);
+				abp raval(basepair[b+cWinSize],(unsigned short int) alignability[b+cWinSize]);
+				rcnvwinvals.push_back(raval);
+//				leftCnvCount += basepair[b];
+//				leftAlignCount += (int) alignability[b];
+//				rightCnvCount += basepair[b+cWinSize];
+//				rightAlignCount += (int) alignability[b+cWinSize];
 			}
+
+// NEED TO ADD IN TRIMMED MEAN FOR CNV WINS
+
+			
+			sort (cnvwinvals.begin(), cnvwinvals.end());
+			sort (rcnvwinvals.begin(), rcnvwinvals.end());
+double trim_perc = 0.02;
+			int num_cnvwins = (int) cnvwinvals.size() * trim_perc;
+			int num_rcnvwins = (int) rcnvwinvals.size() * trim_perc;
+			cnvwinvals.erase(cnvwinvals.end()-num_cnvwins,cnvwinvals.end());
+			rcnvwinvals.erase(rcnvwinvals.end()-num_rcnvwins,rcnvwinvals.end());
+			
+			int c = 0;
+			while(c < (int) cnvwinvals.size()){		
+				leftCnvCount += cnvwinvals[c].score;
+				leftAlignCount += cnvwinvals[c].ascore;
+				c++;
+			}
+			cnvwinvals.erase(cnvwinvals.begin(),cnvwinvals.end());
+			c = 0;
+			while(c < (int) rcnvwinvals.size()){		
+				rightCnvCount += rcnvwinvals[c].score;
+				rightAlignCount += rcnvwinvals[c].ascore;
+				c++;
+			}
+			rcnvwinvals.erase(rcnvwinvals.begin(),rcnvwinvals.end());
+			
 			double cScore = 0;
 			if(leftAlignCount > 0)
 				cScore = leftCnvCount/leftAlignCount;
