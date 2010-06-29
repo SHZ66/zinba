@@ -6,6 +6,7 @@
 #include "bwRead.h"
 #include "dataWins.h"
 #include "cnvWins.h"
+#include "abp.h"
 #include <cstring>
 //#include "base.h"
 #include <map>
@@ -49,6 +50,8 @@ class calcCovs{
 
 		vector<bwRead> signal_slist;//Implemented
 		vector<bwRead> input_slist;
+	vector<abp> cnvwinvals;
+	vector<abp> rcnvwinvals;
 //		slist<bwRead> signal_slist;//Implemented
 //		slist<bwRead> input_slist;
 		list<cnvWins> cnv_wins;
