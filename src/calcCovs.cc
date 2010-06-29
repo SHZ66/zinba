@@ -29,7 +29,7 @@ calcCovs::~calcCovs(){
 	}
 }
 
-int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir,const char * twoBitFile,const char * inputFile,string outfile,const char * flist,int extension,const char * filetype){
+int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir,const char * twoBitFile,const char * inputFile,string outfile,const char * flist,int extension,const char * filetype,double trim_perc){
 
 	FILE * tempTB;
 	time_t rtime;
@@ -165,7 +165,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 					}
 				}
 				sort (cnvwinvals.begin(), cnvwinvals.end());
-double trim_perc = 0.02;
+//double trim_perc = 0.02;
 				int num_cnvwins = (int) cnvwinvals.size() * trim_perc;
 				cnvwinvals.erase(cnvwinvals.end()-num_cnvwins,cnvwinvals.end());
 
@@ -424,7 +424,7 @@ double trim_perc = 0.02;
 			
 			sort (cnvwinvals.begin(), cnvwinvals.end());
 			sort (rcnvwinvals.begin(), rcnvwinvals.end());
-double trim_perc = 0.02;
+//double trim_perc = 0.02;
 			int num_cnvwins = (int) cnvwinvals.size() * trim_perc;
 			int num_rcnvwins = (int) rcnvwinvals.size() * trim_perc;
 			cnvwinvals.erase(cnvwinvals.end()-num_cnvwins,cnvwinvals.end());
