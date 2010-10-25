@@ -83,11 +83,12 @@ int m=0;
 //        basecount[i-6]  = atoi(ptr);
       }
 //      lbasecount=i-5;
-		lbasecount=i-6;
+		lbasecount=i-6; 
     } while ((ptr = strtok(NULL, delim)) != NULL);
   }else{
     error("%s is not tab-delimated\n", input);
   }
+//Rprintf("%d\n",lbasecount);
  
   defineVar(install("x"), mkans(basecount, lbasecount), rho);
     int l=round(INTEGER(eval(f, rho))[0]);

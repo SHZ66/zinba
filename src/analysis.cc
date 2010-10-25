@@ -13,6 +13,7 @@
 #include <ctime>
 #include <time.h>
 #include <algorithm>
+#include <R.h>
 
 using namespace std;
 
@@ -270,7 +271,7 @@ const char * analysis::getKey(unsigned short int chrom){
 	}
 }
 
-int analysis::importCoords(const char *winlist,double threshold,const char *method,int wformat){
+int analysis::importCoords(const char *winlist,double threshold,const char *method,int wformat, int winGap){
 	
 	const char *pscl = "pscl";
 	const char *mixture = "mixture";
@@ -300,7 +301,7 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 		while(flagFinish == 0){
 			if(coordIN_slist.empty())
 				flagFinish = 1;
-			if(flagFinish == 0 && back->chrom == tempCoord.chrom && back->start <= tempCoord.end+1){
+			if(flagFinish == 0 && back->chrom == tempCoord.chrom && back->start <= tempCoord.end+1+winGap){
 				tempCoord.end = back->end;
 				if(strcmp(method,pscl) == 0 && tempCoord.sigVal > back->sigVal)
 					tempCoord.sigVal = back->sigVal;

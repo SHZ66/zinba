@@ -27,13 +27,14 @@ using namespace std;
 using namespace __gnu_cxx; 
 
 extern "C" {
-void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwformat, int * RlengthThresholds,double thresholds[]){
+void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwformat, int * RlengthThresholds,double thresholds[], int *RwinGap){
 	hash_map<string, int, hash<string>,equal_to<string> > cind_map;
 	vector<string> cnames;
 
 	const char * winlist = Rwinlist[0];
 	const char * method = Rmethod[0];
 	int wformat = Rwformat[0];
+	int winGap = RwinGap[0];
 	int lengthThresholds = RlengthThresholds[0];
 	
 	string winstring = string(winlist);
@@ -168,7 +169,7 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 		while(flagEnd == 0){
 			if(back == tempCoords.end())
 				flagEnd = 1;
-			if(back->chrom == tempCoord.chrom && back->start <= tempCoord.end+1 && flagEnd == 0){
+			if(back->chrom == tempCoord.chrom && back->start <= tempCoord.end+1+winGap && flagEnd == 0){
 				tempCoord.end = back->end;
 				if(strcmp(method,pscl) == 0 && tempCoord.sigVal > back->sigVal)
 					tempCoord.sigVal = back->sigVal;
@@ -195,13 +196,15 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 		char tval[128];
 		sprintf(tval,"%.14lf",thresholds[t]);
 		string tv = string(tval);
-		string outputFile = outfile + "_" + tv + ".coords";
+//		string outputFile = outfile + "_" + tv + ".coords";
+  		string outputFile = outfile + "_" + tv + ".coords.bed";
 		fh = fopen(outputFile.c_str(),"w");
 		if(fh==NULL){error("Unable to open output file: %s\n", outputFile.c_str());}
-		fprintf(fh,"COORDID\tCHROM\tSTART\tSTOP\tSTRAND\tSIGVAL\n");
+//		fprintf(fh,"COORDID\tCHROM\tSTART\tSTOP\tSTRAND\tSIGVAL\n");
+//		fprintf(fh,"CHROM\tSTART\tSTOP\tSTRAND\tSIGVAL\n");
 		string chromName;
 		char strand[] = "+";
-		char winID[255];
+//		char winID[255];
 		char start[10];
 		char stop[10];
 		back = coordOUT_slist.begin();
@@ -209,8 +212,9 @@ void collapse_windows(const char ** Rwinlist, const char ** Rmethod, int * Rwfor
 			chromName = cnames[back->chrom];
 			sprintf( start,"%lu", back->start);
 			sprintf( stop,"%lu", back->end);
-			strcpy(winID,chromName.c_str());strcat(winID,":");strcat(winID,start);strcat(winID,"-");strcat(winID,stop);
-			fprintf(fh,"%s\t%s\t%lu\t%lu\t%s\t%.14f\n",winID,chromName.c_str(),back->start,back->end,strand,back->sigVal);
+//			strcpy(winID,chromName.c_str());strcat(winID,":");strcat(winID,start);strcat(winID,"-");strcat(winID,stop);
+//			fprintf(fh,"%s\t%s\t%lu\t%lu\t%s\t%.14f\n",winID,chromName.c_str(),back->start,back->end,strand,back->sigVal);
+			fprintf(fh,"%s\t%lu\t%lu\t%s\t%.14f\n",chromName.c_str(),back->start,back->end,strand,back->sigVal);
 			back++;
 		}
 		fclose (fh);

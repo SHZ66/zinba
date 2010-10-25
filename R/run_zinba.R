@@ -1,4 +1,4 @@
-run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,numProc=1,buildwin=1,pWinSize=200,pquant=0.75,refinepeaks=1,printFullOut=0,method='pscl',initmethod='count',diff=0,filetype="bowtie",extension,trimPerc=0.02,cleanup=FALSE){
+run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,numProc=1,buildwin=1, winGap=0,pWinSize=200,pquant=1,refinepeaks=1,printFullOut=0,method='pscl',initmethod='count',diff=0,filetype="bowtie",extension, cleanup=FALSE){
         rmc <- require(multicore)
         rdmc <- require(doMC)
         rfor <- require(foreach)
@@ -9,12 +9,12 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 	if(is.null(formulaE)){
 		formulaE=exp_count~1
 	}
-	if(is.null(formulaZ)){
+	if(is.null(formulaE)){
 		formulaZ=formula
 	}
-	if(!inherits(formula, "formula")) stop("Check your background component formula, not entered as a formula object")
-        if(!inherits(formulaE, "formula")) stop("Check your enrichment component formula, not entered as a formula object")
-        if(!inherits(formulaZ, "formula")) stop("Check your zero-inflated component formula, not entered as a formula object")
+	if(!inherits(formula, "formula")) cat("Check your background component formula, not entered as a formula object")
+        if(!inherits(formulaE, "formula")) cat("Check your enrichment component formula, not entered as a formula object")
+        if(!inherits(formulaZ, "formula")) cat("Check your zero-inflated component formula, not entered as a formula object")
         #####################################################################################################
 	#create subdirectory to hold intermediate files to be used later
 	outfile_subdir=paste(outfile,"_files/", sep="")
@@ -48,7 +48,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 	if(buildwin==1){
 	    if(is.null(filelist)) filelist=paste(outfile_subpath,".list",sep="")	
 	    cat(paste("\n--------BEGIN BUILDING WINDOW DATA--------",as.character(Sys.time()),"\n"))
-            buildwindowdata(seq=seq,align=align,input=input,twoBit=twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset,filelist=filelist,filetype=filetype,extension=extension, outdir=outfile_subdir,trimPerc=trimPerc)
+            buildwindowdata(seq=seq,align=align,input=input,twoBit=twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset,filelist=filelist,filetype=filetype,extension=extension, outdir=outfile_subdir)
 	}
 	if(refinepeaks==1 && is.null(basecountfile)){
 		stop(paste("Basecount file must be specified, currently",basecountfile,sep=" "))
@@ -82,7 +82,10 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
             }
 	    if(refinepeaks==1){
 		cat(paste("--------MERGE WINDOWS AND REFINE PEAKS--------",as.character(Sys.time()),"\n"))
-		getrefinedpeaks(winlist=winlist,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,winSize=winSize,pWinSize=pWinSize,pquant=pquant,printFullOut=printFullOut,peakconfidence=peakconfidence,threshold=threshold,method=method)
+		getrefinedpeaks(winlist=winlist,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,winSize=winSize,pWinSize=pWinSize,pquant=pquant,printFullOut=printFullOut,peakconfidence=peakconfidence,threshold=threshold,method=method, winGap=winGap, extension=extension)
+	    }else{
+		cat(paste("--------MERGE WINDOWS --------",as.character(Sys.time()),"\n"))
+		collapsewindows(winlist=winlist,twoBit=twoBit,printFullOut=printFullOut,threshold=thresholds,method=method, winGap=winGap)
 	    }
 		
 	}

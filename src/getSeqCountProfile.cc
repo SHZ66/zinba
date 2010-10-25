@@ -14,18 +14,19 @@ using namespace sgi;
 using namespace std;
 
 extern "C" {
-void getSeqCountProfile(char **Rinputfile,char **Rwinlist,double *Rthreshold,char **Rmethod,int *Rwformat,char **Routputfile, char **Rtwobitfile,char **Rchromosome){
+void getSeqCountProfile(char **Rinputfile,char **Rwinlist,double *Rthreshold,char **Rmethod,int *Rwformat,char **Routputfile, char **Rtwobitfile,char **Rchromosome, int *RwinGap){
 	const char*  inputFile = Rinputfile[0];
 	const char* winlist = Rwinlist[0];
 	const char* outputFile = Routputfile[0];
 	double threshold = Rthreshold[0];
 	const char* method = Rmethod[0];
 	int wformat = Rwformat[0];
+	int winGap = RwinGap[0];
 	const char* twobitfile = Rtwobitfile[0];
 	const char* chromosome = Rchromosome[0];
 	
 	analysis newAnalysis;// = new analysis;
-	int ret=newAnalysis.importCoords(winlist,threshold,method,wformat);
+	int ret=newAnalysis.importCoords(winlist,threshold,method,wformat,winGap);
 	
 	if(ret == 0){
 		Rprintf("Getting basecount data for %s\n",chromosome);
