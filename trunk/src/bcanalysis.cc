@@ -11,7 +11,7 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
-
+#include <R.h>
 using namespace std;
 
 bcanalysis::bcanalysis(){

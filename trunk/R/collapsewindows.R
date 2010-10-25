@@ -1,4 +1,4 @@
-collapsewindows=function(winlist,thresholds,method='pscl',printFullOut=0){
+collapsewindows=function(winlist,thresholds,method='pscl',printFullOut=0, winGap=0){
 	if(!file.exists(winlist)){stop("Specified winlist doesnt exist or is incorrect")}
-	cReturn <- .C("collapse_windows",as.character(winlist),as.character(method),as.integer(printFullOut),as.integer(length(thresholds)),as.double(thresholds),PACKAGE="zinba")
+	cReturn <- .C("collapse_windows",as.character(winlist),as.character(method),as.integer(printFullOut),as.integer(length(thresholds)),as.double(thresholds), winGap=as.integer(winGap),PACKAGE="zinba")
 }

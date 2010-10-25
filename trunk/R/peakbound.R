@@ -1,4 +1,4 @@
-peakbound=function(bpprofile,output,pwinSize=200, winSize,quantile=.75,minscore=0){
+peakbound=function(bpprofile,output,pwinSize=200, winSize,quantile=.75,minscore=0, extension=200){
 	    if(!file.exists(bpprofile)){stop("Error, file pertaining to SBP for merged regions does not exist.  Check .winlist file for errors.")}
 	    localMaximum=function(x) {
 		    #from MassSpecWavelet Package in BioConductor, written by Pan Du and Simon Lin, modified by Naim Rashid	
@@ -27,9 +27,9 @@ peakbound=function(bpprofile,output,pwinSize=200, winSize,quantile=.75,minscore=
 	        	localMax[selMaxInd1[temp <= 0]] <- 0
 		        localMax[selMaxInd2[temp > 0]] <- 0
 		    }
-	    	#delete maxes lower than median and in flanking
-	    	localMax[which(x<quantile(x,quantile, na.rm=TRUE))]=0
-localMax[which(x<minscore)]=0
+	    	#delete maxes lower than prob threshold and in flanking
+	    	localMax[which(x<quantile(x,quantile))]=0
+		localMax[which(x<minscore)]=0
 		localMax[c(1:250,(len-250+1):len)]=0
 	    	#ensure global max is always tagged
 	    	localMax[which.max(x[251:(len-250)])+250]=1
