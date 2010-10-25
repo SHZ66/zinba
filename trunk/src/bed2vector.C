@@ -63,10 +63,9 @@ SEXP read_aligned_tags(SEXP filename,SEXP filetype){
 		unsigned long int start;unsigned long int stop;
 		char name[128];
 		int rval;char qscore[128];int eval;
-
 		while(!feof(f)){
 			if (strcmp(ftype,bowtie) == 0){
-				rval = fscanf(f,"%s%s%s%lu%s%s%d",name,strand,cChrom,&fpos,seq,qscore,eval);
+				rval = fscanf(f,"%s%s%s%lu%s%s%d",name,strand,cChrom,&fpos,seq,qscore,&eval);
 				fgets(line,512,f);
 				if(rval == 7){
 					if(strcmp(strand,minus) == 0)
@@ -87,7 +86,7 @@ SEXP read_aligned_tags(SEXP filename,SEXP filetype){
 					}
 				}
 			}else if(strcmp(ftype,bed) == 0){
-				rval = fscanf(f,"%s%lu%lu%s%d%s",cChrom,&start,&stop,name,eval,strand);
+				rval = fscanf(f,"%s%lu%lu%s%d%s",cChrom,&start,&stop,name,&eval,strand);
 				if(rval == 6){
 					if(strcmp(strand,minus) == 0){
 						fpos = -1 * stop;
@@ -97,7 +96,7 @@ SEXP read_aligned_tags(SEXP filename,SEXP filetype){
 					nm = 1;
 				}
 			}else if(strcmp(ftype,tagAlign) == 0){
-				rval = fscanf(f,"%s%lu%lu%s%d%s",cChrom,&start,&stop,name,eval,strand);
+				rval = fscanf(f,"%s%lu%lu%s%d%s",cChrom,&start,&stop,name,&eval,strand);
 				if(rval == 6){
 					if(strcmp(strand,minus) == 0){
 						fpos = -1 * stop;
