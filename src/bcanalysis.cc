@@ -31,7 +31,8 @@ int bcanalysis::processSignals(const char* outputFile,int extend){
 	unsigned short int currchr;
 	int i;
 	const char * chromReport;
-	unsigned short int * basepair = NULL;
+//	unsigned short int * basepair = NULL;
+	unsigned int * basepair = NULL;
 	unsigned short int printFLAG = 0;
 	unsigned long int aStart,aStop;
 	
@@ -40,7 +41,8 @@ int bcanalysis::processSignals(const char* outputFile,int extend){
 		currchr = signal_slist[0].chrom;
 		chromReport = getKey(currchr);
 		cout << "\tProcessing " << chromReport << ".........." << endl;
-		basepair = new unsigned short int[chr_size[currchr]+1];
+//		basepair = new unsigned short int[chr_size[currchr]+1];
+		basepair = new unsigned int[chr_size[currchr]+1];
 		for(int in = chr_size[currchr]; in--;)
 			basepair[in] = 0;
 
@@ -64,7 +66,8 @@ int bcanalysis::processSignals(const char* outputFile,int extend){
 	return 0;
 }
 
-int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,unsigned short int pFLAG,unsigned short int basepair[]){
+//int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,unsigned short int pFLAG,unsigned short int basepair[]){
+int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,unsigned short int pFLAG,unsigned int basepair[]){
 	FILE * fh;
 	const char * chrom = getKey(currChr);
 	if(pFLAG == 0){
@@ -80,7 +83,8 @@ int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,u
 	fprintf(fh,"fixedStep chrom=%s start=1 step=1\n",chrom);
 
 	for(int posP = 1; posP <= chr_size[currChr];posP++)
-		fprintf(fh,"%hu\n",basepair[posP]);
+		fprintf(fh,"%u\n",basepair[posP]);
+//		fprintf(fh,"%hu\n",basepair[posP]);
 	fclose (fh);
 	return 0;
 }
