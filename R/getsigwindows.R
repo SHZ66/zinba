@@ -205,7 +205,10 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
                 ll_old <- ll[max(1, i-10)]
                 prop1=sum(probi1)/(sum(probi1)+sum(probi2))
                 prop2=sum(probi2)/(sum(probi1)+sum(probi2))
-		if(prop1<.5){stop(paste("The estimated proportion of enrichment for  ", files[fnum], " has exceeded 0.5.  This may suggest your need to 1) Swap your enrichment and background formulas or 2) check your data"))}
+		if(prop1<.5){
+			print(paste("The estimated proportion of enrichment for  ", files[fnum], " has exceeded 0.5.  This may suggest your need to 1) Swap your enrichment and background formulas or 2) check your data"))
+			break
+		}
                 #updated values for parameters of component means
                  
                 model_zero <- .C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(XNBZ)), y=as.double(probi0), prior=as.double(rep(1,n)), 
@@ -238,6 +241,9 @@ probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1
 		if(i>300){break}
 		cat(".")
             }
+	    if(prop1<.5){
+		next
+	    }
             numpeaks=length(which(probi2>peakconfidence))
 	    if(printFullOut == 1){
 		data=cbind(data,((data$exp_count>q25)^2),formatC(probi2,format="f",digits=16))
