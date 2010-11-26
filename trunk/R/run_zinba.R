@@ -1,4 +1,4 @@
-run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,numProc=1,buildwin=1, winGap=0,pWinSize=200,pquant=1,refinepeaks=1,printFullOut=0,method='pscl',initmethod='count',diff=0,filetype="bowtie",extension, cleanup=FALSE){
+run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,numProc=1,buildwin=1, winGap=0,pWinSize=200,pquant=1,refinepeaks=1,printFullOut=0,method='pscl',initmethod='count',diff=0,filetype="bowtie",extension, cleanup=FALSE, selectmodel=NULL, selectchr=NULL, selecttype="dirty", selectcovs=NULL){
         rmc <- require(multicore)
         rdmc <- require(doMC)
         rfor <- require(foreach)
@@ -6,20 +6,13 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
             stop(paste("multicore available"))
         }
 	time.start <- Sys.time()
-	if(is.null(formulaE)){
-		formulaE=exp_count~1
-	}
-	if(is.null(formulaZ)){
-		formulaZ=formula
-	}
-	if(!inherits(formula, "formula")) cat("Check your background component formula, not entered as a formula object")
-        if(!inherits(formulaE, "formula")) cat("Check your enrichment component formula, not entered as a formula object")
-        if(!inherits(formulaZ, "formula")) cat("Check your zero-inflated component formula, not entered as a formula object")
+	
+	
         #####################################################################################################
 	#create subdirectory to hold intermediate files to be used later
 	outfile_subdir=paste(outfile,"_files/", sep="")
-	if(!dir.create(outfile_subdir, showWarnings=F)){
-		#if cannot create directory, delete existing and try to create again
+	if(!dir.create(outfile_subdir, showWarnings=FALSE )& buildwin==1){
+		#if cannot create directory, delete existing directory and try to create again
 		cat(paste("\nOverwriting previously existing directory ",outfile_subdir, "\n",sep=""))
 		unlink(outfile_subdir, recursive=T)
 		if(!dir.create(outfile_subdir,showWarnings=F)){
@@ -36,7 +29,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 			}
 		}
 	}else{
-		#set path prefix to where built window analysis files will be place in subdirectory			
+		#if initial directoy creation sucessful, set path prefix to where built window analysis files will be place in subdirectory			
 		slashindex=which(substring(outfile,1:nchar(outfile),1:nchar(outfile))=="/")
 		if(length(slashindex>0)){
 			outfile_subpath=paste(outfile,"_files","/",substr(outfile,slashindex[length(slashindex)]+1,nchar(outfile)),sep="")
@@ -44,12 +37,15 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 			outfile_subpath=paste(outfile,"_files","/",outfile,sep="")	
 		}
 	}
-        #####################################################################################################
+        
+	#####################################################################################################
+	#buildwindows
 	if(buildwin==1){
 	    if(is.null(filelist)) filelist=paste(outfile_subpath,".list",sep="")	
 	    cat(paste("\n--------BEGIN BUILDING WINDOW DATA--------",as.character(Sys.time()),"\n"))
             buildwindowdata(seq=seq,align=align,input=input,twoBit=twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset,filelist=filelist,filetype=filetype,extension=extension, outdir=outfile_subdir)
 	}
+
 	if(refinepeaks==1 && is.null(basecountfile)){
 		stop(paste("Basecount file must be specified, currently",basecountfile,sep=" "))
 	}else if (is.null(filelist)){
@@ -57,11 +53,57 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 	}else if(method != 'pscl' && method != 'mixture'){
 		stop(paste("Method should be either pscl or mixture, currently",method))
 	}else{
-            params=scan(filelist,what=character(0),quiet=T)
-	    winlist=paste(outfile_subpath,".winlist",sep="")
-            peakout=paste(outfile,".peaks",sep="")
-            bpout=paste(outfile_subpath,".bpcount",sep="")
+	        #set prefixes of outputfiles
+                params=scan(filelist,what=character(0),quiet=T)
+	        winlist=paste(outfile_subpath,".winlist",sep="")
+                peakout=paste(outfile,".peaks",sep="")
+                bpout=paste(outfile_subpath,".bpcount",sep="")
 
+	if(is.null(selectmodel)){
+		if(is.null(formulaE)){
+			formulaE=exp_count~1
+		}
+		if(is.null(formulaZ)){
+			formulaZ=formula
+		}
+		if(is.null(formula)){
+			stop("No background formula specified, so must perform model selection procedure")
+		}
+		if(!inherits(formula, "formula")) cat("Check your background component formula, not entered as a formula object")
+	        if(!inherits(formulaE, "formula")) cat("Check your enrichment component formula, not entered as a formula object")
+	        if(!inherits(formulaZ, "formula")) cat("Check your zero-inflated component formula, not entered as a formula object")
+	}else{
+		#start optional model selection
+		if(is.null(selectchr)) stop("need to specify which chromosome to apply model selection to")
+		if(is.null(selectcovs)) stop("need to specify which covariates to use in model selection")
+		supported=c("gcPerc", "align_perc", "input_count", "exp_cnvwin_log")
+		if( sum(selectcovs %in% supported)!=length(selectcovs)){
+			stop(paste("Covariate ",selectcovs[which(selectcovs %in% supported == FALSE)], " not found in list of supported covariates"))
+		}
+		cat(paste("--------STARTING MODEL SELECTION--------",as.character(Sys.time()),"\n\n")) 
+		data=NULL
+		splitlist=strsplit(unlist(strsplit(params,";")),"_")
+		for(i in 1:length(splitlist)){
+			if(any(splitlist[[i]]==selectchr)){
+				data=unlist(strsplit(params,";"))[i]
+				break
+			}
+		}	
+		if(is.null(data)){
+			data=unlist(strsplit(params,";"))[i]
+			cat(paste("\nSpecified chromosome not found or specified, using", data,"\n"))
+		}
+		model=covariateselect(file=data, selection=selecttype,loc=paste(outfile_subpath,".model",sep=""),covs=selectcovs, numProc=numProc)
+		formula=model[[1]]
+		formulaE=model[[2]]
+		formulaZ=model[[3]]
+		cat("\nBACKGROUND FORMULA:\n\t");print(formula);
+		cat("ENRICHMENT FORMULA:\n\t");	print(formulaE)
+		cat("ZERO-INFLATION FORMULA:\n\t");print(formulaZ)
+		cat(paste("--------MODEL SELECTION COMPLETE--------",as.character(Sys.time()),"\n\n")) 
+	}	
+	 
+	   #begin mixture regression (parallelized)
             if(rmc == TRUE && rdmc == TRUE && rfor == TRUE){
 	    cat(paste("--------GETTING ENRICHED WINDOWS--------",as.character(Sys.time()),"\n\n")) 		
                 registerDoMC(numProc)
@@ -72,7 +114,9 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
             
                 write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)
 	    cat(paste("--------WINDOW ANALYSIS COMPLETE--------",as.character(Sys.time()),"\n\n"))		
-            }else{
+            
+	    }else{
+	    #if parallelization fails due to lack of packages, resort to non-parallelized version
 	    cat(paste("--------GETTING ENRICHED WINDOWS--------",as.character(Sys.time()),"\n\n")) 	
                 for(i in 1:length(params)){
                     wfile <- getsigwindows(file=params[i],formula=formula,formulaE=formulaE,threshold=threshold,winout=outfile,peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,initmethod=initmethod)
@@ -80,10 +124,14 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
                 }
 	    cat(paste("--------WINDOW ANALYSIS COMPLETE--------",as.character(Sys.time()),"\n\n"))		
             }
+	    
+	    
 	    if(refinepeaks==1){
-		cat(paste("--------MERGE WINDOWS AND REFINE PEAKS--------",as.character(Sys.time()),"\n"))
+		#merge windows and refine regions		
+		cat(paste("--------MERGE WINDOWS AND REFINE PEAKS (no parallelization)--------",as.character(Sys.time()),"\n"))
 		getrefinedpeaks(winlist=winlist,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,winSize=winSize,pWinSize=pWinSize,pquant=pquant,printFullOut=printFullOut,peakconfidence=peakconfidence,threshold=threshold,method=method, winGap=winGap, extension=extension)
 	    }else{
+		#merge windows only
 		cat(paste("--------MERGE WINDOWS --------",as.character(Sys.time()),"\n"))
 		collapsewindows(winlist=winlist,twoBit=twoBit,printFullOut=printFullOut,threshold=thresholds,method=method, winGap=winGap)
 	    }
@@ -91,6 +139,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 	}
         #####################################################################################################
 	cat(paste("\n--------ZINBA COMPLETE--------",as.character(Sys.time()),"\n\n"))
+	
 	if(cleanup==TRUE) unlink(outfile_subdir, recursive=T)
 	time.end <- Sys.time()
 	print(difftime(time.end,time.start))

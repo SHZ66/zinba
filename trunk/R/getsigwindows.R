@@ -1,4 +1,4 @@
-getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfidence=.8,winout,printFullOut=0,tol=10^-5,method='pscl',initmethod, diff=0){
+getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfidence=.8,winout,printFullOut=0,tol=10^-5,method='pscl',initmethod, diff=0, modelselect=NULL){
     time.start <- Sys.time()
     suppressPackageStartupMessages(library(quantreg))
     library(MASS)
@@ -11,6 +11,7 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
     winfile=NULL
     printflag = 0
     if(method=='pscl'){
+	#not actively maintained
         suppressPackageStartupMessages(library(qvalue))
         files = unlist(strsplit(file,";"))
         for(i in 1:length(files)){
@@ -53,12 +54,12 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
         print(difftime(time.end,time.start))
         return(winfile)
     }else if(method=='mixture'){
-        files = unlist(strsplit(file,";"))
+	files = unlist(strsplit(file,";"))
         for(i in 1:length(files)){
             fnum=i
             data=read.table(files[i], header=TRUE)
             chrm = data$chromosome[1]
-            q25=quantile(data$exp_count, 0.25)
+            q25=quantile(data$exp_count, 0) #not used, set to 0
             mf <- model.frame(formula=formula, data=data)
 	    mfE <- model.frame(formula=formulaE, data=data)
 	    mfZ <- model.frame(formula=formulaZ, data=data)
@@ -241,36 +242,40 @@ probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1
 		if(i>300){break}
 		cat(".")
             }
-	    if(prop1<.5){
+	    if(prop1<.5 & is.null(modelselect)){
 		next
+	    }else if(!is.null(modelselect)){
+	        #if model selection is occuring, return all objects needed
+		return(list(start=start,prop1=prop1, prop2=prop2, probi1=probi1, probi2=probi2, probi0=probi0,ll=ll_new, logdimdata=log(dim(data)[1])))
 	    }
-            numpeaks=length(which(probi2>peakconfidence))
-	    if(printFullOut == 1){
-		data=cbind(data,((data$exp_count>q25)^2),formatC(probi2,format="f",digits=16))
-		colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
-	    }else{
-	    	data=cbind(data[1:3],((data$exp_count>q25)^2),formatC(probi2,format="f",digits=16))
-		colnames(data)=c('chromosome','start','stop','q25','peakprob')
-	    }
-	    if(diff==0){
-		data$q25[Y-mui1<0]=0
-		if(sum(colnames(data)=='input_count')==1){data$q25[data$exp_count/(exp(data$input_count)-1)<1.5*sum(data$exp_count)/sum(exp(data$input_count)-1)]=0}
-            }
-            line = paste("\nProcessed ",files[fnum],"\n\t","Selected number of peaks: ",as.character(numpeaks),"\n\t",as.character(Sys.time()),"\t",sep='')
-    ### PRINT SIGNIFICANT WINDOWS
-            cat(line)
-            winfile = paste(winout,"_",chrm,".wins",sep="")
-            if(printflag==1){
-                write.table(data,winfile,quote=F,sep="\t",row.names=F,col.names=F,append=T)
-            }else{
-                write.table(data,winfile,quote=F,sep="\t",row.names=F)
-                printflag=1
-            }
-		rm(data); rm(Y); rm(X); rm(XNB); rm(XE);rm(XNBE);rm(probi0); rm(probi1); rm(probi2); rm(mui1); rm(mui2); rm(start); rm(prop1);gc();
-        }
-        time.end <- Sys.time()
-	cat("\n")
-        print(difftime(time.end,time.start))
-        return(winfile)
+         	   numpeaks=length(which(probi2>peakconfidence))
+	 	   if(printFullOut == 1){
+			data=cbind(data,((data$exp_count>q25)^2),formatC(probi2,format="f",digits=16)) #all non-zero set to 1
+			colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
+	 	   }else{
+	 	   	data=cbind(data[1:3],((data$exp_count>q25)^2),formatC(probi2,format="f",digits=16))
+			colnames(data)=c('chromosome','start','stop','q25','peakprob') #all non-zero set to 1
+	 	   }
+	 	   if(diff==0){
+			#if differential expression (comparing two samples) is not occuring
+			data$q25[Y-mui1<0]=0
+         	   }
+         	   line = paste("\nProcessed ",files[fnum],"\n\t","Selected number of peaks: ",as.character(numpeaks),"\n\t",as.character(Sys.time()),"\t",sep='')
+    	    ### PRINT SIGNIFICANT WINDOWS
+            	cat(line)
+            	winfile = paste(winout,"_",chrm,".wins",sep="")
+            	if(printflag==1){
+            	    write.table(data,winfile,quote=F,sep="\t",row.names=F,col.names=F,append=T)
+            	}else{
+            	    write.table(data,winfile,quote=F,sep="\t",row.names=F)
+            	    printflag=1
+            	}
+			rm(data); rm(Y); rm(X); rm(XNB); rm(XE);rm(XNBE);rm(probi0); rm(probi1); rm(probi2); rm(mui1); rm(mui2); rm(start); rm(prop1);gc();
+        	}
+
+	        time.end <- Sys.time()
+		cat("\n")
+        	print(difftime(time.end,time.start))
+        	return(winfile)
     }
 }
