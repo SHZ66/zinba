@@ -18,8 +18,9 @@ UCSC Genome Browser custom tracks).  This file is outputted from convertmappabil
             \code{\link{save}}.
           }
           \examples{
-	   #Corresponding to FAIRE example in run.zinba.  For FAIRE, four or less matches to the genome allowed, so athresh=4 rather than 1
-	   alignAdjust('mappability.wig', outDir="align/",twoBitFile,athresh=4,adjustsize=134/2)
+#Corresponding to FAIRE example in run.zinba.  For FAIRE, four or less matches to the 
+    genome allowed, so athresh=4 rather than 1
+alignAdjust('mappability.wig', outDir="align/",twoBitFile,athresh=4,adjustsize=134/2)
    
           }
           \keyword{file}

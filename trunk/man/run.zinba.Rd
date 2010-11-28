@@ -16,17 +16,19 @@ The next step uses the locations in filelist to import this built data into the 
 
 the winlist is then fed to getrefinedpeaks() if peak refinement is desired. The overlapping signficant windows above the peakconfidence threshold are merged and the SBC for these merged windows are imported and exact peak boundaries are determined and outputted to outfile.peaks.   
           }
-          \usage{run.zinba(
-	buildwin=1,refinepeaks=1,method='mixture',threshold=0.01,peakconfidence=.8,outfile=NULL,twoBit=NULL,numProc=1,			#general options
-	seq=NULL,filelist=NULL,input="none",filetype="bowtie",align=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,extension,	#build windows options
-	formula=NULL,formulaE=NULL,formulaZ=NULL,initmethod='count',printFullOut=0,tol=10^-5,								#analysis options
-	basecountfile=NULL,pWinSize=200,pquant=0.75,diff=0,cleanup=FALSE)									#peak refinement options
+          \usage{run.zinba(buildwin=1,refinepeaks=1,seq=NULL,input="none",filelist=NULL,align=NULL,
+    filetype="bowtie",winSize=250,offset=0,cnvWinSize=100000,twoBit=NULL,
+    cnvOffset=0,extension,method='mixture',numProc=1,formula=NULL,formulaE=NULL,
+    formulaZ=NULL,outfile=NULL,basecountfile=NULL,threshold=0.01,
+    peakconfidence=.99,tol=10^-5,winGap=0,pWinSize=200,pquant=1,printFullOut=0, 
+    initmethod='count',diff=0,cleanup=FALSE,selectmodel=NULL, 
+    selectchr=NULL, selecttype="dirty", selectcovs=NULL)
 	}					
           \arguments{
 	    \item{buildwin}{Default value is 1, specifying to build the window files from the raw data.  Raw data corresponds to the mapped sample reads, raw mapped input reads (if available), the current build of the human genome and the alignabilty directory.  A value of 0 specifies you would like to skip this step and use an existing filelist (corresponding to a previously built set of window data)}
             \item{refinepeaks}{Whether exact boundaries of peaks within merged significantly enriched regions is requested (default), otherwise  set to 0.  Helps to isolate punctuate, sharp peaks.}
 	    \item{method}{If 'mixture' is selected, the mixture regression model approach is used (must specify formula and formulaE). If 'pscl' is specified, then only needs to specify formula.  Pscl is an adhoc method that is used on FAIRE data}
-	    \item{peakconfidence}{Posterior probability threshold for signfificant windows if method='mixture'.  Higher is more stringent, must be between 0 and 1. Must be specified if method=mixture, if method='pscl' then can leave blank.  }
+	    \item{peakconfidence}{Posterior probability threshold for signfificant windows if method='mixture'.  Higher is more stringent, must be between 0 and 1. Must be specified if method=mixture, if method='pscl' then ignore this parameter.  }
 	    \item{threshold}{FDR threshold for significant windows for pscl method, lower is more stringent.  Must be specified if method='pscl'.  If method='mixture' then can leave blank.  }
 	    \item{outfile}{Prefix used to denote the .wins, .winlist and .peaks files that are outputted by zinba}
 	    \item{twoBit}{Path to build of the genome your reads were mapped to, in .2bit format}
@@ -36,14 +38,18 @@ the winlist is then fed to getrefinedpeaks() if peak refinement is desired. The 
 	    \item{input}{OPTIONAL. Path to mapped input reads if buildwin=1, formatted as either 'bed', 'tagAlign', or 'bowtie'.  If left blank, then defaults to 'none'}
 	    \item{filetype}{Format of mapped sample and input reads.  'bed' is files in the standard .bed format, 'tagAlign' signifies those in .taf format, and 'bowtie' signifies mapped reads directly outputted from bowtie.  Default is 'bowtie'}
 	    \item{align}{Path to directory containing alignability files for each chromsome, obtained from alignAdjust (check how these files are generated) or downloadd from our respository.  Alignability information is specific to the uniquness threshold one used to initially filter their mapped reads and the length of the sequence tags used}
-	    \item{winSize}{OPTIONAL.  Window size for build window data, default=500bp}
+	    \item{winSize}{OPTIONAL.  Window size for build window data, default=250 bp}
 	    \item{offset}{OPTIONAL. Bp offset, default is no offsets (offset=0).  If one's winSize is 500 and would like 4 equally spaced offsets, then specifying offset=125 would achieve this}
 	    \item{cnvWinSize}{OPTIONAL. Size of windows used to calculate CNV activity in sample, default size is 100000}
 	    \item{cnvOffset}{OPTIONAL. Offset for CNV windows, typically 2500bp is suffcient, although default is no offsets}
 	    \item{extension}{Average length of fragments in fragment library used, typically around 200}
 	    \item{formula}{Specifies the formula desired to model the background component of counts.  Must begin with "exp_count~"  (without quotes) and end with a set of desired covariates separated by "+" or "*" (without quotes). The covariates could be input_count (input), gcPerc (gc percentage), exp_cnvwin_log (cnv estimate), and align_perc (alignability estimate).  The "+" indicates linear addition of terms, and "*" indicates linear addition of terms plus an interaction between the terms.  Examples:  If sufficiently sequenced input is present, exp_count~input_count.  If no input is present, exp_count~gcPerc+exp_cnvwin_log+align_perc is sufficient. }
 	    \item{formulaE}{Only used if method is "mixture".  Specifies the formula desired to model the enriched component.  If one is unsure about making assumptions about the relationship with covarites and enriched signal, use exp_count~1}
-	    \item{formulaZ}{Only used if method is "mixture".  Specifies the formula desired to model the zero inflated component.  If one is unsure about making assumptions about the relationship with covarites and enriched signal, leave blank and will use the model specified for background (formula)}	    
+	    \item{formulaZ}{Only used if method is "mixture".  Specifies the formula desired to model the zero inflated component.  If one is unsure about making assumptions about the relationship with covarites and enriched signal, leave blank and will use the model specified for background (formula)}	
+	    \item{selectmodel}{if TRUE, then perform model selection before mixture regression to determine best set of component covariates}   
+	    \item{selectchr}{chromsome to use for model selection typicaly a smaller one such as human chromosome 22 (selectchr="chr22")}
+	    \item{selecttype}{If "dirty" (default) then covariates for background and enriched components are determined while zero-inflation formula is held fixed with no covariates.  After background and enriched covariates are determined, the best zero inflation formula is determined given the best background and enriched covariates. If set to "complete" then all possible sets of covariates are determined (guaruntees best model will be selected but 20x longer computation time).  This option should be used if estimates of covariate effects are desired rather than just peak calling}
+	    \item{selectcovs}{Set of starting covariates to consider for model selection entered as a vector of strings representing each covariate to be used.  For example, to only consider covariates GC content, alignability, and input control then enter c("gcPerc", "align_perc", "input_count").  To only consider covariates GC content, alignability, and local background then enter c("gcPerc", "align_perc", "exp_cnvwin_log").  It is advised not to include the local background estimate in model selection unless input is not available.}
 	    \item{initmethod}{OPTIONAL.  Used only if method is "mixture".  Method of intial partitioning of windows into each component prior to mixture regression model run.  usually does nto make a difference. 'count' is default, specifies taking the windows with largest counts and classifying them intially as enriched.  'quantile' runs a quantile regression onthe data using the background covariates, takes the top residuals and assigns them as enriched.  'pscl' uses the pscl method to find likely enriched regions and assigns these windows to the enriched component. } 
 	    \item{printFullOut}{OPTIONAL. If set to 1, prints out the original dataset along with the posterior probabilities.  Otherwise, prints out only window coordinates and significance score (default)}
 	    \item{tol}{OPTIONAL. Relative tolerance for convergence, default  is 10^-5}
