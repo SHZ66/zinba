@@ -5,7 +5,9 @@
           \description{
             If peak refinement is desired after getsigwindows, the overlapping signficant windows above the peakconfidence threshold from getsigwindows() are merged. The SBC (overlapping read representaion) for these merged windows are calculated and exact peak boundaries are determined and outputted to outfile.peaks.   Automates running of basecountimport() and then feeds resulting bpout file to peakbound().
           }
-          \usage{getrefinedpeaks(winlist,basecountfile,bpout,peakout,twoBit,winSize,pWinSize=200,printFullOut=0,pquant=0.75,threshold=.01,peakconfidence=0.8,method='pscl',minscore=0)}
+          \usage{getrefinedpeaks(winlist,basecountfile,bpout,peakout,twoBit,winSize,
+    pWinSize=200,printFullOut=0,pquant=1,threshold=.01,peakconfidence=0.99,method='mixture',
+    winGap=0,minscore=0)}
           \arguments{
             \item{winlist}{the path to an existing .winlist file containing the locations of the .wins files corresponding on the outputted files from getsignwindows}
             \item{bpout}{specify file name/path for temporary file that holds matrix of overlap information generated for peak refinement}
@@ -17,8 +19,9 @@
 	    \item{peakconfidence}{posterior probability threshold  for signfiicant windows if the mixture regression model is used}
 	    \item{threshold}{FDR threshold for signfiicant windows if the pscl method is used}
 	    \item{printFullOut}{specifies the file format ouputted from getsigwindows, where 1 correspondinds to output of full dataset with posterior enrichment probability results, 0 corresponds to only genomic coordinates and posterior probabilities}
-	    \item{method}{method used to generate files in winlist, either mixture or pscl}
-	    \item{pquant}{In the peak refinement step, filters out local maximums whose height is lower than the 'pquant' quantile in the window. Use pquant=1 for selecting only the global max in a collapsed region, god for ChIP-seq datasets.  Default is .75}
+	    \item{method}{method used to generate files in winlist, either mixture (default) or pscl}
+	    \item{pquant}{In the peak refinement step, filters out local maximums whose height is lower than the 'pquant' quantile in the window. Use pquant=1 for selecting only the global max in a collapsed region, god for ChIP-seq datasets.  Default is 1}
+	    \item{winGap}{Distance threshold in b to merge windows.  Default is 0 (only adjacent or overlapping windows are merged)}
 	    \item{minscore}{minimum max height threshold for significant windows, filters out windows with max values below this point}
 }
           \seealso{

@@ -1,4 +1,4 @@
-getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfidence=.8,winout,printFullOut=0,tol=10^-5,method='pscl',initmethod, diff=0, modelselect=NULL){
+getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfidence=.99,winout,printFullOut=0,tol=10^-5,method='mixture',initmethod="count", diff=0, modelselect=NULL){
     time.start <- Sys.time()
     suppressPackageStartupMessages(library(quantreg))
     library(MASS)
