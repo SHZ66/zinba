@@ -12,7 +12,7 @@
 	    \item{covs}{Set of starting covariates to consider for model selection entered as a vector of strings representing each covariate to be used.  For example, to only consider covariates GC content, alignability, and input control then enter c("gcPerc", "align_perc", "input_count").  To only consider covariates GC content, alignability, and local background then enter c("gcPerc", "align_perc", "exp_cnvwin_log").  It is advised not to include the local background estimate in model selection unless input is not available.}
 	    \item{formulaZ}{OPTIONAL.  Formula to fix the zero-inflation component to if selection="dirty".  Default is no covariates}
 	    \item{numProc}{OPTIONAL.  Number of processors to use}
-	    \item{start}{OPTIONAL}{Start the model at a certain model number rather from just the beginning}
+	    \item{start}{OPTIONAL.  Start the model at a certain model number rather from just the beginning}
 	    \item{append}{append model selection results to an existing model file}
           }
 	  \seealso{
