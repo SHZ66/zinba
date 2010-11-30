@@ -13,13 +13,17 @@
 	    \item{formulaZ}{OPTIONAL.  Formula to fix the zero-inflation component to if selection="dirty".  Default is no covariates}
 	    \item{numProc}{OPTIONAL.  Number of processors to use}
 	    \item{start}{OPTIONAL.  Start the model at a certain model number rather from just the beginning}
-	    \item{append}{append model selection results to an existing model file}
+	    \item{append}{OPTIONAL. append model selection results to an existing model file}
           }
 	  \seealso{
             \code{\link{save}}.
           }
           \examples{
 #Corresponding to FAIRE example in run.zinba:
-covariateselect(file="builtchrom.txt", covs=c("gcPerc","align_perc"), selection="dirty",numProc=1,loc="data.model")
+covariateselect(file="FAIRE/faire_chr10_win250bp_offset0bp.txt;FAIRE/faire_chr10_win250bp_offset50bp.txt", 
+		covs=c("gcPerc","align_perc"), 
+		selection="dirty",
+		numProc=1,
+		loc="data.model")
           }
           \keyword{file}
