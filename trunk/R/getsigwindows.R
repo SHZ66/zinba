@@ -1,4 +1,4 @@
-getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfidence=.99,winout,printFullOut=0,tol=10^-5,method='mixture',initmethod="count", diff=0, modelselect=NULL){
+getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfidence=.8,winout,printFullOut=0,tol=10^-5,method='pscl',initmethod, diff=0, modelselect=NULL){
     time.start <- Sys.time()
     suppressPackageStartupMessages(library(quantreg))
     library(MASS)
@@ -15,7 +15,7 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
         suppressPackageStartupMessages(library(qvalue))
         files = unlist(strsplit(file,";"))
         for(i in 1:length(files)){
-            data=read.table(files[i], header=TRUE)
+            data=read.table(files[], header=TRUE)
             chrm = data$chromosome[1]
             mf <- model.frame(formula=formula, data=data)
             X <- model.matrix(attr(mf, "terms"), data=mf)
@@ -55,9 +55,9 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
         return(winfile)
     }else if(method=='mixture'){
 	files = unlist(strsplit(file,";"))
-        for(i in 1:length(files)){
-            fnum=i
-            data=read.table(files[i], header=TRUE)
+	fnum=1
+        while(fnum <= length(files)){
+            data=read.table(files[fnum], header=TRUE)
             chrm = data$chromosome[1]
             q25=quantile(data$exp_count, 0) #not used, set to 0
             mf <- model.frame(formula=formula, data=data)
@@ -115,8 +115,8 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
 
             #INITIALIZATION OF THE MIXTURE MODEL
            if(initmethod=='quantile'){
-	 	if(i == 1){
-	                    startprop=startenrichment(c(.15, .001), data, formula, formulaE, initmethod)
+	 	if(fnum == 1){
+	                    startprop=startenrichment(c(.15, .001), data, formula, formulaE, formulaZ, initmethod)
 	            }
 	        data2=data
 	        if(sum(colnames(data)=='input_count')==1){data2$input_count=exp(data2$input_count)-1}
@@ -128,8 +128,8 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
 		priorCOUNTweight[as.double(which(t$residuals>quantile(t$residuals,1-prop2)))]=1-10^-10
 		rm(data2)
   	   }else if(initmethod=='count'){
-		    if(i == 1){
-	                    startprop=startenrichment(c(.15, .001), data, formula, formulaE,initmethod)
+		    if(fnum == 1){
+	                    startprop=startenrichment(c(.15, .001), data, formula, formulaE,formulaZ,initmethod)
 	            }
 		    prop2=startprop
 	            prop1=1-prop2
@@ -140,7 +140,7 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
   	  }else if(initmethod=='pscl'){
             	    mf2 <- model.frame(formula=formula, data=data)
             	    X2 <- model.matrix(attr(mf2, "terms"), data=mf2)
-            	    if(i == 1){
+            	    if(fnum == 1){
                     	a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE)
 	            }else{
                         a=zeroinfl(formula, data=data,dist='negbin', EM=TRUE,start=param)
@@ -179,11 +179,11 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
             start <- list(count1 = model_count1$fitted, count2 = model_count2$fitted,zero = model_zero$fitted, zerocoef=model_zero$coefficients)
             start$theta1 <- 1
             start$theta2 <- 1
-            probi0=probi0/(probi0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
-            probi0[Y1]=0
-            
+                        
             probi1  <- (1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
             probi2  <- (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+            probi0=probi0/(probi0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+            probi0[Y1]=0
             
             NAs=which(probi1=='NaN'| probi2=='NaN')			
             if(length(NAs>0)){
@@ -202,12 +202,12 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
             i=2
             
             while(abs((ll_old - ll_new)/ll_old) > tol) {
-		#print(ll_new)
+#		print(ll_new)
                 ll_old <- ll[max(1, i-10)]
                 prop1=sum(probi1)/(sum(probi1)+sum(probi2))
                 prop2=sum(probi2)/(sum(probi1)+sum(probi2))
 		if(prop1<.5){
-			print(paste("The estimated proportion of enrichment for  ", files[fnum], " has exceeded 0.5.  This may suggest your need to 1) Swap your enrichment and background formulas or 2) check your data"))
+			print(paste("The estimated proportion of enrichment for  ", files[fnum], " has exceeded 0.5, suggesting difficulty in estimating enrichment.  Switching to more conservative model"))
 			break
 		}
                 #updated values for parameters of component means
@@ -226,11 +226,12 @@ probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1
                 mui2  <- model_count2$fitted
                 probi0 <- model_zero$fitted
 
-                probi0=probi0/(probi0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
-            	probi0[Y1]=0
+
 	        probi1  <- (1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
             	probi2  <- (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
-                NAs=which(probi1=='NaN'| probi2=='NaN')			
+                probi0=probi0/(probi0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
+                probi0[Y1]=0
+		NAs=which(probi1=='NaN'| probi2=='NaN')			
                 if(length(NAs>0)){
                         probi1[NAs]=0
                         probi2[NAs]=1
@@ -243,11 +244,23 @@ probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1
 		cat(".")
             }
 	    if(prop1<.5 & is.null(modelselect)){
+		model=paste(winout,".model",sep="")
+		if(file.exists(model)){
+			print("searching for existing model file")
+			final=read.table(model, header=T, sep="\t")
+			bestICL=which.min(final$ICL)
+			formula=as.formula(paste("exp_count~",final$formula[bestICL]))
+			formulaE=as.formula(paste("exp_count~",final$formulaE[bestICL]))
+			formulaZ=as.formula(paste("exp_count~",final$formulaZ[bestICL]))
+		}else{
+			print("model file not found, defaulting enrichment to intercept")
+			formulaZ=exp_count~1
+		}
 		next
 	    }else if(!is.null(modelselect)){
 	        #if model selection is occuring, return all objects needed
 		return(list(start=start,prop1=prop1, prop2=prop2, probi1=probi1, probi2=probi2, probi0=probi0,ll=ll_new, logdimdata=log(dim(data)[1])))
-	    }
+	    }else{
          	   numpeaks=length(which(probi2>peakconfidence))
 	 	   if(printFullOut == 1){
 			data=cbind(data,((data$exp_count>q25)^2),formatC(probi2,format="f",digits=16)) #all non-zero set to 1
@@ -270,8 +283,10 @@ probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1
             	    write.table(data,winfile,quote=F,sep="\t",row.names=F)
             	    printflag=1
             	}
-			rm(data); rm(Y); rm(X); rm(XNB); rm(XE);rm(XNBE);rm(probi0); rm(probi1); rm(probi2); rm(mui1); rm(mui2); rm(start); rm(prop1);gc();
+		fnum=fnum+1
+		rm(data); rm(Y); rm(X); rm(XNB); rm(XE);rm(XNBE);rm(probi0); rm(probi1); rm(probi2); rm(mui1); rm(mui2); rm(start); rm(prop1);gc();
         	}
+    }
 
 	        time.end <- Sys.time()
 		cat("\n")

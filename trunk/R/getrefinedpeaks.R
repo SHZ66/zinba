@@ -1,4 +1,4 @@
-getrefinedpeaks=function(winlist,basecountfile,bpout,peakout,twoBit,winSize,pWinSize=200,printFullOut=0,pquant=1,threshold=.01,peakconfidence=0.99,method='mixture',minscore=0, winGap=0, extension=200){
+getrefinedpeaks=function(winlist,basecountfile,bpout,peakout,twoBit,winSize,pWinSize=200,printFullOut=0,pquant=0.75,threshold=.01,peakconfidence=0.8,method='pscl',minscore=0, winGap=0, extension=200){
     if(!file.exists(winlist)){stop("Specified winlist doesnt exist or is not correct")}
     if(!file.exists(basecountfile)){stop("Specified basecountfile doesnt exist or is not correct")}
     if(!file.exists(twoBit)){stop("Specified twoBit file doesnt exist or is not correct")}
