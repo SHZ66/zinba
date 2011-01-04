@@ -1,4 +1,4 @@
-buildwindowdata=function(seq,input="none",align,twoBit,winSize=250,offset=0,cnvWinSize=100000,cnvOffset=2500,filelist,filetype="bowtie",extension=NULL, outdir="default"){
+buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,filelist,filetype="bowtie",extension, outdir="default"){
 	if(!file.exists(align)){
 		stop(paste("Specified Alignability directory not found,",align,sep=" "))
 	}else{
