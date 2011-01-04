@@ -27,21 +27,21 @@ failure=glm_nb(N, M, 1,y, prior, offset, X,stratum, maxit, conv,init,
 	    rank,Xb,fitted, resid, weights, 
 	    scale, df_resid, Rtheta);
 		if (failure == 1) {
-    			//Rprintf("Glm.nb : Failure to converge\n");
+    			Rprintf("Glm.nb : Failure to converge\n");
 		} 
 } else if(family==2){
 failure=glm_fit(POISSON, LOG, N, M, 1,y, prior, offset, X,stratum, maxit, conv,init, 
 	    rank,Xb,fitted, resid, weights, 
 	    scale, df_resid, theta);
 		if (failure == 1) {
-    			//Rprintf("Poisson : Failure to converge\n");
+    			Rprintf("Poisson : Failure to converge\n");
 		} 
 } else if(family==1){
 failure=glm_fit(BINOMIAL, LOGIT, N, M, 1,y, prior, offset, X,stratum, maxit, conv,init, 
 	    rank,Xb,fitted, resid, weights, 
 	    scale, df_resid, theta);
 		if (failure == 1) {
-    			//Rprintf("Binomial : Failure to converge\n");
+    			Rprintf("Binomial : Failure to converge\n");
 		} 
 }
 
