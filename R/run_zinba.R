@@ -59,7 +59,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
                 peakout=paste(outfile,".peaks",sep="")
                 bpout=paste(outfile_subpath,".bpcount",sep="")
 
-	if(is.null(selectmodel)){
+	if(is.null(selectmodel) | selectmodel==FALSE){
 		if(is.null(formulaE)){
 			formulaE=exp_count~1
 		}
@@ -72,7 +72,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 		if(!inherits(formula, "formula")) cat("Check your background component formula, not entered as a formula object")
 	        if(!inherits(formulaE, "formula")) cat("Check your enrichment component formula, not entered as a formula object")
 	        if(!inherits(formulaZ, "formula")) cat("Check your zero-inflated component formula, not entered as a formula object")
-	}else{
+	}else if(selectmodel==TRUE){
 		#start optional model selection
 		if(is.null(selectchr)) stop("need to specify which chromosome to apply model selection to")
 		if(is.null(selectcovs)) stop("need to specify which covariates to use in model selection")
