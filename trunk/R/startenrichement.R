@@ -66,8 +66,7 @@ startenrichment=function(range, data, formula,formulaE, formulaZ, initmethod){
 		data2=data
 	        if(sum(colnames(data)=='input_count')==1){data2$input_count=exp(data2$input_count)-1}
 		if(sum(colnames(data)=='exp_cnvwin_log')==1){data2$exp_cnvwin_log=exp(data2$exp_cnvwin_log)-1}
-		prop2=startprop
-            	prop1=1-prop2
+         	prop1=1-prop2
 		t=rq(formula, tau=1-prop2, data=data2, method='pfn')
 		priorCOUNTweight=rep(10^-10, length(Y))      
 		priorCOUNTweight[as.double(which(t$residuals>quantile(t$residuals,1-prop2)))]=1-10^-10
