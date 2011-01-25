@@ -254,7 +254,7 @@ probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1
 			formulaZ=as.formula(paste("exp_count~",final$formulaZ[bestICL]))
 		}else{
 			print("model file not found, defaulting enrichment to intercept")
-			formulaZ=exp_count~1
+			formulaE=exp_count~1
 		}
 		next
 	    }else if(!is.null(modelselect)){
