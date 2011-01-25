@@ -97,9 +97,12 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 		formula=model[[1]]
 		formulaE=model[[2]]
 		formulaZ=model[[3]]
-		print(paste("Background formula is ", as.character(formula)))
-		print(paste("Enrichment formula is ", as.character(formulaE)))
-		print(paste("Zero-inflated formula is ", as.character(formulaZ)))
+		cat("Background formula is:\n\t") 
+			print(formula)
+		cat("Enrichment formula is:\n\t") 
+			print(formulaE)
+		cat("Zero-inflated formula is:\n\t") 
+			print(formulaE)
 		cat(paste("--------MODEL SELECTION COMPLETE--------",as.character(Sys.time()),"\n\n")) 
 	}	
 	 
