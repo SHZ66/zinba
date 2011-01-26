@@ -1,4 +1,4 @@
-getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfidence=.8,winout,printFullOut=0,tol=10^-5,method='pscl',initmethod, diff=0, modelselect=NULL){
+getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfidence=.8,winout,printFullOut=0,tol=10^-5,method='pscl',initmethod, diff=0, modelselect=NULL, trace=0){
     time.start <- Sys.time()
     suppressPackageStartupMessages(library(quantreg))
     library(MASS)
@@ -57,6 +57,7 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
 	files = unlist(strsplit(file,";"))
 	fnum=1
         while(fnum <= length(files)){
+	    fail=0
             data=read.table(files[fnum], header=TRUE)
             chrm = data$chromosome[1]
             q25=quantile(data$exp_count, 0) #not used, set to 0
@@ -107,9 +108,9 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
             linkinv <- linkobj$linkinv
 
             #starting params for ze0 component
-           model_zero <-.C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(XNBZ)), y=as.double(Y0), prior=as.double(rep(1,n)), offset=as.double
-(rep(0,n)), X=as.double(unlist(XNBZ)),  stratum=as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), Xb=double(n*ncol(XNBZ)), fitted=as.double((rep(1,n) * Y0 + 0.5)/(rep
-(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
+           model_zero <-.C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(XNBZ)), as.double(Y0), as.double(rep(1,n)), as.double
+(rep(0,n)), as.double(unlist(XNBZ)),  as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), double(n*ncol(XNBZ)), fitted=as.double((rep(1,n) * Y0 + 0.5)/(rep
+(1,n) + 1)), double(n), double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
 
 
 
@@ -167,8 +168,8 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
     	  }
             
 
-	    model_count1 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(1-priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
-            model_count2 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNBE)), y=as.double(Y), prior=as.double(priorCOUNTweight), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNBE)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNBE)), fitted=as.double(Y+(Y==0)/6), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
+	    model_count1 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), as.double(Y), as.double(1-priorCOUNTweight), as.double(rep(0,length(Y))), as.double(unlist(XNB)),  as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), double(length(Y)*ncol(XNB)), fitted=as.double(Y+(Y==0)/6), double(length(Y)), double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
+            model_count2 <- .C("pglm_fit", family=as.integer(2), N=as.integer(length(Y)), M=as.integer(ncol(XNBE)), as.double(Y), as.double(priorCOUNTweight), as.double(rep(0,length(Y))), as.double(unlist(XNBE)),  as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1),double(length(Y)*ncol(XNBE)), fitted=as.double(Y+(Y==0)/6), double(length(Y)), double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')
             
             #starting prior probs
             mui1  <- model_count1$fitted
@@ -202,22 +203,27 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
             i=2
             
             while(abs((ll_old - ll_new)/ll_old) > tol) {
-#		print(ll_new)
                 ll_old <- ll[max(1, i-10)]
                 prop1=sum(probi1)/(sum(probi1)+sum(probi2))
                 prop2=sum(probi2)/(sum(probi1)+sum(probi2))
+		if(trace==1){             
+                        print(c(ll_new, prop2))
+                }
+
 		if(prop1<.5){
 			print(paste("The estimated proportion of enrichment for  ", files[fnum], " has exceeded 0.5, suggesting difficulty in estimating enrichment.  Switching to more conservative model"))
 			break
 		}
                 #updated values for parameters of component means
                  
-                model_zero <- .C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(XNBZ)), y=as.double(probi0), prior=as.double(rep(1,n)), 
-offset=as.double(rep(0,n)), X=as.double(unlist(XNBZ)),  stratum=as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), Xb=double(n*ncol(XNBZ)), fitted=as.double((rep(1,n)*
-probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')    
-                model_count1 <- .C("pglm_fit", family=as.integer(0), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), y=as.double(Y), prior=as.double(probi1), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNB)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNB)), fitted=as.double(start$count1), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(start$theta1), package='zinba')  
-                model_count2 <- .C("pglm_fit", family=as.integer(0), N=as.integer(length(Y)), M=as.integer(ncol(XNBE)), y=as.double(Y), prior=as.double(probi2), offset=as.double(rep(0,length(Y))), X=as.double(unlist(XNBE)),  stratum=as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), Xb=double(length(Y)*ncol(XNBE)), fitted=as.double(start$count2), resid=double(length(Y)), weights=double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(start$theta2), package='zinba')  
+                model_zero <- .C("pglm_fit", family=as.integer(1), N=as.integer(length(Y)), M=as.integer(ncol(XNBZ)),as.double(probi0), as.double(rep(1,n)), 
+as.double(rep(0,n)), as.double(unlist(XNBZ)),  as.integer(rep(1,n)),init=as.integer(1), rank=integer(1), double(n*ncol(XNBZ)), fitted=as.double((rep(1,n)*
+probi0 + 0.5)/(rep(1,n) + 1)), double(n), double(n),scale=double(1), df_resid=integer(1), theta=as.double(-1), package='zinba')    
+                model_count1 <- .C("pglm_fit", family=as.integer(0), N=as.integer(length(Y)), M=as.integer(ncol(XNB)), as.double(Y), as.double(probi1), as.double(rep(0,length(Y))), as.double(unlist(XNB)),  as.integer(rep(1,length(Y))),init=as.integer(1), rank=integer(1), double(length(Y)*ncol(XNB)), fitted=as.double(start$count1), double(length(Y)), double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(start$theta1), package='zinba')  
+                model_count2 <- .C("pglm_fit", family=as.integer(0), N=as.integer(length(Y)), M=as.integer(ncol(XNBE)), as.double(Y), as.double(probi2), as.double(rep(0,length(Y))), as.double(unlist(XNBE)),  as.integer(rep(1,length(Y))),init=as.integer(1), 
+rank=integer(1), double(length(Y)*ncol(XNBE)), fitted=as.double(start$count2), double(length(Y)), double(length(Y)),scale=double(1), df_resid=integer(1), theta=as.double(start$theta2), package='zinba')  
 
+		#check for invalid fitted values, continue to next file if foun
                 start <- list(count1 = model_count1$fitted, count2 = model_count2$fitted,zero = model_zero$fitted, zerocoef=model_zero$coefficients)
                 start$theta1 <- model_count1$theta
                 start$theta2 <- model_count2$theta
@@ -226,11 +232,17 @@ probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1
                 mui2  <- model_count2$fitted
                 probi0 <- model_zero$fitted
 
+                if(any(!is.finite(mui1)) | any(!is.finite(mui2)) | any(!is.finite(probi0))){
+                        fail=1
+			break
+                }
 
 	        probi1  <- (1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
             	probi2  <- (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
                 probi0=probi0/(probi0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
                 probi0[Y1]=0
+
+		#extremely large counts can lead to small denominators in calculation of probi1, probi2
 		NAs=which(probi1=='NaN'| probi2=='NaN')			
                 if(length(NAs>0)){
                         probi1[NAs]=0
@@ -243,7 +255,11 @@ probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1
 		if(i>300){break}
 		cat(".")
             }
-	    if(prop1<.5 & is.null(modelselect)){
+	    
+	    if(fail==1){
+		fnum=fnum+1
+		next
+	    }else if(prop1<.5 & is.null(modelselect)){
 		model=paste(winout,".model",sep="")
 		if(file.exists(model)){
 			print("searching for existing model file")
@@ -256,7 +272,7 @@ probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1
 			print("model file not found, defaulting enrichment to intercept")
 			formulaE=exp_count~1
 		}
-		next
+	    	next
 	    }else if(!is.null(modelselect)){
 	        #if model selection is occuring, return all objects needed
 		return(list(start=start,prop1=prop1, prop2=prop2, probi1=probi1, probi2=probi2, probi0=probi0,ll=ll_new, logdimdata=log(dim(data)[1])))

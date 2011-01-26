@@ -1,4 +1,4 @@
-startenrichment=function(range, data, formula,formulaE, formulaZ, initmethod){
+startenrichment=function(range, data, formula,formulaE, formulaZ, initmethod, trace=0){
 	library(zinba)
 	suppressPackageStartupMessages(library(quantreg))
             mf <- model.frame(formula=formula, data=data)
@@ -66,7 +66,8 @@ startenrichment=function(range, data, formula,formulaE, formulaZ, initmethod){
 		data2=data
 	        if(sum(colnames(data)=='input_count')==1){data2$input_count=exp(data2$input_count)-1}
 		if(sum(colnames(data)=='exp_cnvwin_log')==1){data2$exp_cnvwin_log=exp(data2$exp_cnvwin_log)-1}
-         	prop1=1-prop2
+		prop2=startprop
+            	prop1=1-prop2
 		t=rq(formula, tau=1-prop2, data=data2, method='pfn')
 		priorCOUNTweight=rep(10^-10, length(Y))      
 		priorCOUNTweight[as.double(which(t$residuals>quantile(t$residuals,1-prop2)))]=1-10^-10
@@ -138,7 +139,10 @@ probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1
                 mui2  <- model_count2$fitted
                 probi0 <- model_zero$fitted
 
-
+		if(any(!is.finite(mui1)) | any(!is.finite(mui2)) | any(!is.finite(probi0))){
+                        fail=1
+                       	break
+                }
 	        probi1  <- (1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)/(probi0*Y0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
             	probi2  <- (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
                 probi0=probi0/(probi0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
@@ -156,6 +160,7 @@ probi0 + 0.5)/(rep(1,n) + 1)), resid=double(n), weights=double(n),scale=double(1
 		}
 		result[k]=ll_new
 	}
+	if(trace==1) print(result)
 	return(probs[which.max(result)])
 	rm(data); rm(Y); rm(X); rm(XNB); rm(XZ); rm(XNBZ); rm(XE);rm(XNBE);rm(probi0); rm(probi1); rm(probi2); rm(mui1); rm(mui2); rm(start); rm(prop1); rm(prop2);gc();
 }
