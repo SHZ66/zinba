@@ -256,7 +256,7 @@ rank=integer(1), double(length(Y)*ncol(XNBE)), fitted=as.double(start$count2), d
 		cat(".")
             }
 	    
-	    if(fail==1){
+	    if(fail==1 &  is.null(modelselect)){
 		fnum=fnum+1
 		next
 	    }else if(prop1<.5 & is.null(modelselect)){
