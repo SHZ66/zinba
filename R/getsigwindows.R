@@ -122,7 +122,7 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
 	        data2=data
 	        if(sum(colnames(data)=='input_count')==1){data2$input_count=exp(data2$input_count)-1}
 		if(sum(colnames(data)=='exp_cnvwin_log')==1){data2$exp_cnvwin_log=exp(data2$exp_cnvwin_log)-1}
-		prop2=startprop
+		prop2=max(c(startprop, 350/n))
             	prop1=1-prop2
 		t=rq(formula, tau=1-prop2, data=data2, method='pfn')
 		priorCOUNTweight=rep(10^-10, length(Y))      
@@ -132,7 +132,7 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
 		    if(fnum == 1){
 	                    startprop=startenrichment(c(.15, .001), data, formula, formulaE,formulaZ,initmethod)
 	            }
-		    prop2=startprop
+		    prop2=max(c(startprop, 350/n))
 	            prop1=1-prop2
 	            n1  = round(length(Y) * (1 - prop2))
 		    priorCOUNTweight=rep(1-10^-10, length(Y))
