@@ -101,7 +101,7 @@ int glm_fit(int family, int link, int N, int M, int S,
     weights[i] = wi;
     resid[i] = ri;
 
-    if (weights[i] <= 1e-10) weights[i] = 0.;
+    if (weights[i] <= 0.) weights[i] = 0.;
   }
 	
   /* If M>0, include covariates */
@@ -174,7 +174,7 @@ int glm_fit(int family, int link, int N, int M, int S,
 	      
 	    weights[i] = wi;
 	    resid[i] = ri;
-	    if (weights[i] <= 1e-10) weights[i] = 0.;
+	    if (weights[i] <= 0.) weights[i] = 0.;
 	  }
 	}
 	convg =/* (family==2) ||*/ (Nu<=0) || (iter && (fabs(wss-wss_last)/wss_last < conv));
