@@ -49,7 +49,8 @@ void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **R
 			found = expSeqFile.find_last_of(".");
 			found2 = expSeqFile.find_last_of("/");
 			outfile_prefix = outdir+expSeqFile.substr(found2+1,found-found2-1);
-		}		
+		}
+		Rprintf("Printing output to %s \n", outfile_prefix.c_str());
 		ret = newAnalysis.processSignals(zWinSize,zOffsetSize,cWinSize,cOffsetSize,alignDir,twoBitFile,inSeqFile,outfile_prefix,filelist,extension,filetype);
 		if(ret == 1){
 			Rprintf("ERROR: building windows was unsuccssful\n");
