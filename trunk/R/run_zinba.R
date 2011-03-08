@@ -136,7 +136,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 	    }else{
 		#merge windows only
 		cat(paste("--------MERGE WINDOWS --------",as.character(Sys.time()),"\n"))
-		collapsewindows(winlist=winlist,printFullOut=printFullOut,threshold=thresholds,method=method, winGap=winGap)
+		collapsewindows(winlist=winlist,printFullOut=printFullOut,thresholds=threshold,method=method, winGap=winGap)
 	    }
 		
 	}
