@@ -1,4 +1,4 @@
-getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfidence=.8,winout,printFullOut=0,tol=10^-5,method='pscl',initmethod, diff=0, modelselect=NULL, trace=0){
+getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfidence=.8,winout,printFullOut=0,tol=10^-5,method='pscl',initmethod, diff=0, modelselect=FALSE, trace=0, FDR=FALSE){
     time.start <- Sys.time()
     suppressPackageStartupMessages(library(quantreg))
     library(MASS)
@@ -59,6 +59,7 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
 	retry=0	#flag for retrial of offset
         while(fnum <= length(files)){
 	    fail=0 #failure flag for GLM, reset to zero for each offset
+#	    print(files[fnum])
             data=read.table(files[fnum], header=TRUE)
             chrm = data$chromosome[1]
             q25=quantile(data$exp_count, 0) #not used, set to 0
@@ -235,6 +236,7 @@ rank=integer(1), double(length(Y)*ncol(XNBE)), fitted=as.double(start$count2), d
 
                 if(any(!is.finite(mui1)) | any(!is.finite(mui2)) | any(!is.finite(probi0))){
                         fail=1
+			print(paste("none finite values obtained, likely failure of GLMs in", files[fnum]))
 			break
                 }
 
@@ -242,14 +244,14 @@ rank=integer(1), double(length(Y)*ncol(XNBE)), fitted=as.double(start$count2), d
             	probi2  <- (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2)/(probi0*Y0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
                 probi0=probi0/(probi0+(1-probi0)*prop1*dnbinom(Y, size = start$theta1, mu = mui1)+ (1-probi0)*prop2*dnbinom(Y, size = start$theta2, mu = mui2))
                 probi0[Y1]=0
-		probi1[probi1<10^-10]=10^-10
-		probi2[probi2<10^-10]=10^-10
 		#extremely large counts can lead to small denominators in calculation of probi1, probi2
 		NAs=which(probi1=='NaN'| probi2=='NaN')			
                 if(length(NAs>0)){
-                        probi1[NAs]=0
+                        probi1[NAs]=10^-10
                         probi2[NAs]=1
                 }
+		probi1[probi1<10^-10]=10^-10
+                probi2[probi2<10^-10]=10^-10
 
                 ll_new <- loglikfun(list(start=start, prop1=prop1, prop2=prop2))
                 ll[i]=ll_new
@@ -258,15 +260,15 @@ rank=integer(1), double(length(Y)*ncol(XNBE)), fitted=as.double(start$count2), d
 		cat(".")
             }
 	    
-	    if(!is.null(modelselect)){
+	    if(modelselect==TRUE){
 	        #if model selection is occuring, return all objects needed
 		#note that we need to state that failure has occurred when we update ZINBA for model selection
-		return(list(start=start,prop1=prop1, prop2=prop2, probi1=probi1, probi2=probi2, probi0=probi0,ll=ll_new, logdimdata=log(dim(data)[1])))
-	    }else if(fail==1 &  is.null(modelselect) & fnum<length(files)){
+		return(list(start=start,prop1=prop1, prop2=prop2, probi1=probi1, probi2=probi2, probi0=probi0,ll=ll_new, logdimdata=log(dim(data)[1]), fail=(prop1<.5)^2))
+	    }else if(fail==1 &  modelselect==FALSE & fnum<length(files)){
 		#if GLM function fails, skip to next offset, fail is reset at start
 		fnum=fnum+1
 		next
-	    }else if(prop1<.5 & is.null(modelselect) & fnum<length(files)){
+	    }else if(prop1<.5 & modelselect==FALSE & fnum<length(files)){
 		#retry offset, do not go to next offset until # tries exceeds 2		
 		#model did not converge, switch to more convervative ICL model 
 		#if model selection file is available, otherwise switch to more
@@ -274,7 +276,7 @@ rank=integer(1), double(length(Y)*ncol(XNBE)), fitted=as.double(start$count2), d
 		#and state that model selection needs to be performed with this chrm
 		model=paste(winout,".model",sep="")
 		if(file.exists(model) & retry==0){
-			print("using for existing model file")
+			print("using ICL existing model file")
 			final=read.table(model, header=T, sep="\t")
 			bestICL=which.min(final$ICL)
 			formula=as.formula(paste("exp_count~",final$formula[bestICL]))
@@ -302,20 +304,29 @@ rank=integer(1), double(length(Y)*ncol(XNBE)), fitted=as.double(start$count2), d
 		stop("no offsets converged successfully")
 	    }else{
 		   #success, print peaks
-         	   numpeaks=length(which(probi2>peakconfidence))
+		   p=1-probi2
+		   p2=rep(0,length(p))
+		   p2[order(p)]=cumsum(p[order(p)])/(1:length(p))
+
+		   if(FDR){
+			numpeaks=length(which(p2<threshold))
+		   }else{
+         	   	numpeaks=length(which(probi2>peakconfidence))
+		   }
+
 	 	   if(printFullOut == 1){
-			data=cbind(data,((data$exp_count>q25)^2),formatC(probi2,format="f",digits=16)) #all non-zero set to 1
-			colnames(data)[c(dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob')
+				data=cbind(data,((data$exp_count>q25)^2),formatC(probi2,format="f",digits=16), formatC(p2,format="f",digits=16)) #all non-zero set to 1
+				colnames(data)[c(dim(data)[2]-2 ,dim(data)[2]-1,dim(data)[2])]=c('q25','peakprob','qvalue')
 	 	   }else{
-	 	   	data=cbind(data[1:3],((data$exp_count>q25)^2),formatC(probi2,format="f",digits=16))
-			colnames(data)=c('chromosome','start','stop','q25','peakprob') #all non-zero set to 1
+	 	   	data=cbind(data[1:3],((data$exp_count>q25)^2),formatC(probi2,format="f",digits=16), formatC(p2,format="f",digits=16))
+			colnames(data)=c('chromosome','start','stop','q25','peakprob','qvalue') #all non-zero set to 1
 	 	   }
 	 	   if(diff==0){
 			#if differential expression (comparing two samples) is not occuring
 			data$q25[Y-mui1<0]=0
          	   }
          	   line = paste("\nProcessed ",files[fnum],"\n\t","Selected number of peaks: ",as.character(numpeaks),"\n\t",as.character(Sys.time()),"\t",sep='')
-    	    ### PRINT SIGNIFICANT WINDOWS
+    	    ### PRINT WINDOWS
             	cat(line)
             	winfile = paste(winout,"_",chrm,".wins",sep="")
             	if(printflag==1){

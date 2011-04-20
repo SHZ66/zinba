@@ -80,7 +80,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	int printFlag = 0;
 	int getChrmData = 0;
 	unsigned short int collectData = 0;
-	list<coord>::iterator i = coordOUT_slist.begin();
+	list<coord2>::iterator i = coordOUT_slist.begin();
 	unsigned short int * basepair = NULL;
 	unsigned short int * profile = NULL;
 	unsigned long int countBases = 250000000;
@@ -110,7 +110,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 							profile[pIndex] = basepair[s];
 							pIndex++;
 						}
-						if(outputData( outputFile,printFlag,i->chrom,startPos,stopPos,i->sigVal,pIndex,profile) != 0){
+						if(outputData( outputFile,printFlag,i->chrom,startPos,stopPos,i->sigVal,i->qVal,pIndex,profile) != 0){
 							cout << "Error printing output to file, exiting" << endl;
 							return 1;
 						}
@@ -189,7 +189,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 					profile[pIndex] = basepair[s];
 					pIndex++;
 				}
-				if(outputData( outputFile,printFlag,i->chrom,startPos,stopPos,i->sigVal,pIndex,profile) != 0){
+				if(outputData( outputFile,printFlag,i->chrom,startPos,stopPos,i->sigVal,i->qVal,pIndex,profile) != 0){
 					cout << "Error printing output to file, exiting" << endl;
 					return 1;
 				}
@@ -208,7 +208,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	return 0;
 }
 
-int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,double pSigVal,int printStop,unsigned short int pProfile[]){
+int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,double pSigVal, double pqVal,int printStop,unsigned short int pProfile[]){
 	FILE * fh;
 	if(pFlag == 0){
 		fh = fopen(outputFile,"w");
@@ -216,7 +216,7 @@ int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pC
 			cout << "Unable to open output file: " << outputFile << endl;
 			return 1;
 		}
-		fprintf(fh,"COORDID\tCHROM\tSTART\tSTOP\tSTRAND\tSIGVAL");
+		fprintf(fh,"COORDID\tCHROM\tSTART\tSTOP\tSTRAND\tSIGVAL\tQVAL");
 		for(int p = 1;p <= printStop;p++){
 			fprintf(fh,"\tPosition%i",p);
 		}
@@ -236,7 +236,7 @@ int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pC
 	sprintf( start,"%lu", pStart);
 	sprintf( stop,"%lu", pStop);
 	strcpy(winID,chromName);strcat(winID,":");strcat(winID,start);strcat(winID,"-");strcat(winID,stop);
-	fprintf(fh,"%s\t%s\t%lu\t%lu\t%s\t%.14f",winID,chromName,pStart,pStop,strand,pSigVal);
+	fprintf(fh,"%s\t%s\t%lu\t%lu\t%s\t%.14f\t%.14f",winID,chromName,pStart,pStop,strand,pSigVal,pqVal);
 	for(int posP = 0; posP < printStop;posP++){
 		fprintf(fh,"\t%i",pProfile[posP]);
 	}
@@ -271,7 +271,7 @@ const char * analysis::getKey(unsigned short int chrom){
 	}
 }
 
-int analysis::importCoords(const char *winlist,double threshold,const char *method,int wformat, int winGap){
+int analysis::importCoords(const char *winlist,double threshold,const char *method,int wformat, int winGap, int FDR){
 	
 	const char *pscl = "pscl";
 	const char *mixture = "mixture";
@@ -281,7 +281,7 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 		rval = importPscl(winlist,threshold,wformat);
 	}else if(strcmp(method,mixture) == 0){
 		cout << "Getting significant regions from mixture run" << endl;
-		rval = importMixture(winlist,threshold,wformat);
+		rval = importMixture(winlist,threshold,wformat,FDR);
 	}else{
 		cout << "ERROR: method must be either pscl OR mixture" << endl;
 		return 1;
@@ -290,11 +290,11 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 	if(rval == 0){
 		cout << "\nImported " << coordIN_slist.size() << " coordinates" << endl;
 		coordIN_slist.sort();
-		list<coord>::iterator back =  coordIN_slist.begin();
+		list<coord2>::iterator back =  coordIN_slist.begin();
 		///////////////////////////
 		unsigned long int winSizeThresh = (back->end - back->start) * 10;
 		//////////////////////////
-		coord tempCoord = *back;
+		coord2 tempCoord = *back;
 		coordIN_slist.erase(back++);
 		int flagFinish = 0;
 		
@@ -303,10 +303,16 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 				flagFinish = 1;
 			if(flagFinish == 0 && back->chrom == tempCoord.chrom && back->start <= tempCoord.end+1+winGap){
 				tempCoord.end = back->end;
-				if(strcmp(method,pscl) == 0 && tempCoord.sigVal > back->sigVal)
+				if(strcmp(method,pscl) == 0 && tempCoord.sigVal > back->sigVal){
 					tempCoord.sigVal = back->sigVal;
-				else if(strcmp(method,mixture) == 0 && tempCoord.sigVal < back->sigVal)
+				}else if(strcmp(method,mixture) == 0 && tempCoord.sigVal < back->sigVal & FDR==0){
 					tempCoord.sigVal = back->sigVal;
+					tempCoord.qVal = back->qVal;
+				}else if(strcmp(method,mixture) == 0 && tempCoord.qVal < back->sigVal & FDR==1){
+					tempCoord.sigVal = back->sigVal;
+					tempCoord.qVal = back->qVal;
+				}
+
 				coordIN_slist.erase(back++);
 			}else{
 //				if((tempCoord.end-tempCoord.start) <= winSizeThresh){
@@ -378,7 +384,7 @@ int analysis::importPscl(const char *winlist,double threshold,int wformat){
 						if(qFlag == 1){
 							string chromIn(cChrom);
 							unsigned short int chromInt = getHashValue(chromIn.c_str());
-							coord c(chromInt,iStart,iEnd,qFlag,sigVal);
+							coord2 c(chromInt,iStart,iEnd,qFlag,sigVal,sigVal);
 							coordIN_slist.push_back(c);
 						}
 					}
@@ -394,7 +400,7 @@ int analysis::importPscl(const char *winlist,double threshold,int wformat){
 	return 0;
 }
 
-int analysis::importMixture(const char *winlist,double threshold,int wformat){
+int analysis::importMixture(const char *winlist,double threshold,int wformat, int FDR){
 
 	FILE * wlist;
 	wlist = fopen(winlist,"r");
@@ -407,6 +413,7 @@ int analysis::importMixture(const char *winlist,double threshold,int wformat){
 	unsigned long int iEnd;
 	unsigned short int qFlag;
 	double sigVal;	
+	double qVal;
 	char sigFile [256];
 	int readResult = 0;
 	char firstline [256];
@@ -424,23 +431,34 @@ int analysis::importMixture(const char *winlist,double threshold,int wformat){
 				fgets(firstline,256,fh);
 				while(!feof(fh)){
 					readResult = 0;
-					if(wformat == 0){
-						rwline = fscanf(fh,"%s%lu%lu%hu%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal);
-						if(sigVal >= threshold && rwline == 5){
+					if(wformat == 0 & FDR==0){
+						rwline = fscanf(fh,"%s%lu%lu%hu%lf%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal,&qVal);
+						if(sigVal >= threshold && rwline == 6){
 							readResult = 1;
 						}
-					}else if(wformat == 1){
-						rwline = fscanf(fh,"%s%lu%lu%d%lf%lf%lf%lf%hu%lf",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal);
-						if(sigVal >= threshold && rwline == 10){
+					}else if(wformat == 1 & FDR==0){
+						rwline = fscanf(fh,"%s%lu%lu%d%lf%lf%lf%lf%hu%lf%lf",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal,&qVal);
+						if(sigVal >= threshold && rwline == 11){
+							readResult = 1;
+						}
+					}else if(wformat == 0 & FDR==1){
+						rwline = fscanf(fh,"%s%lu%lu%hu%lf%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal,&qVal);
+						if(qVal <= threshold && rwline == 6){
+							readResult = 1;
+						}
+					}else if(wformat == 1 & FDR==1){
+						rwline = fscanf(fh,"%s%lu%lu%d%lf%lf%lf%lf%hu%lf%lf",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal,&qVal);
+						if(qVal <= threshold && rwline == 11){
 							readResult = 1;
 						}
 					}
 					
+					//Rprintf("chrom %s start %lu stop %lu qflag %d pp %lf qval %lf thresh %f readres %d FDR %d\n", cChrom,iStart,iEnd,qFlag,sigVal,qVal, threshold, readResult, FDR);
 					if(readResult == 1){
 						if(qFlag == 1){
 							string chromIn(cChrom);
 							unsigned short int chromInt = getHashValue(chromIn.c_str());
-							coord c(chromInt,iStart,iEnd,qFlag,sigVal);
+							coord2 c(chromInt,iStart,iEnd,qFlag,sigVal,qVal);
 							coordIN_slist.push_back(c);
 						}
 					}
@@ -455,3 +473,4 @@ int analysis::importMixture(const char *winlist,double threshold,int wformat){
 	fclose(wlist);
 	return 0;
 }
+

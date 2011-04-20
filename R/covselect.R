@@ -101,7 +101,7 @@ covanal=function(file, formula, formulaE, formulaZ,i,loc, size){
 	#k is sum of the number of covariates within each component + the rest is fixed regardless of the model (intercepts always used in each component + two dispersion parameters)
 	k=sum(attr(terms(formula),"order"))+sum(attr(terms(formulaE),"order"))+sum(attr(terms(formulaZ),"order"))+ (3+2)
 	mix0=getsigwindows(file=file,formula=formula,formulaE=formulaE,formulaZ=formulaZ,method='mixture',initmethod="count",modelselect=TRUE)	
-	write.table(t(c(i,as.character(formula)[3], as.character(formulaE)[3], as.character(formulaZ)[3],-2*mix0$ll+k*mix0$logdimdata, 2*k-2*mix0$ll,-2*mix0$ll+sum(-2*mix0$probi0*log(mix0$probi0 + (mix0$probi0==0))-2*mix0$probi1*log(mix0$probi1 + (mix0$probi1==0))-2*mix0$probi2*log(mix0$probi2 + (mix0$probi2==0)))+k*mix0$logdimdata,k,mix0$ll)),file=loc,quote=F, append=T, row.names=F,col.names=F, sep="\t")
+	write.table(t(c(i,as.character(formula)[3], as.character(formulaE)[3], as.character(formulaZ)[3],-2*mix0$ll+k*mix0$logdimdata, 2*k-2*mix0$ll,-2*mix0$ll+sum(-2*mix0$probi0*log(mix0$probi0 + (mix0$probi0==0))-2*mix0$probi1*log(mix0$probi1 + (mix0$probi1==0))-2*mix0$probi2*log(mix0$probi2 + (mix0$probi2==0)))+k*mix0$logdimdata,k,mix0$ll, mix0$fail)),file=loc,quote=F, append=T, row.names=F,col.names=F, sep="\t")
 	rm(mix0)		
 	gc()
 	cat(paste("\nmodel ",i," completed out of ",size,"\t"))
@@ -185,7 +185,7 @@ print(formulas)
 if(selection=="complete"){
 	index=start:(length(formulas)^3)
 	if(!append){
-		write.table(t(c("i","formula", "formulaE", "formulaZ","BIC","AIC","ICL","k","ll")),loc,quote=F, append=F,  row.names=F, 	col.names=F, sep="\t")
+		write.table(t(c("i","formula", "formulaE", "formulaZ","BIC","AIC","ICL","k","ll", "fail")),loc,quote=F, append=F,  row.names=F, 	col.names=F, sep="\t")
 	}
  		registerDoMC(numProc)
  		mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
@@ -197,8 +197,7 @@ if(selection=="complete"){
 }else if(selection=="dirty"){
 	if(is.null(formulaZ)) formulaZ=exp_count~1 
 	index=start:(length(formulas)^2)
-	write.table(t(c("i","formula", "formulaE", "formulaZ","BIC","AIC","ICL","k","ll")),loc,quote=F, append=F, row.names=F, 	col.names=F, sep="\t")
-
+	write.table(t(c("i","formula", "formulaE", "formulaZ","BIC","AIC","ICL","k","ll","fail")),loc,quote=F, append=F, row.names=F, 	col.names=F, sep="\t")
  	registerDoMC(numProc)
  	mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
  	getDoParWorkers()
@@ -206,6 +205,7 @@ if(selection=="complete"){
                      covanal(file=file,formula=formulas[[ceiling(i/length(formulas))]],formulaE=formulas[[i-(ceiling(i/length(formulas))-1)*length(formulas)]],formulaZ=formulaZ,i=i,loc=loc, size=length(formulas)^2)
 	#now pick best zero-inflated formula given bg and enrichd covariates
 	final=read.table(loc, header=T, sep="\t")
+	final=final[final$fail==0,]
 	bestBIC=which.min(final$BIC)
 	formvector=c(
 	as.formula(paste("exp_count~",final$formula[bestBIC])),
@@ -223,6 +223,7 @@ if(selection=="complete"){
 } 
 
 final=read.table(loc, header=T, sep="\t")
+final=final[final$fail==0,]
 bestBIC=which.min(final$BIC)
 formvector=c(
 as.formula(paste("exp_count~",final$formula[bestBIC])),

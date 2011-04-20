@@ -426,12 +426,6 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			for(int ch = chr_size[currchr]; ch--;)
 				ibasepair[ch] = 0;
 
-			while(input_slist[i].chrom!=currchr){
-				i++;
-			}
-			input_slist.erase(input_slist.begin(),input_slist.begin()+i);
-			i = 0;
-			
 			while(input_slist[i].chrom==currchr && i < (int) input_slist.size()){
 				ibasepair[input_slist[i].pos]++;
 				i++;
@@ -462,7 +456,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			char winsize[128];
 			sprintf(winsize,"%d",zWinSize);			
 			outfileDATA = outfile + "_" + chromReport + "_win" + string(winsize) + "bp_offset" + string(offset) + "bp.txt";
-
+			
 			if(o == (numOffsets-1))
 				fprintf(tempTB,"%s\n",outfileDATA.c_str());
 			else

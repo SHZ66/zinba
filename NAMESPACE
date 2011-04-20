@@ -29,6 +29,7 @@ export(getwindowcounts)
 export(run)
 export(signalnoise)
 export(rc.wins)
+export(zinba)
 # ------------------------------------------
 # S3method declarations.  
 # ------------------------------------------

@@ -33,6 +33,7 @@ SEXP peakboundc(SEXP f, SEXP bpprofile, SEXP outputfile, SEXP rho){
 
 /////////////////
 double sig;
+double qVal;
 /////////////////
 	
   for(j=0; j<MAX_LEN;j++){
@@ -56,7 +57,7 @@ double sig;
     }
 
 //print headers to file
-sprintf(line, "PEAKID\tChrom\tStart\tStop\tStrand\tSig\tMaxloc\tMax\tpStart\tpStop\tMedian\n");
+sprintf(line, "PEAKID\tChrom\tStart\tStop\tStrand\tSig\tMaxloc\tMax\tpStart\tpStop\tMedia\tqValuen\n");
 fputs(line, FO);
 
 
@@ -80,14 +81,13 @@ int m=0;
       }else if(i==5){
         strcpy(strand, ptr);
       }else if(i==6){
-		  sig = atof(ptr);
-	  }else if(i>6){
-		  basecount[i-7]  = atoi(ptr);
-//	  }else if(i>5){
-//        basecount[i-6]  = atoi(ptr);
+	sig = atof(ptr);
+      }else if(i==7){
+	qVal= atof(ptr);
+      }else if(i>7){
+		  basecount[i-8]  = atoi(ptr);
       }
-//      lbasecount=i-5;
-		lbasecount=i-6; 
+      lbasecount=i-7; 
     } while ((ptr = strtok(NULL, delim)) != NULL);
   }else{
     error("%s is not tab-delimated\n", input);
@@ -244,7 +244,7 @@ int pos=0;
 
 for(i=0;i<=h;i++){
 	med=torben(basecount, lbasecount,results[2*i],results[2*i+1]);
-	sprintf(line, "%s\t%s\t%d\t%d\t%s\t%.14f\t%d\t%d\t%d\t%d\t%d\n",ID, chr, pstart, pstop, strand,sig ,pstart+hmaxvec[i],basecount[hmaxvec[i]],pstart+results[2*i],pstart+results[2*i+1], med);
+	sprintf(line, "%s\t%s\t%d\t%d\t%s\t%.14f\t%d\t%d\t%d\t%d\t%d\t%.14f\n",ID, chr, pstart, pstop, strand,sig ,pstart+hmaxvec[i],basecount[hmaxvec[i]],pstart+results[2*i],pstart+results[2*i+1], med, qVal);
 	fputs(line, FO);
 }
 
@@ -290,13 +290,15 @@ if(fgets(str_buf, MAX_LEN, FI2) == NULL){
       }else if(i==5){
         strcpy(strand, ptr);
       }else if(i==6){
-		  sig = atof(ptr);
-	 }
+	sig = atof(ptr);
+      }else if (i==12){
+	qVal=atof(ptr);
+      }
     } while ((ptr = strtok(NULL, delim)) != NULL);
   }else{
     error("%s is not tab-delimated\n", input);
   }
-  sprintf(line, "%s\t%d\t%d\t%s\t%.14f\t%s\n", chr, pstart, pstop, ID,sig ,strand);
+  sprintf(line, "%s\t%d\t%d\t%s\t%.14f\t%s\t%.14f\n", chr, pstart, pstop, ID,sig ,strand,qVal);
   fputs(line, FO2);
 }
 
