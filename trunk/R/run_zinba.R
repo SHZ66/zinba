@@ -1,4 +1,15 @@
-run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=2500,basecountfile=NULL,threshold=0.01,peakconfidence=.95,tol=10^-5,numProc=1,buildwin=1, winGap=0,pWinSize=200,pquant=1,refinepeaks=1,printFullOut=0,method='mixture',initmethod='count',diff=0,filetype="bowtie",extension, cleanup=FALSE, selectmodel=FALSE, selectchr=NULL, selecttype="dirty", selectcovs=NULL){
+run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,
+		winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,
+		numProc=1,buildwin=1, winGap=0,pWinSize=200,pquant=1,refinepeaks=1,printFullOut=0,method='pscl',initmethod='count',
+		diff=0,filetype="bowtie",extension, cleanup=FALSE, selectmodel=FALSE, selectchr=NULL, selecttype="dirty", selectcovs=NULL, FDR=FALSE){
+	
+	parameters=list(filelist=filelist,formula=formula,formulaE=formulaE,formulaZ=formulaZ,outfile=outfile,seq=seq,align=align,input=input,twoBit=twoBit,
+                winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset,basecountfile=basecountfile,threshold=threshold,peakconfidence=peakconfidence,tol=tol,
+                numProc=numProc,buildwin=buildwin, winGap=winGap,pWinSize=pWinSize,pquant=pquant,refinepeaks=refinepeaks,printFullOut=printFullOut,method=method,initmethod=initmethod,
+                diff=diff,filetype=filetype,extension=extension, cleanup=cleanup, selectmodel=selectmodel, selectchr=selectchr, selecttype=selecttype, selectcovs=selectcovs, FDR=FDR)
+	print("parameters in effect:")
+	print(parameters)
+
         rmc <- require(multicore)
         rdmc <- require(doMC)
         rfor <- require(foreach)
@@ -57,7 +68,8 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
                 params=scan(filelist,what=character(0),quiet=T)
 	        winlist=paste(outfile_subpath,".winlist",sep="")
                 peakout=paste(outfile,".peaks",sep="")
-                bpout=paste(outfile_subpath,".bpcount",sep="")
+                broadpeakout=paste(outfile,".peaks.broad.bed",sep="")
+		bpout=paste(outfile_subpath,".bpcount",sep="")
 
 	if(selectmodel==FALSE){
 		if(is.null(formulaE)){
@@ -112,9 +124,10 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
                 registerDoMC(numProc)
                 mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
                 getDoParWorkers()
-                winfiles <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,.errorhandling="remove",.options.multicore = mcoptions) %dopar%
-                    getsigwindows(file=params[i],formula=formula,formulaE=formulaE,formulaZ=formulaZ,threshold=threshold,winout=outfile_subpath,peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,initmethod=initmethod)
-            
+                winfiles <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,.errorhandling="remove",.options.multicore = mcoptions) %dopar%{
+			getsigwindows(file=params[i],formula=formula,formulaE=formulaE,formulaZ=formulaZ,threshold=threshold,winout=outfile_subpath,
+			peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,initmethod=initmethod, FDR=FDR)
+                }
                 write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)
 	    cat(paste("--------WINDOW ANALYSIS COMPLETE--------",as.character(Sys.time()),"\n\n"))		
             
@@ -122,7 +135,8 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 	    #if parallelization fails due to lack of packages, resort to non-parallelized version
 	    cat(paste("--------GETTING ENRICHED WINDOWS--------",as.character(Sys.time()),"\n\n")) 	
                 for(i in 1:length(params)){
-                    wfile <- getsigwindows(file=params[i],formula=formula,formulaE=formulaE,threshold=threshold,winout=outfile,peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,initmethod=initmethod)
+                    wfile <- 
+getsigwindows(file=params[i],formula=formula,formulaE=formulaE,threshold=threshold,winout=outfile,peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,initmethod=initmethod, FDR=FDR)
                     winfiles <- rbind(wfile)
                 }
 	    cat(paste("--------WINDOW ANALYSIS COMPLETE--------",as.character(Sys.time()),"\n\n"))		
@@ -132,11 +146,12 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 	    if(refinepeaks==1){
 		#merge windows and refine regions		
 		cat(paste("--------MERGE WINDOWS AND REFINE PEAKS (no parallelization)--------",as.character(Sys.time()),"\n"))
-		getrefinedpeaks(winlist=winlist,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,winSize=winSize,pWinSize=pWinSize,pquant=pquant,printFullOut=printFullOut,peakconfidence=peakconfidence,threshold=threshold,method=method, winGap=winGap, extension=extension)
+		getrefinedpeaks(winlist=winlist,basecountfile=basecountfile,bpout=bpout,peakout=peakout,twoBit=twoBit,winSize=winSize,pWinSize=pWinSize,pquant=pquant,printFullOut=printFullOut,peakconfidence=peakconfidence,threshold=threshold,method=method, 
+winGap=winGap, extension=extension, FDR=FDR)
 	    }else{
 		#merge windows only
 		cat(paste("--------MERGE WINDOWS --------",as.character(Sys.time()),"\n"))
-		collapsewindows(winlist=winlist,printFullOut=printFullOut,thresholds=threshold,method=method, winGap=winGap)
+		collapsewindows(winlist=winlist,printFullOut=printFullOut,thresholds=threshold,method=method, winGap=winGap, FDR=FDR, output=broadpeakout)
 	    }
 		
 	}

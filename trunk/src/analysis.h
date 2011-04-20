@@ -4,7 +4,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
-#include "coord.h"
+#include "coord2.h"
 #include <map>
 #include <list>
 #include <ext/slist>
@@ -19,11 +19,11 @@ class analysis{
 	
 		analysis(); //Implemented
 		~analysis(); //Implemented
-		int importCoords(const char *,double,const char *,int, int);//Implemented
+		int importCoords(const char *,double,const char *,int, int, int);//Implemented
 		int processCoords(const char *,const char *,const char *,const char *);//Implemented
-		int outputData(const char *,int,unsigned short int,unsigned long int,unsigned long int,double,int,unsigned short int[]);//Implemented
+		int outputData(const char *,int,unsigned short int,unsigned long int,unsigned long int,double,double, int,unsigned short int[]);//Implemented
 		int importPscl(const char *,double,int);
-		int importMixture(const char *,double,int);
+		int importMixture(const char *,double,int,int);
 	
 		struct ltstr{
 			bool operator()(const char* s1, const char* s2) const
@@ -34,8 +34,8 @@ class analysis{
 
 	private:
 		
-		list<coord> coordIN_slist;//Implemented
-		list<coord> coordOUT_slist;//Implemented
+		list<coord2> coordIN_slist;//Implemented
+		list<coord2> coordOUT_slist;//Implemented
 	
 		unsigned short int chromCounter;//Implemented
 		unsigned short int getHashValue(const char *);//Implemented
