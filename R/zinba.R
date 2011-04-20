@@ -41,6 +41,7 @@ refinepeaks=1,printFullOut=0,filetype="bowtie",extension=NULL,broad=FALSE){
 		align=align,
 		numProc=numProc,
 		seq=seq,
+		input=input,
 		basecountfile=basecountfile,
 		filetype=filetype,
 		offset=125,
