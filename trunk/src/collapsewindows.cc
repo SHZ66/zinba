@@ -82,7 +82,7 @@ RlengthThresholds,double thresholds[], int *RwinGap, int *RFDR, const char ** Ro
 				highThresh = thresholds[t];
 		}
 	}else if(strcmp(method,mixture) == 0 & FDR==1){
-                highThresh = 1;
+                highThresh = 0;
                 for(int t = 0; t < lengthThresholds; t++){
                         if(thresholds[t] > highThresh)
                                 highThresh = thresholds[t];
@@ -243,7 +243,7 @@ RlengthThresholds,double thresholds[], int *RwinGap, int *RFDR, const char ** Ro
 			sprintf( stop,"%lu", back->end);
 //			strcpy(winID,chromName.c_str());strcat(winID,":");strcat(winID,start);strcat(winID,"-");strcat(winID,stop);
 //			fprintf(fh,"%s\t%s\t%lu\t%lu\t%s\t%.14f\n",winID,chromName.c_str(),back->start,back->end,strand,back->sigVal);
-			fprintf(fh,"%s\t%lu\t%lu\t%s\t%.14f\t%.14f\n",chromName.c_str(),back->start,back->end,strand,back->sigVal,back->sigVal);
+			fprintf(fh,"%s\t%lu\t%lu\t%s\t%.14f\t%.14f\n",chromName.c_str(),back->start,back->end,strand,back->sigVal,back->qVal);
 			back++;
 		}
 		fclose (fh);
