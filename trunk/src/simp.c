@@ -57,7 +57,7 @@ double qVal;
     }
 
 //print headers to file
-sprintf(line, "PEAKID\tChrom\tStart\tStop\tStrand\tSig\tMaxloc\tMax\tpStart\tpStop\tMedia\tqValue\n");
+sprintf(line, "PEAKID\tChrom\tStart\tStop\tStrand\tSig\tMaxloc\tMax\tpStart\tpStop\tMedian\tqValue\n");
 fputs(line, FO);
 
 
