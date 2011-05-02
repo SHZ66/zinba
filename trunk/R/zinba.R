@@ -7,7 +7,6 @@ refinepeaks=1,printFullOut=0,filetype="bowtie",extension=NULL,broad=FALSE){
 	if(!file.exists(input) & input!="none"){stop("sequencing file does not exist at the specified path, check path for errors")}
 	if(!file.exists(twoBit)){stop(".2bit file does not exist at the specified path, check path for errors")}
 	if(is.null(basecountfile) & refinepeaks==1){stop("basecount file needs to be specified for peak refinement")}
-	if(!file.exists(basecountfile) & refinepeaks==1){stop("basecount file does not exist at the specified path, check path for errors")}
 	if(is.null(extension)){stop("sequencing read extension length (average length of fragment library) needs to be specified")}
 
 	buildwin=1
