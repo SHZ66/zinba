@@ -131,12 +131,12 @@ RlengthThresholds,double thresholds[], int *RwinGap, int *RFDR, const char ** Ro
 				}else if(strcmp(method,mixture) == 0 & FDR==1){
                                         if(wformat == 0){
                                                 rwline = fscanf(fh,"%s%lu%lu%hu%lf%lf",cChrom,&iStart,&iEnd,&qFlag,&sigVal,&qVal);
-                                                if(sigVal <= highThresh && rwline == 6)
+                                                if(qVal <= highThresh && rwline == 6)
                                                         readResult = 1;
                                         }else if(wformat == 1){
                                                 int exp;double inp,gc,ap,ecl;
                                                 rwline = fscanf(fh,"%s%lu%lu%d%lf%lf%lf%lf%hu%lf%lf",cChrom,&iStart,&iEnd,&ec,&ic,&gc,&ap,&cnv,&qFlag,&sigVal,&qVal);
-                                                if(sigVal <= highThresh && rwline== 11)
+                                                if(qVal <= highThresh && rwline== 11)
                                                         readResult = 1;
                                         }
                                 }
