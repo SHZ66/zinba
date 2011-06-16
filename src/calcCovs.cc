@@ -53,6 +53,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		currchr = signal_slist[0].chrom;
 		const char * chromReport = getKey(currchr);
 		cout << "\nProcessing " << chromReport << endl;
+		cout << "\tInitializing to length " << chr_size[currchr] << endl;
 		basepair = new unsigned short int[chr_size[currchr]+1];
 		for(int ch = chr_size[currchr]; ch--;)
 			basepair[ch] = 0;
@@ -509,6 +510,8 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			if(outputData(outfileDATA.c_str(),currchr) != 0){
 				cout << "Error printing output to file, exiting" << endl;
 				exit(1);
+			}else{
+				cout << "\tPrinted out data to " << outfileDATA << endl;
 			}
 			
 		}
@@ -609,6 +612,7 @@ int calcCovs::importRawSignal(const char * signalFile,int extension,const char *
 		unsigned long int cStart;
 		while(!feof(tempTB)){
 			int ret = fscanf(tempTB,"%s%lu",cChrom,&cStart);
+			cout << "\t\tFor " << cChrom << " length is " << cStart << endl;
 			unsigned short int chromInt = getHashValue(cChrom);
 			chr_size[chromInt] = cStart;
 		}
@@ -653,6 +657,7 @@ int calcCovs::importRawSignal(const char * signalFile,int extension,const char *
 
 int calcCovs::importBowtie(const char * signalFile,int extension,int dataType){
 	
+	cout << "\tImporting bowtie formatted reads" << endl;
 	FILE * fh;
 	fh = fopen(signalFile,"r");
 	if(fh == NULL){
@@ -668,6 +673,7 @@ int calcCovs::importBowtie(const char * signalFile,int extension,int dataType){
 	char name[128];char sscore[128];int ival;
 	int extend = (int)(extension/2);
 	int rval;
+	int num_skip = -1;
 
 	while(!feof(fh)){
 		rval = fscanf(fh,"%s%s%s%lu%s%s%i",name,strand,cChrom,&pos,seq,sscore,&ival);
@@ -691,14 +697,18 @@ int calcCovs::importBowtie(const char * signalFile,int extension,int dataType){
 				signal_slist.push_back(sig);
 			else if(dataType == 1)
 				input_slist.push_back(sig);
+		}else{
+			num_skip++;
 		}
 	}
 	fclose(fh);
+	cout << "\tSkipped " << num_skip << " reads" << endl;
 	return 0;
 }
 
 int calcCovs::importTagAlign(const char * signalFile,int extension,int dataType){
 	
+	cout << "\tImporting tagAlign formatted reads" << endl;
 	FILE * fh;
 	fh = fopen(signalFile,"r");
 	if(fh == NULL){
@@ -714,6 +724,7 @@ int calcCovs::importTagAlign(const char * signalFile,int extension,int dataType)
 	char seq[128];int score;
 	int extend = (int)(extension/2);
 	int rval;
+	int num_skip = -1;
 	
 	while(!feof(fh)){
 		rval = fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,seq,&score,strand);
@@ -736,14 +747,18 @@ int calcCovs::importTagAlign(const char * signalFile,int extension,int dataType)
 				signal_slist.push_back(sig);
 			else if(dataType == 1)
 				input_slist.push_back(sig);
+		}else{
+			num_skip++;
 		}
 	}
 	fclose(fh);
+	cout << "\tSkipped " << num_skip << " reads" << endl;
 	return 0;
 }
 
 int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 	
+	cout << "\tImporting bed formatted reads" << endl;
 	FILE * fh;
 	fh = fopen(signalFile,"r");
 	if(fh == NULL){
@@ -759,6 +774,7 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 	char name[128];int bscore;
 	int extend = (int)(extension/2);
 	int rval;
+	int num_skip = -1;
 	
 	while(!feof(fh)){
 		rval = fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,name,&bscore,strand);
@@ -781,9 +797,12 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 				signal_slist.push_back(sig);
 			else if(dataType == 1)
 				input_slist.push_back(sig);
+		}else{
+			num_skip++;
 		}
 	}
 	fclose(fh);
+	cout << "\tSkipped " << num_skip << " reads" << endl;
 	return 0;
 }
 
@@ -811,8 +830,8 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 	char sysCall[256];
 	
 	unsigned short int currchr = 999;
-	unsigned short int * basepair = NULL;
-	unsigned short int * ibasepair = NULL;
+	unsigned int * basepair = NULL;
+	unsigned int * ibasepair = NULL;
 	unsigned char * gcContent = NULL;	
 	unsigned char * alignability = NULL;
 	int i;
@@ -826,7 +845,7 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 		currchr = signal_slist[0].chrom;
 		const char * chromReport = getKey(currchr);
 		cout << "\nProcessing " << chromReport << endl;
-		basepair = new unsigned short int[chr_size[currchr]+1];
+		basepair = new unsigned int[chr_size[currchr]+1];
 		for(int ch = chr_size[currchr]; ch--;)
 			basepair[ch] = 0;
 

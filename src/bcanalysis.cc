@@ -35,12 +35,14 @@ int bcanalysis::processSignals(const char* outputFile,int extend){
 	unsigned int * basepair = NULL;
 	unsigned short int printFLAG = 0;
 	unsigned long int aStart,aStop;
+	cout << "Processing " << signal_slist.size() << " reads" << endl;
 	
 	while(!signal_slist.empty()){
 		i = 0;
 		currchr = signal_slist[0].chrom;
 		chromReport = getKey(currchr);
 		cout << "\tProcessing " << chromReport << ".........." << endl;
+		cout << "\t\tInitializing length to " << chr_size[currchr] << endl;
 //		basepair = new unsigned short int[chr_size[currchr]+1];
 		basepair = new unsigned int[chr_size[currchr]+1];
 		for(int in = chr_size[currchr]; in--;)
@@ -55,9 +57,13 @@ int bcanalysis::processSignals(const char* outputFile,int extend){
 				basepair[rpos]++;
 			i++;
 		}
+		cout << "\t\t" << i << " reads mapped to " << chromReport << endl;
 
-		if(outputData(outputFile,currchr,printFLAG,basepair) != 0)
+		if(outputData(outputFile,currchr,printFLAG,basepair) != 0){
 			return 1;
+		}else{
+			cout << "\t\tPrinted results to " << outputFile << endl;
+		}
 		printFLAG = 1;
 		delete [] basepair;
 		basepair = NULL;
@@ -155,6 +161,7 @@ int bcanalysis::importRawSignal(const char * signalFile,int extension,const char
 		unsigned long int cStart;
 		while(!feof(tempTB)){
 			int ret = fscanf(tempTB,"%s%lu",cChrom,&cStart);
+			cout << "\t\tFor " << cChrom << " length is " << cStart << endl;
 			unsigned short int chromInt = getHashValue(cChrom);
 			chr_size[chromInt] = cStart;
 		}
@@ -183,6 +190,7 @@ int bcanalysis::importRawSignal(const char * signalFile,int extension,const char
 		cout << "\tLoaded " << signal_slist.size() << " reads" << endl;
 		cout << "\tSorting reads ...";
 		sort (signal_slist.begin(), signal_slist.end());
+		cout << "COMPLETE" << endl;
 	}else{
 		cout << "Stopping basealigncounts" << endl;
 		return 1;
@@ -192,10 +200,11 @@ int bcanalysis::importRawSignal(const char * signalFile,int extension,const char
 
 int bcanalysis::importBowtie(const char * signalFile,int extension){
 	
+	cout << "\nLoading bowtie formatted reads" << endl;
 	FILE * fh;
 	fh = fopen(signalFile,"r");
 	if(fh == NULL){
-		cout << "ERROR: Unable to open file containing reads " << signalFile << endl;
+		cout << "\nERROR: Unable to open file containing reads " << signalFile << endl;
 		return 1;
 	}
 	
@@ -206,6 +215,7 @@ int bcanalysis::importBowtie(const char * signalFile,int extension){
 	char line[512];char seq[128];
 	char name[128];char sscore[128];int ival;
 	int rval;
+	int num_skip = -1;
 	
 	while(!feof(fh)){
 		rval = fscanf(fh,"%s%s%s%lu%s%s%i",name,strand,cChrom,&pos,seq,sscore,&ival);
@@ -221,14 +231,18 @@ int bcanalysis::importBowtie(const char * signalFile,int extension){
 //			bwRead sig(chromInt,pos,sval);
 			bwRead sig(chromInt,pos);
 			signal_slist.push_back(sig);
+		}else{
+			num_skip++;
 		}
 	}
 	fclose(fh);
+	cout << "\tSkipped " << num_skip << " reads" << endl;
 	return 0;
 }
 
 int bcanalysis::importTagAlign(const char * signalFile,int extension){
 	
+	cout << "\nLoading tagAlign formatted reads" << endl;
 	FILE * fh;
 	fh = fopen(signalFile,"r");
 	if(fh == NULL){
@@ -243,6 +257,7 @@ int bcanalysis::importTagAlign(const char * signalFile,int extension){
 	unsigned long int start;unsigned long int stop;
 	char seq[128];int score;
 	int rval;
+	int num_skip = -1;
 	
 	while(!feof(fh)){
 		rval = fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,seq,&score,strand);
@@ -259,14 +274,18 @@ int bcanalysis::importTagAlign(const char * signalFile,int extension){
 //			bwRead sig(chromInt,pos,sval);
 			bwRead sig(chromInt,pos);
 			signal_slist.push_back(sig);
+		}else{
+			num_skip++;
 		}
 	}
 	fclose(fh);
+	cout << "\tSkipped " << num_skip << " reads" << endl;
 	return 0;
 }
 
 int bcanalysis::importBed(const char * signalFile,int extension){
 	
+	cout << "\nLoading bed formatted reads" << endl;
 	FILE * fh;
 	fh = fopen(signalFile,"r");
 	if(fh == NULL){
@@ -282,6 +301,7 @@ int bcanalysis::importBed(const char * signalFile,int extension){
 	unsigned long int start;unsigned long int stop;
 	char name[128];int bscore;
 	int rval;
+	int num_skip = -1;
 	
 	while(!feof(fh)){
 		rval = fscanf(fh,"%s%lu%lu%s%i%s",cChrom,&start,&stop,name,&bscore,strand);
@@ -298,9 +318,12 @@ int bcanalysis::importBed(const char * signalFile,int extension){
 //			bwRead sig(chromInt,pos,sval);
 			bwRead sig(chromInt,pos);
 			signal_slist.push_back(sig);
+		}else{
+			num_skip++;
 		}
 	}
 	fclose(fh);
+	cout << "\tSkipped " << num_skip << " reads" << endl;
 	return 0;
 }
 

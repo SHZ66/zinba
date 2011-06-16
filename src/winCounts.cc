@@ -38,7 +38,7 @@ int winCounts::processSignalsWC(const char * twoBitFile,const char * outfile){
 	char sysCall[256];
 	
 	unsigned short int currchr = 999;
-	unsigned short int * basepair = NULL;
+	unsigned int * basepair = NULL;
 	int i;
 	int wcount = 0;
 	int printflag = 0;
@@ -48,8 +48,9 @@ int winCounts::processSignalsWC(const char * twoBitFile,const char * outfile){
 		currchr = signal_slist[0].chrom;
 		const char * chromReport = getKey(currchr);
 		cout << "\nProcessing " << chromReport << endl;
+		cout << "\tLength is " << chr_size[currchr] << endl;
 		
-		basepair = new unsigned short int[chr_size[currchr]+1];
+		basepair = new unsigned int[chr_size[currchr]+1];
 		for(int ch = chr_size[currchr]; ch--;)
 			basepair[ch] = 0;
 
@@ -90,6 +91,10 @@ int winCounts::outputDataWC(const char * outputFile, unsigned short int currChr,
 		fprintf(fh,"REGID\tCHROM\tSTART\tSTOP\tSTRAND\tSCORE\tWIN_COUNT\n");
 	}else{
 		fh = fopen(outputFile,"a");
+	}
+	if(fh == NULL){
+		cout << "\nERROR: Can't open output file: " << outputFile << endl;
+		return 1;
 	}
 	const char * chrom = getKey(currChr);
 	char winID[255];
@@ -178,6 +183,7 @@ int winCounts::importRawSignalWC(const char * signalFile,int extension,const cha
 		unsigned long int cStart;
 		while(!feof(tempTB)){
 			int ret = fscanf(tempTB,"%s%lu",cChrom,&cStart);
+			cout << "\tFor " << cChrom << " length is " << cStart << endl;
 			unsigned short int chromInt = getHashValue(cChrom);
 			chr_size[chromInt] = cStart;
 		}
@@ -186,12 +192,15 @@ int winCounts::importRawSignalWC(const char * signalFile,int extension,const cha
 		tbSizeFlag = 1;
 	}
 
+	cout << "\nImporting reads from " << signalFile << endl;
 	int rval = importBowtieWC(signalFile,extension);
 	if(rval == 0){
 		cout << "\tImported " << signal_slist.size() << " reads" << endl;
 		cout << "\tSorting reads ...";
 		sort (signal_slist.begin(), signal_slist.end());
 		cout << "COMPLETE" << endl;
+	}else{
+		return 1;
 	}
 	return 0;
 }
@@ -213,6 +222,7 @@ int winCounts::importBowtieWC(const char * signalFile,int extension){
 	char name[128];char sscore[128];int ival;
 	int extend = (int)(extension/2);
 	int rval;
+	int num_skip = -1;
 
 	while(!feof(fh)){
 		rval = fscanf(fh,"%s%s%s%lu%s%s%i",name,strand,cChrom,&pos,seq,sscore,&ival);
@@ -233,9 +243,12 @@ int winCounts::importBowtieWC(const char * signalFile,int extension){
 //			bwRead sig(chromInt,pos,sval);
 			bwRead sig(chromInt,pos);
 			signal_slist.push_back(sig);
+		}else{
+			num_skip++;
 		}
 	}
 	fclose(fh);
+	cout << "\tSkipped " << num_skip << " reads" << endl;
 	return 0;
 }
 	
@@ -251,6 +264,7 @@ int winCounts::importCoordsWC(const char *coordfile){
 	int rwline;
 	
 	FILE * cfile;
+	cout << "\tOpening coord file " << coordfile << endl;
 	cfile = fopen(coordfile,"r");
 	if(cfile == NULL){
 		cout << "ERROR: opening window list file" << endl;
@@ -269,8 +283,9 @@ int winCounts::importCoordsWC(const char *coordfile){
 	}
 	fclose(cfile);
 	
+	cout << "\nImported " << coord_slist.size() << " coordinates.....\nSorting coords......." << endl;
 	coord_slist.sort();
-	cout << "\nImported " << coord_slist.size() << " coordinates....." << endl;
+	cout << "COMPLETE" << endl;
 	return 0;
 }
 

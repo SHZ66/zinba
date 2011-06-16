@@ -26,21 +26,19 @@ void readcountWindows(char **RseqFile,char **RcoordFile,char **Routfile,char **R
 	Rprintf("\nImporting reads from file %s \n", seqFile.c_str());
 	ret=newAnalysis.importRawSignalWC(seqFile.c_str(),extension,twoBitFile);
 
-	if(ret == 1){
-		Rprintf("ERROR opening file %s \n",seqFile.c_str());
-	}else{
+	if(ret == 0){
 		Rprintf("\nImporting coordinates from file %s \n", coordFile.c_str());		
 		ret = newAnalysis.importCoordsWC(coordFile.c_str());
-		if(ret == 1){
-			Rprintf("ERROR opening file %s \n",coordFile.c_str());			
-		}else{
+		if(ret == 0){
 			Rprintf("\nGetting reads counts in windows\n");
 			ret = newAnalysis.processSignalsWC(twoBitFile,outfile.c_str());
-			if(ret == 1){
-				Rprintf("ERROR: counting was unsuccssful\n");
-			}
 		}
 	}
-	Rprintf("\n\n--------READ COUNT IN WINDOWS COMPLETE-------\n\n");
+
+	if(ret != 0){
+		Rprintf("\n\n--------READ COUNT IN WINDOWS EXITING WITH ERRORS----------------\n\n");
+	}else if (ret == 0){
+		Rprintf("\n\n--------READ COUNT IN WINDOWS COMPLETE-------\n\n");
+	}
 }
 }

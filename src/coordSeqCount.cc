@@ -26,12 +26,13 @@ void coordSeqCount(char **Rsbpcfile,char ** Rcoordfile,char **Routputfile, char 
 	if(ret == 0){
 		Rprintf("Getting basecount data from %s\n",sbpcFile);
 		ret = newAnalysis.processCoords(sbpcFile,outputFile,twobitfile);
-		if(ret == 1)
-			Rprintf("\nERROR occurred in processing\n");
-	}else{
-		Rprintf("\nERROR occurred in processing exiting\n");
 	}
-	Rprintf("\ncoordSeqCount COMPLETE\n");
+	
+	if(ret != 0){
+		Rprintf("\ncoordSeqCount EXITING with ERRORS\n");		
+	}else if (ret == 0){
+		Rprintf("\ncoordSeqCount SUCCESSFULLY COMPLETE\n");
+	}
 
 }
 }
