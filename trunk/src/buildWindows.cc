@@ -33,10 +33,12 @@ void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **R
 	int ret;
 	calcCovs newAnalysis;// = new analysis;
 	Rprintf("\nImporting reads from file %s \n", expSeqFile.c_str());
+	Rprintf("\tFiletype is %s \n", filetype);
+	Rprintf("\tExtension is %i \n", extension);
 	ret=newAnalysis.importRawSignal(expSeqFile.c_str(),extension,filetype,0,twoBitFile);
 
 	if(ret == 1){
-		Rprintf("ERROR opening file %s \n",expSeqFile.c_str());
+		Rprintf("\nEXITING due to error\n");
 	}else{
 		size_t found;
 		size_t found2;

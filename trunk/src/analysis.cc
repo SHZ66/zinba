@@ -62,6 +62,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	while(!feof(tempTB)){
 		int ret = fscanf(tempTB,"%s%lu",tbChrom,&tbStart);
 		if(ret == 2){
+			cout << "\tFor " << tbChrom << " length is " << tbStart << endl;
 			string sChr(tbChrom);
 			unsigned short int chromIntTB = getHashValue(sChr.c_str());
 			chr_size[chromIntTB] = tbStart;
@@ -81,14 +82,14 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	int getChrmData = 0;
 	unsigned short int collectData = 0;
 	list<coord2>::iterator i = coordOUT_slist.begin();
-	unsigned short int * basepair = NULL;
-	unsigned short int * profile = NULL;
+	unsigned int * basepair = NULL;
+	unsigned int * profile = NULL;
 	unsigned long int countBases = 250000000;
 	unsigned long int startOffset = 0;
-	cout << "Getting basecount data from " << inputFile << endl;
+	cout << "\nGetting basecount data from " << inputFile << endl;
 	ifstream seqfile(inputFile);
 	if(!seqfile.is_open()){
-		cout << "Error opening input file" << inputFile << ", exiting" << endl;
+		cout << "ERROR opening input file" << inputFile << ", exiting" << endl;
 		return 1;
 	}
 
@@ -105,7 +106,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 						unsigned long int stopPos = chr_size[chromInt];
 						if((i->end+profile_extend) < chr_size[chromInt])
 							stopPos = i->end+profile_extend;
-						profile = new unsigned short int[(stopPos-startPos)+1];
+						profile = new unsigned int[(stopPos-startPos)+1];
 						for(int s = startPos; s <= stopPos; s++){
 							profile[pIndex] = basepair[s];
 							pIndex++;
@@ -131,6 +132,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 				}
 			}
 			
+			cout << "\tProcessing: " << line << endl;
 			istringstream iss(line);
 			while(iss >> field){
 				if (field[0] == 'c'){
@@ -146,12 +148,13 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 						getChrmData = 1;
 					}else{
 						getChrmData = 0;
-						cout << "Skipping " << chrom.c_str() << endl;
+						cout << "\t\tSkipping " << chrom.c_str() << endl;
 					}
 					
 					if(getChrmData == 1){
-						cout << "Loading data for " << chrom.c_str() << endl;
-						basepair = new unsigned short int[chr_size[chromInt]+1];
+						cout << "\t\tLoading data for " << chrom.c_str() << endl;
+						cout << "\t\tInitializing length of " << chr_size[chromInt] << endl;
+						basepair = new unsigned int[chr_size[chromInt]+1];
 						for(int c = chr_size[chromInt];c--;)
 							basepair[c] = 0;
 						countBases = 0;
@@ -162,16 +165,18 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 						startVal += field.at(it);
 					}
 					startOffset = atoi(startVal.c_str());
+					cout << "\t\tStarting position in chromosome is " << startOffset << endl;
 					countBases = startOffset - 1;
 				}
 			}
 		}else if(getChrmData == 1 && line[0] != 't'){
 				collectData = 1;
 				countBases++;
-				basepair[countBases] = atoi(line.c_str());
 				if(countBases > chr_size[chromInt]){
-					cout << "Print some error, adding more data than basepairs in chrom\n";
+					cout << "\nERROR: Current position is " << countBases << " and chromosome length is " << chr_size[chromInt] << endl;
+					return 1;
 				}
+				basepair[countBases] = atoi(line.c_str());
 		}
 	}
 
@@ -184,7 +189,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 				if(i->start > profile_extend)
 					startPos = i->start-profile_extend;
 				unsigned long int stopPos = i->end+profile_extend;
-				profile = new unsigned short int[(stopPos-startPos)+1];
+				profile = new unsigned int[(stopPos-startPos)+1];
 				for(int s = startPos; s <= stopPos; s++){
 					profile[pIndex] = basepair[s];
 					pIndex++;
@@ -208,7 +213,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	return 0;
 }
 
-int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,double pSigVal, double pqVal,int printStop,unsigned short int pProfile[]){
+int analysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,double pSigVal, double pqVal,int printStop,unsigned int pProfile[]){
 	FILE * fh;
 	if(pFlag == 0){
 		fh = fopen(outputFile,"w");
@@ -308,7 +313,7 @@ int analysis::importCoords(const char *winlist,double threshold,const char *meth
 				}else if(strcmp(method,mixture) == 0 && tempCoord.sigVal < back->sigVal & FDR==0){
 					tempCoord.sigVal = back->sigVal;
 					tempCoord.qVal = back->qVal;
-				}else if(strcmp(method,mixture) == 0 && tempCoord.qVal < back->sigVal & FDR==1){
+				}else if(strcmp(method,mixture) == 0 && tempCoord.qVal > back->qVal & FDR==1){
 					tempCoord.sigVal = back->sigVal;
 					tempCoord.qVal = back->qVal;
 				}
@@ -343,7 +348,7 @@ int analysis::importPscl(const char *winlist,double threshold,int wformat){
 	FILE * wlist;
 	wlist = fopen(winlist,"r");
 	if(wlist == NULL){
-		cout << "ERROR: opening window list file" << endl;
+		cout << "ERROR: opening window list file" << winlist << endl;
 		return 1;
 	}
 	char cChrom[128];
@@ -390,10 +395,12 @@ int analysis::importPscl(const char *winlist,double threshold,int wformat){
 					}
 				}
 				fclose(fh);
-			}//else{
-				//cout << "ERROR: problem opening .wins file " << signalFile.c_str() << endl;
-				//return 1;
-			//}
+			}else{
+				cout << "ERROR: unable to open .wins file " << signalFile.c_str() << endl;
+				return 1;
+			}
+		}else{
+			cout << "\tSkipping line, " << sigFile << endl;
 		}
 	}
 	fclose(wlist);
@@ -405,7 +412,7 @@ int analysis::importMixture(const char *winlist,double threshold,int wformat, in
 	FILE * wlist;
 	wlist = fopen(winlist,"r");
 	if(wlist == NULL){
-		cout << "ERROR: opening window list file" << endl;
+		cout << "ERROR: opening window list file" << winlist << endl;
 		return 1;
 	}
 	char cChrom[128];
@@ -464,10 +471,12 @@ int analysis::importMixture(const char *winlist,double threshold,int wformat, in
 					}
 				}
 				fclose(fh);
-			}//else{
-				//cout << "ERROR: problem opening .wins file " << signalFile.c_str() << endl;
-				//return 1;
-			//}
+			}else{
+				cout << "ERROR: unable to open .wins file " << signalFile.c_str() << endl;
+				return 1;
+			}
+		}else{
+			cout << "\tSkipping line, " << sigFile << endl;
 		}
 	}
 	fclose(wlist);

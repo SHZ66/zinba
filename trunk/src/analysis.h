@@ -21,7 +21,7 @@ class analysis{
 		~analysis(); //Implemented
 		int importCoords(const char *,double,const char *,int, int, int);//Implemented
 		int processCoords(const char *,const char *,const char *,const char *);//Implemented
-		int outputData(const char *,int,unsigned short int,unsigned long int,unsigned long int,double,double, int,unsigned short int[]);//Implemented
+		int outputData(const char *,int,unsigned short int,unsigned long int,unsigned long int,double,double, int,unsigned int[]);//Implemented
 		int importPscl(const char *,double,int);
 		int importMixture(const char *,double,int,int);
 	

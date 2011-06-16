@@ -15,6 +15,7 @@ using namespace std;
 
 extern "C" {
 void getSeqCountProfile(char **Rinputfile,char **Rwinlist,double *Rthreshold,char **Rmethod,int *Rwformat,char **Routputfile, char **Rtwobitfile,char **Rchromosome, int *RwinGap, int *RFDR){
+
 	const char*  inputFile = Rinputfile[0];
 	const char* winlist = Rwinlist[0];
 	const char* outputFile = Routputfile[0];
@@ -27,17 +28,34 @@ void getSeqCountProfile(char **Rinputfile,char **Rwinlist,double *Rthreshold,cha
 	const char* chromosome = Rchromosome[0];
 	
 	analysis newAnalysis;// = new analysis;
+	Rprintf("\nGetting significant windows from %s\n",winlist);
+	Rprintf("\tThreshold is %f\n",threshold);
+	if(FDR == 0)
+		Rprintf("\tUsing posterior probability as threshold\n");
+	else if (FDR == 1)
+		Rprintf("\tUsing qvalue as threshold\n");
+
+	Rprintf("\tData generated using %s\n",method);
+
+	if(wformat == 0)
+		Rprintf("\tData format is compact\n");
+	else if (wformat == 1)
+		Rprintf("\tData format is expanded\n");
+	
+	Rprintf("\tDistance to collapse windows is %i\n",winGap);
+	
 	int ret=newAnalysis.importCoords(winlist,threshold,method,wformat,winGap,FDR);
 	
 	if(ret == 0){
-		Rprintf("Getting basecount data for %s\n",chromosome);
+		
+		Rprintf("\nGetting basecount data for %s\n",chromosome);
 		ret = newAnalysis.processCoords(inputFile,outputFile,twobitfile,chromosome);
-		if(ret == 1)
-			Rprintf("\nERROR occurred in processing\n");
-	}else{
-		Rprintf("\nERROR occurred in processing exiting\n");
 	}
-	Rprintf("\ngetSeqCountProfile COMPLETE\n");
+	
+	if(ret != 0)
+		Rprintf("\ngetSeqCountProfile exiting with ERRORS\n");
+	else if (ret == 0)
+		Rprintf("\ngetSeqCountProfile COMPLETED SUCCESSFULLY\n");
 
 }
 }

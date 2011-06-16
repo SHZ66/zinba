@@ -21,7 +21,7 @@ class canalysis{
 		~canalysis(); //Implemented
 		int importCoords(const char *);//Implemented
 		int processCoords(const char *,const char *,const char *);//Implemented
-		int outputData(const char *,int,unsigned short int,unsigned long int,unsigned long int,unsigned short int,double,int,unsigned short int[]);//Implemented
+		int outputData(const char *,int,unsigned short int,unsigned long int,unsigned long int,unsigned short int,double,int,unsigned int[]);//Implemented
 	
 		struct ltstr{
 			bool operator()(const char* s1, const char* s2) const

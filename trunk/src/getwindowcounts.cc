@@ -22,23 +22,30 @@ void getWindowCounts(char **RexpSeqFile,char **RtwoBitFile,int *RzWinSize,int *R
 	const char * filetype = Rfiletype[0];
 	int extension = Rextension[0];
 	double Nthresh = *RNthresh;
-	
 	int ret;
+	
+	Rprintf("\nRunning getWindowCounts\n");
+	Rprintf("\nWindow size is %i\n",zWinSize);
+	Rprintf("\nOffset size is %i\n",zOffsetSize);	
+	Rprintf("\nExtension is %i\n",extension);
+	Rprintf("\nN threshold is %f\n",Nthresh);
+	Rprintf("\nFiletype is %s\n",filetype);
+	
 	calcCovs newAnalysis;// = new analysis;
 	Rprintf("\nImporting reads from file %s \n", expSeqFile.c_str());
 	ret=newAnalysis.importRawSignal(expSeqFile.c_str(),extension,filetype,0,twoBitFile);
 
-	if(ret == 1){
-		Rprintf("ERROR opening file %s \n",expSeqFile.c_str());
-	}else{
+	if(ret == 0){
 		Rprintf("\nBuilding window data\n");
 		size_t found = expSeqFile.find_last_of(".");
 		string outfile_prefix = expSeqFile.substr(0,found);
 		ret = newAnalysis.processWinSignal(zWinSize,zOffsetSize,twoBitFile,outfile_prefix,extension,filetype, Nthresh);
-		if(ret == 1){
-			Rprintf("ERROR: building windows was unsuccssful\n");
-		}
 	}
-	Rprintf("\n\n--------GET WINDOW COUNTS COMPLETE-------\n\n");
+	
+	if(ret != 0){
+		Rprintf("ERROR: building windows was unsuccssful\n");
+	}else if (ret == 0){
+		Rprintf("\n\n--------GET WINDOW COUNTS COMPLETE-------\n\n");
+	}
 }
 }

@@ -15,7 +15,7 @@ getsigwindows=function(file,formula,formulaE,formulaZ,threshold=.01,peakconfiden
         suppressPackageStartupMessages(library(qvalue))
         files = unlist(strsplit(file,";"))
         for(i in 1:length(files)){
-            data=read.table(files[], header=TRUE)
+            data=read.table(files[i], header=TRUE)
             chrm = data$chromosome[1]
             mf <- model.frame(formula=formula, data=data)
             X <- model.matrix(attr(mf, "terms"), data=mf)

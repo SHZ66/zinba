@@ -23,15 +23,16 @@ void baseAlignCounts(char **RinputFile,char **RoutputFile, char **Rtwobitfile,in
 	
 	bcanalysis newAnalysis;// = new analysis;
 	Rprintf("\nImporting reads from file %s ....\n",inputFile);
-	Rprintf("Reads are formatted as %s ....\n",filetype);
-	Rprintf("Extending reads by %d bp....\n",extendLength);
+	Rprintf("\tReads are formatted as %s ....\n",filetype);
+	Rprintf("\tExtending reads by %i bp....\n",extendLength);
 	int ret=newAnalysis.importRawSignal(inputFile,extendLength,filetype,twobitfile);
 	if(ret == 0){
-		Rprintf("Calculating counts at each base\nPrinting output to %s\n",outputFile);
+		Rprintf("\nCalculating counts at each base\n");
 		ret = newAnalysis.processSignals(outputFile,extendLength);
 		if(ret == 0)
 			Rprintf("-------- BASE ALIGN COUNTS COMPLETE SUCCESSFULLY --------\n");
 	}
+		
 	if(ret != 0)
 		Rprintf("-------- BASE ALIGN COUNTS EXITING WITH ERRORS --------\n");
 }

@@ -62,6 +62,7 @@ int canalysis::processCoords(const char* inputFile,const char* outputFile,const 
 		int ret = fscanf(tempTB,"%s%lu",tbChrom,&tbStart);
 		if(ret == 2){
 			string sChr(tbChrom);
+			cout << "For " << tbChrom << " length is " << tbStart << endl;
 			unsigned short int chromIntTB = getHashValue(sChr.c_str());
 			chr_size[chromIntTB] = tbStart;
 		}
@@ -76,8 +77,8 @@ int canalysis::processCoords(const char* inputFile,const char* outputFile,const 
 	int printFlag = 0;
 	unsigned short int collectData = 0;
 	list<coord>::iterator i = coord_slist.begin();
-	unsigned short int * basepair = NULL;
-	unsigned short int * profile = NULL;
+	unsigned int * basepair = NULL;
+	unsigned int * profile = NULL;
 	unsigned long int countBases = 250000000;
 	unsigned long int startOffset = 0;
 	cout << "Getting basecount data from " << inputFile << endl;
@@ -94,7 +95,7 @@ int canalysis::processCoords(const char* inputFile,const char* outputFile,const 
 				while(i!=coord_slist.end()){
 					if(i->chrom == chromInt){
 						int pIndex = 0;
-						profile = new unsigned short int[(i->end-i->start)+1];
+						profile = new unsigned int[(i->end-i->start)+1];
 						for(int s = i->start; s <= i->end; s++){
 							profile[pIndex] = basepair[s];
 							pIndex++;
@@ -102,6 +103,8 @@ int canalysis::processCoords(const char* inputFile,const char* outputFile,const 
 						if(outputData( outputFile,printFlag,i->chrom,i->start,i->end,i->qFlag,i->sigVal,pIndex,profile) != 0){
 							cout << "Error printing output to file, exiting" << endl;
 							return 1;
+						}else{
+							cout << "Printed results to " << outputFile << endl;
 						}
 						delete [] profile;
 						profile = NULL;
@@ -128,8 +131,8 @@ int canalysis::processCoords(const char* inputFile,const char* outputFile,const 
 						chrom += field.at(it);
 					}
 					chromInt = getHashValue(chrom.c_str());
-					cout << "Loading data for " << chrom.c_str() << endl;
-					basepair = new unsigned short int[chr_size[chromInt]+1];
+					cout << "\tLoading data for " << chrom.c_str() << endl;
+					basepair = new unsigned int[chr_size[chromInt]+1];
 					for(int c = chr_size[chromInt];c--;)
 						basepair[c] = 0;
 					countBases = 0;
@@ -140,16 +143,18 @@ int canalysis::processCoords(const char* inputFile,const char* outputFile,const 
 						startVal += field.at(it);
 					}
 					startOffset = atoi(startVal.c_str());
+					cout << "\tStarting position is " << startOffset << endl;
 					countBases = startOffset - 1;
 				}
 			}
 		}else if(line[0] != 't'){
 				collectData = 1;
 				countBases++;
-				basepair[countBases] = atoi(line.c_str());
 				if(countBases > chr_size[chromInt]){
-					cout << "Print some error, adding more data than basepairs in chrom\n";
+					cout << "Trying to add data beyond end of chromosome\n\tCurrent position is " << countBases << "\n\tEnd of chrom is " << chr_size[chromInt] << endl;
+					return 1;
 				}
+				basepair[countBases] = atoi(line.c_str());
 		}
 	}
 
@@ -157,7 +162,7 @@ int canalysis::processCoords(const char* inputFile,const char* outputFile,const 
 	while(i!=coord_slist.end()){
 		if(i->chrom == chromInt){
 			int pIndex = 0;
-			profile = new unsigned short int[(i->end-i->start)+1];
+			profile = new unsigned int[(i->end-i->start)+1];
 			for(int s = i->start; s <= i->end; s++){
 				profile[pIndex] = basepair[s];
 				pIndex++;
@@ -180,7 +185,7 @@ int canalysis::processCoords(const char* inputFile,const char* outputFile,const 
 	return 0;
 }
 
-int canalysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,unsigned short int sFlag,double pSigVal,int printStop,unsigned short int pProfile[]){
+int canalysis::outputData(const char * outputFile,int pFlag,unsigned short int pChrom,unsigned long int pStart,unsigned long int pStop,unsigned short int sFlag,double pSigVal,int printStop,unsigned int pProfile[]){
 	FILE * fh;
 	if(pFlag == 0){
 		fh = fopen(outputFile,"w");
@@ -268,8 +273,10 @@ int canalysis::importCoords(const char *coordfile){
 	FILE * cfile;
 	cfile = fopen(coordfile,"r");
 	if(cfile == NULL){
-		cout << "ERROR: opening window list file" << endl;
+		cout << "ERROR: opening coord file" << coordfile << endl;
 		return 1;
+	}else{
+		cout << "Opened coord file " << coordfile << endl;
 	}
 	
 //	fgets(firstline,256,cfile);
@@ -286,7 +293,9 @@ int canalysis::importCoords(const char *coordfile){
 	}
 	fclose(cfile);
 	
+	cout << "\nImported " << coord_slist.size() << " coordinates" << endl;
+	cout << "Sorting coords.........";
 	coord_slist.sort();
-	cout << "\nImported " << coord_slist.size() << " coordinates....." << endl;
+	cout << "COMPLETE" << endl;
 	return 0;
 }
