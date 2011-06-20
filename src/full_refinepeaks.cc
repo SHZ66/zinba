@@ -14,7 +14,7 @@ using namespace sgi;
 using namespace std;
 
 extern "C"{
-void full_refinepeaks(char **RreadFile,char **RbcountFile,int *RrextendLength,char **Rrfiletype,char **Rwinlist,double *Rthreshold,char **Rmethod,int *Rwformat,,char **Rchromosome,int *RwinGap,int *RFDR,char **Rtwobitfile,char **RoutputFile){
+void full_refinepeaks(char **RreadFile,char **RbcountFile,int *RrextendLength,char **Rrfiletype,char **Rwinlist,double *Rthreshold,char **Rmethod,int *Rwformat,char **Rchromosome,int *RwinGap,int *RFDR,char **Rtwobitfile,char **RoutputFile){
 
 	const char * readFile = RreadFile[0];
 	const char * bcountFile = RbcountFile[0];
@@ -49,7 +49,7 @@ void full_refinepeaks(char **RreadFile,char **RbcountFile,int *RrextendLength,ch
 	
 	Rprintf("\tDistance to collapse windows is %i\n",winGap);
 	
-	int ret=newAnalysis.importCoords(winlist,threshold,method,wformat,winGap,FDR);
+	int ret=newAnalysis.importCoords(winlist,threshold,method,wformat,winGap,FDR,twobitfile);
 	
 	if(ret == 0){
 		string bcflag = "none";
@@ -59,7 +59,7 @@ void full_refinepeaks(char **RreadFile,char **RbcountFile,int *RrextendLength,ch
 			Rprintf("\nImporting reads from file %s ....\n",readFile);
 			Rprintf("\tReads are formatted as %s ....\n",filetype);
 			Rprintf("\tExtending reads by %i bp....\n",extendLength);
-			ret=newAnalysis.importRawSignal(readFile,bcountFile,extendLength,filetype,twobitfile);
+			ret=newAnalysis.importRawSignal(readFile,extendLength,filetype);
 		}
 
 		if(ret == 0){
