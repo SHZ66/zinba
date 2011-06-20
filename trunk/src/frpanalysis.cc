@@ -16,11 +16,11 @@
 #include <R.h>
 using namespace std;
 
-frpanalysis::bcanalysis(){
+frpanalysis::frpanalysis(){
 	chromCounter = 0;
 }
 
-frpanalysis::~bcanalysis(){
+frpanalysis::~frpanalysis(){
 	map<const char*, int>::iterator i;
 	for(i=chroms.begin();i!=chroms.end();++i){
 		delete [] i->first;	
@@ -33,6 +33,7 @@ int frpanalysis::processSigCoords(const char* bcountFile,int extend,const char* 
 	int profile_extend = 500;
 	const char * chromReport;
 	unsigned int * basepair = NULL;
+	unsigned int * profile = NULL;
 	unsigned short int printFLAG = 0;
 	unsigned short int currchr;
 	unsigned long int countBases = 250000000;
@@ -40,8 +41,11 @@ int frpanalysis::processSigCoords(const char* bcountFile,int extend,const char* 
 	int getChrmData = 0;
 	int collectData = 0;
 	string allChrm = "all";
+	string line;
+	string field;
 	list<coord2>::iterator i = coordOUT_slist.begin();
 	int rnum;
+	ifstream seqfile;
 	
 	if(strcmp(bcountFile,nflag.c_str()) == 0){
 		cout << "\nGetting basecount data from reads ....." << endl;
@@ -52,7 +56,7 @@ int frpanalysis::processSigCoords(const char* bcountFile,int extend,const char* 
 		if(!seqfile.is_open()){
 			cout << "ERROR opening input file" << bcountFile << ", exiting" << endl;
 			return 1;
-		}		
+		}
 	}
 	
 	while(!coordOUT_slist.empty()){
@@ -181,7 +185,7 @@ int frpanalysis::processSigCoords(const char* bcountFile,int extend,const char* 
 				}else if(getChrmData == 1 && collectData == 0){
 					countBases++;
 					if(countBases > chr_size[currchr]){
-						cout << "\nERROR: Current position is " << countBases << " and chromosome length is " << chr_size[chromInt] << endl;
+						cout << "\nERROR: Current position is " << countBases << " and chromosome length is " << chr_size[currchr] << endl;
 						return 1;
 					}
 					basepair[countBases] = atoi(line.c_str());
@@ -249,7 +253,7 @@ int frpanalysis::outputData(const char * outputFile, unsigned short int currChr,
 	return 0;
 }
 
-unsigned short int frpanalysis::getHashValue(char *currChrom){
+unsigned short int frpanalysis::getHashValue(const char *currChrom){
 	map<const char*, int>::iterator i;
 	i = chroms.find(currChrom);
 	if(i == chroms.end()){
@@ -275,7 +279,7 @@ const char * frpanalysis::getKey(unsigned short int chrom){
 	}
 }
 
-int frpanalysis::importRawSignal(const char * readFile,int extension,const char * filetype,const char * twoBitFile){
+int frpanalysis::importRawSignal(const char * readFile,int extension,const char * filetype){
 	
 	const char * bowtie = "bowtie";
 	const char * bed = "bed";
@@ -283,11 +287,11 @@ int frpanalysis::importRawSignal(const char * readFile,int extension,const char 
 	int rval = 0;
 	
 	if(strcmp(filetype,bed) == 0){
-		rval = importBed(signalFile,extension);
+		rval = importBed(readFile,extension);
 	}else if (strcmp(filetype,bowtie) == 0){
-		rval = importBowtie(signalFile,extension);
+		rval = importBowtie(readFile,extension);
 	}else if(strcmp(filetype,tagAlign) == 0){
-		rval = importTagAlign(signalFile,extension);
+		rval = importTagAlign(readFile,extension);
 	}else{
 		cout << "Unrecognized type of file " << filetype << ", must be either bowtie, bed, or tagAlign" << endl;
 		return 1;
@@ -431,7 +435,7 @@ int frpanalysis::importBed(const char * signalFile,int extension){
 	return 0;
 }
 
-int frpanalysis::importCoords(const char *winlist,double threshold,const char *method,int wformat, int winGap, int FDR){
+int frpanalysis::importCoords(const char *winlist,double threshold,const char *method,int wformat, int winGap, int FDR, const char * twoBitFile){
 	
 	FILE * tempTB;
 	time_t rtime;
