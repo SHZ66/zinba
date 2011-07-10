@@ -1,5 +1,5 @@
 
-covariateselect=function(file=NULL, covs=NULL, selection="dirty",formulaZ=NULL,numProc=1,loc=NULL, start=1, append=FALSE){
+covariateselect=function(file=NULL, covs=NULL, selection="dirty",formulaZ=NULL,numProc=1,loc=NULL, start=1, append=FALSE, interaction=TRUE){
 
 ###################################local functions#####################################3
 #From MuMIn R Package
@@ -122,7 +122,12 @@ if( sum(covs %in% supported)!=length(covs)){
 }
 marg.ex=NULL
 fixed=as.formula("~1")
-global.model= as.formula(paste("exp_count~", paste(covs, collapse="*")))
+if(interaction==TRUE){
+        global.model= as.formula(paste("exp_count~", paste(covs, collapse="*")))
+}else if(interaction==FALSE){
+        global.model= as.formula(paste("exp_count~", paste(covs, collapse="+")))
+}
+
 all.terms <- getAllTerms(global.model)
 n.vars=length(all.terms)
 m.max <- n.vars

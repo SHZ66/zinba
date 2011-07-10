@@ -41,7 +41,7 @@ failure=glm_fit(BINOMIAL, LOGIT, N, M, 1,y, prior, offset, X,stratum, maxit, con
 	    rank,Xb,fitted, resid, weights, 
 	    scale, df_resid, theta);
 		if (failure == 1) {
-    			Rprintf("Binomial : Failure to converge\n");
+//    			Rprintf("Binomial : Failure to converge\n");
 		} 
 }
 

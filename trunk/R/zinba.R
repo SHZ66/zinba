@@ -1,5 +1,5 @@
 zinba=function(outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,basecountfile=NULL,threshold=0.05,numProc=1,
-refinepeaks=1,printFullOut=0,filetype="bowtie",extension=NULL,broad=FALSE){
+refinepeaks=1,printFullOut=0,filetype="bowtie",extension=NULL,broad=FALSE, mode="peaks", interaction=TRUE){
 	if(is.null(outfile)){stop("output prefix must be specified")}
 	if(is.null(seq)){stop("path to mapped experimental reads must be specified")}
 	if(!file.exists(seq)){stop("sequencing file does not exist at the specified path, check path for errors")}
@@ -36,35 +36,71 @@ refinepeaks=1,printFullOut=0,filetype="bowtie",extension=NULL,broad=FALSE){
 	}
 
 
-	run.zinba(
-		align=align,
-		numProc=numProc,
-		seq=seq,
-		input=input,
-		basecountfile=basecountfile,
-		filetype=filetype,
-		offset=125,
-		buildwin=1,
-		outfile=outfile,
-		threshold=threshold,
-		twoBit=twoBit,
-		cnvOffset=2500,
-		pquant=1,
-		winGap=winGap,
-		cnvWinSize=100000,	
-		initmethod="count",
-		printFullOut=1,
-		winSize=250,
-		diff=0,
-		pWinSize=200,	
-		extension=extension,
-		method="mixture",
-		refinepeaks=refinepeaks,
-		selectmodel=TRUE,
-		selectchr="chr22",
-		selecttype=selecttype,
-		selectcovs=selectcovs,
-		FDR=TRUE
-	)
 
+	if(mode=="peaks"){
+		run.zinba(
+			align=align,
+			numProc=numProc,
+			seq=seq,
+			input=input,
+			basecountfile=basecountfile,
+			filetype=filetype,
+			offset=125,
+			buildwin=1,
+			outfile=outfile,
+			threshold=threshold,
+			twoBit=twoBit,
+			cnvOffset=2500,
+			pquant=1,
+			winGap=winGap,
+			cnvWinSize=100000,	
+			initmethod="count",
+			printFullOut=1,
+			winSize=250,
+			diff=0,
+			pWinSize=200,	
+			extension=extension,
+			method="mixture",
+			refinepeaks=refinepeaks,
+			selectmodel=TRUE,
+			selectchr="chr22",
+			selecttype=selecttype,
+			selectcovs=selectcovs,
+			FDR=TRUE,
+			interaction=interaction
+		)
+	}else if(mode=="CNV"){
+		run.zinba(
+			align=align,
+			numProc=numProc,
+			seq=seq,
+			input=input,
+			basecountfile=basecountfile,
+			filetype=filetype,
+			offset=2500,
+			buildwin=1,
+			outfile=outfile,
+			threshold=threshold,
+			twoBit=twoBit,
+			cnvOffset=2500,
+			pquant=1,
+			winGap=10000,
+			cnvWinSize=100000,	
+			initmethod="count",
+			printFullOut=1,
+			winSize=10000,
+			diff=0,
+			pWinSize=200,	
+			extension=extension,
+			method="mixture",
+			refinepeaks=refinepeaks,
+			selectmodel=FALSE,
+			formula=exp_count~1,
+			formulaE=exp_count~1,
+			formulaZ=exp_count~1,
+			FDR=FALSE,
+			peakconfidence=0.95,
+			interaction=interaction
+		)
+	}
 } 
