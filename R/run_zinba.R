@@ -1,7 +1,7 @@
 run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,
 		winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,
 		numProc=1,buildwin=1, winGap=0,pWinSize=200,pquant=1,refinepeaks=1,printFullOut=0,method='pscl',initmethod='count',
-		diff=0,filetype="bowtie",extension, cleanup=FALSE, selectmodel=FALSE, selectchr=NULL, selecttype="dirty", selectcovs=NULL, FDR=FALSE){
+		diff=0,filetype="bowtie",extension, cleanup=FALSE, selectmodel=FALSE, selectchr=NULL, selecttype="dirty", selectcovs=NULL, FDR=FALSE, interaction=TRUE){
 	
 	parameters=list(filelist=filelist,formula=formula,formulaE=formulaE,formulaZ=formulaZ,outfile=outfile,seq=seq,align=align,input=input,twoBit=twoBit,
                 winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset,basecountfile=basecountfile,threshold=threshold,peakconfidence=peakconfidence,tol=tol,
@@ -105,7 +105,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 			data=unlist(strsplit(params,";"))[i]
 			cat(paste("\nSpecified chromosome not found or specified, using", data,"\n"))
 		}
-		model=covariateselect(file=data, selection=selecttype,loc=paste(outfile_subpath,".model",sep=""),covs=selectcovs, numProc=numProc)
+		model=covariateselect(file=data, selection=selecttype,loc=paste(outfile_subpath,".model",sep=""),covs=selectcovs, numProc=numProc, interaction=interaction)
 		formula=model[[1]]
 		formulaE=model[[2]]
 		formulaZ=model[[3]]
@@ -150,6 +150,7 @@ getsigwindows(file=params[i],formula=formula,formulaE=formulaE,threshold=thresho
 winGap=winGap, extension=extension, FDR=FDR)
 	    }else{
 		#merge windows only
+		if(method=="mixture") threshold = peakconfidence
 		cat(paste("--------MERGE WINDOWS --------",as.character(Sys.time()),"\n"))
 		collapsewindows(winlist=winlist,printFullOut=printFullOut,thresholds=threshold,method=method, winGap=winGap, FDR=FDR, output=broadpeakout)
 	    }
