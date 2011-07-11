@@ -1,0 +1,12 @@
+#summary How to use ZINBA
+
+http://www.unc.edu/~nur2/zinbaweb/overview.jpg
+
+= Using ZINBA =
+A <a href="test_data.tgz">test dataset</a> has been created that corresponds to the example code given in each function used below. 
+= Details =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
