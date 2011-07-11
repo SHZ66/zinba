@@ -1,4 +1,4 @@
-#summary ZINBA Installatoin
+#summary ZINBA Installation
 <wiki:toc max_depth="2" />
 
 = ZINBA Installation =
