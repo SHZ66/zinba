@@ -21,7 +21,7 @@ library(zinba)
 
 == Mac ==
 
-Open a <u>terminal<\u> and copy and paste the block of commands below into a terminal to automate the installation process.  Important: you must run R from the terminal, do not use the R.app GUI as you will experience problems with Zinba
+Open a terminal and copy and paste the block of commands below into a terminal to automate the installation process.  Important: you must run R from the terminal, do not use the R.app GUI as you will experience problems with Zinba
 
 {{{
 curl -O http://zinba.googlecode.com/files/zinba_2.0.tar.gz
