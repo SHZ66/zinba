@@ -1,5 +1,2 @@
   * [Installation Installation]
-    * [LinuxInstallation Linux]
-    * [MACInstallation Mac]
   * [UsingZINBA Using ZINBA]
-    * [PrepareFiles Preparing your files]
