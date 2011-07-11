@@ -1,0 +1,10 @@
+#summary ZINBA Installatoin
+<wiki:toc max_depth="2" />
+
+= ZINBA Installation =
+
+Here you will find instructions to install the Zinba software package into  <a href="http://cran.r-project.org/" >R</a>.  It is assumed that you already have R installed.  
+
+== Linux ==
+
+== Mac ==
