@@ -153,10 +153,10 @@ Enter R and generate your alignability directory in addition to your basecount f
 {{{
 library(zinba)
 generateAlignability(
-   mapdir='map36/',				#mappability directory 
-   outdir='align_athresh1_extension200/', 	#destination directory
-   athresh=1, 					#for mapped reads, number of hits per read allowed
-   extension=200, 				#average fragment library length (size selected)
+   mapdir='map36/',
+   outdir='align_athresh1_extension200/', 
+   athresh=1,  
+   extension=200,  
    twoBitFile='hg18.2bit		'
 )   
 
@@ -164,7 +164,7 @@ basealigncount(
    inputfile='data/ctcfGM12878rep3chr22.taf', 
    outputfile='data/ctcfGM12878rep3chr22.basecount', 
    extension=200, 
-   filetype='tagAlign', 			#Either 'bed', 'bowtie', or tagAlign
+   filetype='tagAlign',
    twoBitFile='hg18.2bit' )
 }}}
 
