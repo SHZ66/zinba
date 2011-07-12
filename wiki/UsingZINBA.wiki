@@ -63,8 +63,7 @@ zinba(
   outfile=       #prefix for outputted files
   twoBit=        #path to genome build in .2bit format
   extension=  #average fragment library length (size selected)
-  printFullOut=  #print original data with enrichment estimates
- 1 for yes, 0 for no (saves space)
+  printFullOut=  #print original data with enrichment estimates, 1 for yes, 0 for no (saves space)
   refinepeaks=   #refine peaks?  1 for yes, 0 for no
   broad=         #broad setting (TRUE or FALSE)?
   input=         #Path to mapped input reads, if available
