@@ -55,21 +55,25 @@ basealigncount(
 Usage for the ZINBA pipeline function
 {{{
 zinba(
-	align=         #path to alignability directory
-	numProc=       #CPUs to use, must be less than max available
-	seq=           #path to mapped experimental reads
-	basecountfile= #path to basecount file
-	filetype=      #either 'bed', 'bowtie', or 'tagAlign'
-	outfile=       #prefix for outputted files
-	twoBit=        #path to genome build in .2bit format
-	extension=200  #average fragment library length (size selected)
-	printFullOut=  #print original data with enrichment estimates
+  align=         #path to alignability directory
+  numProc=       #CPUs to use, must be less than max available
+  seq=           #path to mapped experimental reads
+  basecountfile= #path to basecount file, if refinepeaks is 1
+  filetype=      #either 'bed', 'bowtie', or 'tagAlign'
+  outfile=       #prefix for outputted files
+  twoBit=        #path to genome build in .2bit format
+  extension=  #average fragment library length (size selected)
+  printFullOut=  #print original data with enrichment estimates
  1 for yes, 0 for no (saves space)
-	refinepeaks=   #refine peaks?  1 for yes, 0 for no
-	broad=         #broad setting (TRUE or FALSE)?
-	input=         #Path to mapped input reads
+  refinepeaks=   #refine peaks?  1 for yes, 0 for no
+  broad=         #broad setting (TRUE or FALSE)?
+  input=         #Path to mapped input reads, if available
+  interaction=   #whether or not to considering interaction during model selection (TRUE or FALSE)
 )
-}}}    
+}}}
+
+This function is optimized for speed and for ease of use and for speed, utilizing only input if available.  A more flexible function run.zinba is available where more parameters can be specified. 
+    
 ==FAIRE-seq example==
 ChIP-seq data example: sequencing reads are 36 bp in length, and correspond to a fragment library length of 200 base pairs. The mappability file is unpacked, unloading the map36/ folder with the mappability files contained in it. We create the alignability directory at align_athresh1_extension200/, where our reads were mapped with an alignability threshold of matching up to 1 region in the genome (otherwise they were filtered out). Download the necessary files, unpack your mappability directory, and create a directory to place your alignability files. Open a terminal and run the following, corresponding to the test dataset unpacked (a data/ directory will be created wherever you unpacked it). 
 {{{
