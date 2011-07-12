@@ -6,29 +6,21 @@ http://www.unc.edu/~nur2/zinbaweb/overview.jpg
 A <a href="test_data.tgz">test dataset</a> has been created that corresponds to the example code given in each function used below. 
 
 =Necessary file downloads=
-Before using Zinba, you need two files before you can start your analysis, given below.   The build of the genome you are using in .2bit format, downloadable below.  Also downloadable from the from the <a href=" http://hgdownload.cse.ucsc.edu/downloads.html"  target ="showframe">UCSC genome browser</a>. NOTE: YOUR DOWNLOADED BUILD MUST BE THE SAME BUILD THAT YOUR READS WERE MAPPED TO. 
-      
-	<table border="1" bordercolor="#000000" style="background-color:#FFFFFF" width="400" cellpadding="3" cellspacing="0"> 
-	<tr> 
-		<td><strong>Human</strong></td> 
-		<td><strong>Mouse</strong></td> 
-		<td><strong>Drosophila</strong></td> 
-		<td><strong>C. Elegans</strong></td> 
-	</tr> 
-	<tr> 
-		<td><a href="http://hgdownload.cse.ucsc.edu/goldenPath/hg18/bigZips/hg18.2bit"  target ="showframe">hg18</a></td> 
-		<td><a href="http://hgdownload.cse.ucsc.edu/goldenPath/mm8/bigZips/mm8.2bit"  target ="showframe">mm8</a></td> 
-		<td><a href="http://www.bios.unc.edu/~nrashid/dm3.2bit"  target ="showframe">dm3</a></td> 
-		<td><a href="http://www.bios.unc.edu/~nrashid/ce4.2bit"  target ="showframe">ce4</a></td> 
-	</tr> 
-	<tr> 
-		<td><a href="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit"  target ="showframe">hg19</a></td> 
-		<td><a href="http://hgdownload.cse.ucsc.edu/goldenPath/mm9/bigZips/mm9.2bit"  target ="showframe">mm9</a></td> 
-		<td></td> 
-		<td><a href="http://www.bios.unc.edu/~nrashid/ce6.2bit"  target ="showframe">ce6</a> </td> 
-	</tr> 
-	<br> 
-</table>
+Before using Zinba, you need two files before you can start your analysis, given below.   
+
+  1. The build of the genome you are using in .2bit format, downloadable below.  Also downloadable from the from the <a href=" http://hgdownload.cse.ucsc.edu/downloads.html">UCSC genome browser</a>. NOTE: YOUR DOWNLOADED BUILD MUST BE THE SAME BUILD THAT YOUR READS WERE MAPPED TO. 
+
+||*Human*||*Mouse*||*Drosophila*||*C. Elegans*||
+||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/hg18/bigZips/hg18.2bit"  >hg18</a>||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/mm8/bigZips/mm8.2bit"  >mm8</a>||<a href="http://www.bios.unc.edu/~nrashid/dm3.2bit" >dm3</a>||<a href="http://www.bios.unc.edu/~nrashid/ce4.2bit">ce4</a>||
+||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/hg18/bigZips/hg19.2bit"  >hg19</a>||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/mm9/bigZips/mm9.2bit"  >mm9</a>|| ||<a href="http://www.bios.unc.edu/~nrashid/ce6.2bit">ce6</a>|| 
+	
+
+  2.  A mappability folder corresponding to your <u>sequencing read length</u> and <u>genome</u> (links to compressed files are below).
+
+||*Human*||*Mouse*||*Drosophila*||*C. Elegans*||
+||<a href="http://www.bios.unc.edu/~nrashid/map36.tgz"  >hg18 36bp</a><br><a href="http://www.bios.unc.edu/~nrashid/map50.tgz"  >hg18 50bp</a> || ||<a href="http://www.bios.unc.edu/~nrashid/map36_dm3.tgz"  >dm3 36bp</a>||<a href="http://www.bios.unc.edu/~nrashid/map36_ce4.tgz"  >ce4 36bp</a> ||
+||<a href="http://www.bios.unc.edu/~nrashid/map36_hg19.tgz"  >hg19  36bp</a><br><a href="http://www.bios.unc.edu/~nrashid/map50_hg19.tgz"  >hg19 50bp</a> ||<a href="http://www.bios.unc.edu/~nrashid/map36_mm9.tgz"  >mm9 36bp</a><br><a href="http://www.bios.unc.edu/~nrashid/map50_mm9.tgz"  >mm9 50bp</a> ||||<a href="http://www.bios.unc.edu/~nrashid/map36_ce6.tgz"  >ce6 36bp</a>|| 
+
 
 =Preparing your files=
 =Analyze your Data=
