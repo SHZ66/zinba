@@ -1,6 +1,5 @@
 #summary How to use ZINBA
-
-http://www.unc.edu/~nur2/zinbaweb/overview.jpg
+<wiki:toc max_depth="2" />
 
 = Using ZINBA =
 A <a href="test_data.tgz">test dataset</a> has been created that corresponds to the example code given in each function used below. 
@@ -8,14 +7,15 @@ A <a href="test_data.tgz">test dataset</a> has been created that corresponds to 
 =Necessary file downloads=
 Before using Zinba, you need two files before you can start your analysis, given below.   
 
-  1. The build of the genome you are using in .2bit format, downloadable below.  Also downloadable from the from the <a href=" http://hgdownload.cse.ucsc.edu/downloads.html">UCSC genome browser</a>. NOTE: YOUR DOWNLOADED BUILD MUST BE THE SAME BUILD THAT YOUR READS WERE MAPPED TO. 
-
+==1. Genome Build==
+The build of the genome you are using in .2bit format, downloadable below.  Also downloadable from the from the <a href=" http://hgdownload.cse.ucsc.edu/downloads.html">UCSC genome browser</a>. NOTE: YOUR DOWNLOADED BUILD MUST BE THE SAME BUILD THAT YOUR READS WERE MAPPED TO. 
 ||*Human*||*Mouse*||*Drosophila*||*C. Elegans*||
 ||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/hg18/bigZips/hg18.2bit"  >hg18</a>||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/mm8/bigZips/mm8.2bit"  >mm8</a>||<a href="http://www.bios.unc.edu/~nrashid/dm3.2bit" >dm3</a>||<a href="http://www.bios.unc.edu/~nrashid/ce4.2bit">ce4</a>||
 ||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/hg18/bigZips/hg19.2bit"  >hg19</a>||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/mm9/bigZips/mm9.2bit"  >mm9</a>|| ||<a href="http://www.bios.unc.edu/~nrashid/ce6.2bit">ce6</a>|| 
-	
 
-  2.  A mappability folder corresponding to your <u>sequencing read length</u> and <u>genome</u> (links to compressed files are below).
+	
+==2. Mappability File==
+A mappability folder corresponding to your <u>sequencing read length</u> and <u>genome</u> (links to compressed files are below).  These files were generated using code from <a href="www.gersteinlab.org/proj/PeakSeq">Peakseq </a>, developed by the Gerstein Lab. This file is used to derive final mappability score in ZINBA.
 
 ||*Human*||*Mouse*||*Drosophila*||*C. Elegans*||
 ||<a href="http://www.bios.unc.edu/~nrashid/map36.tgz"  >hg18 36bp</a><br><a href="http://www.bios.unc.edu/~nrashid/map50.tgz"  >hg18 50bp</a> || ||<a href="http://www.bios.unc.edu/~nrashid/map36_dm3.tgz"  >dm3 36bp</a>||<a href="http://www.bios.unc.edu/~nrashid/map36_ce4.tgz"  >ce4 36bp</a> ||
