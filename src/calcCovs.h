@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "bwRead.h"
+#include "bwRead2.h"
 #include "dataWins.h"
 #include "cnvWins.h"
 #include <cstring>
@@ -31,6 +32,9 @@ class calcCovs{
 		int importTagAlign(const char *,int,int);
 		int importBed(const char *,int,int);
 		int processWinSignal(int , int ,const char * ,string outfile,int ,const char *, double);
+		int	processCustomSignal(int zWinSize, int zOffsetSize,const char * twoBitFile,const char * inputFile,string outfile, const char* flist, int extension);
+		int importCustomBed(const char * signalFile,int extension);
+		int outputCustomData(const char * outputFile, unsigned short int currChr);
 		struct ltstr{
 			bool operator()(const char* s1, const char* s2) const
 			{
@@ -49,11 +53,13 @@ class calcCovs{
 
 		vector<bwRead> signal_slist;//Implemented
 		vector<bwRead> input_slist;
+		vector<bwRead2> custom_slist;
 //		slist<bwRead> signal_slist;//Implemented
 //		slist<bwRead> input_slist;
 		list<cnvWins> cnv_wins;
 		slist<dataWins> peak_wins;
 		slist<dataWinsCount> peak_wins2;
+		slist<dataWinsCustom> peak_wins3;
 		unsigned short int tbSizeFlag;
 	
 		unsigned short int chromCounter;//Implemented

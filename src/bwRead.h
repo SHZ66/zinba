@@ -12,7 +12,7 @@ class bwRead {
 			bwRead(unsigned short int, unsigned long int);
 			bwRead(const bwRead&);
 			bool operator <(bwRead) const;
-
+			
 			unsigned short int chrom;//2
 			unsigned long int pos;//8
 //			unsigned short int strand;//Plus = 1;Minus = 0

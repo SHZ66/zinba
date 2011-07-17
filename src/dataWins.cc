@@ -68,3 +68,33 @@ bool dataWinsCount::operator <(dataWinsCount other) const{
 	}
 }
 
+dataWinsCustom::~dataWinsCustom(){}
+
+dataWinsCustom::dataWinsCustom(){}
+
+dataWinsCustom::dataWinsCustom(const dataWinsCustom& s){
+	chrom = s.chrom;
+	start = s.start;
+	stop = s.stop;
+	eCount = s.eCount;
+	iCount = s.iCount;
+}
+
+dataWinsCustom::dataWinsCustom(unsigned short int _chrom, unsigned long int _start, unsigned long int _stop,int _eCount, double _iCount){
+	chrom = _chrom;
+	start = _start;
+	stop = _stop;
+	eCount = _eCount;
+	iCount = _iCount;
+}
+bool dataWinsCustom::operator <(dataWinsCustom other) const{
+	if(chrom==other.chrom){
+		if( start < other.start ){
+			return true;
+		}else{
+			return false;	
+		}
+	}else{
+		return (chrom<other.chrom);	
+	}
+}
