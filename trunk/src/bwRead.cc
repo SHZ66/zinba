@@ -17,6 +17,8 @@ bwRead::bwRead(unsigned short int _chrom, unsigned long int _pos){
 //	strand = _strand;
 }
 
+
 bool bwRead::operator <(bwRead other) const{
 		return (chrom<other.chrom);
 }
+

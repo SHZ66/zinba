@@ -958,3 +958,185 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 	return 0;
 }
 
+
+
+
+
+
+int calcCovs::importCustomBed(const char * signalFile,int extension){
+	
+	cout << "\tImporting bed formatted reads" << endl;
+	FILE * fh;
+	fh = fopen(signalFile,"r");
+	if(fh == NULL){
+		cout << "ERROR: Unable to open file containing reads " << signalFile << endl;
+		return 1;
+	}
+	
+	char cChrom[128];
+	unsigned long int pos;
+	char strand[1];
+	char minus[] = "-";
+	unsigned long int start;unsigned long int stop;
+	char name[128];int bscore;
+	int extend = (int)(extension/2);
+	int rval;
+	int num_skip = -1;
+	int score=0;
+	while(!feof(fh)){
+		rval = fscanf(fh,"%s%lu%lu%d",cChrom,&start,&stop,&score);
+		if(rval == 4){
+			/*if(strcmp(strand,minus) == 0){
+				if(stop >= extend)
+					pos = stop - extend + 1;
+				else
+					pos = 1;
+			}else{*/  //Ignoring strand for now
+				if((start + extend-1) <= chr_size[getHashValue(cChrom)])
+					pos = start + extend - 1;
+				else
+					pos = chr_size[getHashValue(cChrom)];
+			//}
+			unsigned short int chromInt = getHashValue(cChrom);
+			bwRead2 sig(chromInt,pos,score);
+			custom_slist.push_back(sig);
+		}else{
+			num_skip++;
+		}
+	}
+	fclose(fh);
+	cout << "\tSkipped " << num_skip << " reads" << endl;
+	return 0;
+}
+
+int calcCovs::processCustomSignal(int zWinSize, int zOffsetSize,const char * twoBitFile,const char * inputFile,string outfile, const char* flist, int extension){
+
+	FILE * tempTB;
+	unsigned short int currchr = 999;
+	unsigned short int * basepair = NULL;
+	unsigned short int * ibasepair = NULL;
+	int i;
+	int printflag = 0;
+
+	int readInput = 0;
+	const char* noneVal = "none";
+	
+	while(!signal_slist.empty()){
+		i = 0;
+		currchr = signal_slist[0].chrom;
+		const char * chromReport = getKey(currchr);
+		cout << "\nProcessing " << chromReport << endl;
+		cout << "\tInitializing to length " << chr_size[currchr] << endl;
+		basepair = new unsigned short int[chr_size[currchr]+1];
+		for(int ch = chr_size[currchr]; ch--;)
+			basepair[ch] = 0;
+
+		cout << "\tMapping reads to chromosome......" << endl;
+		while(signal_slist[i].chrom==currchr && i < (int) signal_slist.size()){		
+			basepair[signal_slist[i].pos]++;
+			i++;
+		}
+		signal_slist.erase(signal_slist.begin(),signal_slist.begin()+i);
+
+		if(strcmp(inputFile,noneVal)!=0){
+			if(readInput == 0){
+				cout << "\tLoading reads from input file " << inputFile << "........." << endl;
+				int rVal = importCustomBed(inputFile,extension);
+				if(rVal == 1){
+					cout << "Unable to open file with input reads" << endl;
+					return 1;
+				}
+				readInput = 1;
+			}
+			cout << "\tMapping tags and scores from custom file to the genome........." << endl;
+			i = 0;
+			ibasepair = new unsigned short int[chr_size[currchr]+1];
+			for(int ch = chr_size[currchr]; ch--;)
+				ibasepair[ch] = 0;
+
+			while(custom_slist[i].chrom==currchr && i < (int) custom_slist.size()){
+				ibasepair[custom_slist[i].pos]++;
+				i++;
+			}
+			custom_slist.erase(custom_slist.begin(),custom_slist.begin()+i);
+		}
+		
+		cout << "\tGetting counts for zinba windows.........." << endl;
+		if(printflag==0){
+			tempTB = fopen(flist,"w");
+			printflag = 1;
+		}else{
+			tempTB = fopen(flist,"a");
+		}
+		int numOffsets = 1;
+		if(zOffsetSize > 0){
+			numOffsets = (int) zWinSize/zOffsetSize;
+		}
+		string outfileDATA;
+		slist<dataWinsCustom>::iterator z;
+		for(int o = 0; o < numOffsets; o++){		
+			z = peak_wins3.previous(peak_wins3.end());	
+			cout << "\t\tOffset " << (zOffsetSize * o) << "bp......" << endl;
+			char offset[128];
+			sprintf(offset,"%d",(zOffsetSize * o));
+			char winsize[128];
+			sprintf(winsize,"%d",zWinSize);			
+			outfileDATA = outfile + "_" + chromReport + "_win" + string(winsize) + "bp_offset" + string(offset) + "bp.txt";
+			
+			if(o == (numOffsets-1))
+				fprintf(tempTB,"%s\n",outfileDATA.c_str());
+			else
+				fprintf(tempTB,"%s;",outfileDATA.c_str());
+			unsigned long int zWinStart = (zOffsetSize * o) + 1;
+			unsigned long int zWinStop = zWinStart + zWinSize - 1;
+			while(zWinStop <= chr_size[currchr]){
+				int peakCount = 0;
+				double inCount = 0;
+				for(int b = zWinStart; b <= zWinStop; b++){
+					peakCount += basepair[b];					
+					if(readInput == 1)
+						inCount += ibasepair[b];
+				}					
+					inCount = log((inCount+1)); //need to check this
+					dataWinsCustom zwin(currchr,zWinStart,zWinStop,peakCount,inCount);
+					z = peak_wins3.insert_after(z,zwin);
+				}
+				zWinStart += zWinSize;
+				zWinStop += zWinSize;
+			}
+			
+			if(outputCustomData(outfileDATA.c_str(),currchr) != 0){
+				cout << "Error printing output to file, exiting" << endl;
+				exit(1);
+			}else{
+				cout << "\tPrinted out data to " << outfileDATA << endl;
+			}
+			
+		}
+		fclose(tempTB);
+		cnv_wins.clear();
+		delete [] basepair;
+		basepair = NULL;
+		if(readInput == 1){
+			delete [] ibasepair;
+			ibasepair = NULL;
+		}
+	return 0;	
+}
+	
+
+
+int calcCovs::outputCustomData(const char * outputFile, unsigned short int currChr){
+	FILE * fh;
+	fh = fopen(outputFile,"w");
+	fprintf(fh,"chromosome\tstart\tstop\texp_count\tinput_count\n");
+	const char * chrom = getKey(currChr);
+	slist<dataWinsCustom>::iterator c = peak_wins3.begin();
+	while(c != peak_wins.end()){
+		fprintf(fh,"%s\t%lu\t%lu\t%i\t%f\n",chrom,c->start,c->stop,c->eCount,c->iCount);
+		peak_wins3.erase(c++);
+	}
+	fclose (fh);
+	return 0;
+}
+
