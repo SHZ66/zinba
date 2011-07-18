@@ -74,7 +74,8 @@ zinba(
 This function is optimized for speed and for ease of use and for speed, utilizing only input if available.  A more flexible function run.zinba is available where more parameters can be specified. 
     
 ==FAIRE-seq example==
-ChIP-seq data example: sequencing reads are 36 bp in length, and correspond to a fragment library length of 200 base pairs. The mappability file is unpacked, unloading the map36/ folder with the mappability files contained in it. We create the alignability directory at align_athresh1_extension200/, where our reads were mapped with an alignability threshold of matching up to 1 region in the genome (otherwise they were filtered out). Download the necessary files, unpack your mappability directory, and create a directory to place your alignability files. Open a terminal and run the following, corresponding to the test dataset unpacked (a data/ directory will be created wherever you unpacked it). 
+FAIRE data example: sequencing reads are 36 bp in length, and correspond to a fragment library length of 134 base pairs. The mappability file is unpacked, unloading the map36/ folder with the mappability files contained in it. We create the alignability directory at align_athresh4_extension134/, where our reads were mapped with an alignability threshold of matching up to 4 regions in the genome (otherwise they were filtered out). Download the necessary files, unpack your mappability directory, and create a directory to place your alignability files. Open a terminal and run the following, corresponding to the test dataset unpacked (a data/ directory will be created wherever you unpacked it). 
+
 {{{
 #open a terminal and download the necessary files and test dataset.  
 #on the mac, use curl -O instead of wget
@@ -87,7 +88,7 @@ tar -xzvf map36.tgz
 tar -xzvf test_data.tgz
 
 #create your directory to hold your alignability files.  You can do this anyway you please, terminal command is below
-mkdir align_athresh1_extension200
+mkdir align_athresh4_extension134
 }}}
 
 Enter R and generate your alignability directory in addition to your basecount file 
@@ -95,38 +96,40 @@ Enter R and generate your alignability directory in addition to your basecount f
 library(zinba)
 generateAlignability(
    mapdir='map36/',
-   outdir='align_athresh1_extension200/',
-   athresh=1, 				number of hits per read allowed
-   extension=200, 			
-   twoBitFile='hg18.2bit'		
+   outdir='align_athresh4_extension134/',
+   athresh=4,
+   extension=134,
+   twoBitFile='hg18.2bit'
 )   
 
 basealigncount(
-   inputfile='data/ctcfGM12878rep3chr22.taf', 
-   outputfile='data/ctcfGM12878rep3chr22.basecount', 
-   extension=200, 
-   filetype='tagAlign', 
+   inputfile='data/faireGM12878rep1chr22.taf',
+   outputfile='data/faireGM12878rep1chr22.basecount', 
+   extension=134, 
+   filetype='tagAlign',
    twoBitFile='hg18.2bit'
 )
+
 }}}
 
-Now, run your zinba analysis. Here we start from our mapped sample reads and our prepared files, build the datasets needed for analysis, run the mixture regression model considering only input control, and then run a peak boundary refinement to capture exact peak boundaries. This function is our pipeline function, tying together the smaller functions that work on different parts of the analysis. The steps are detailed in the diagram at the top of this page, and details how to access and use the individual functions are given in the function reference section of this website. Here we are assuming we know what formulas to use and also want to specify directly some of the ZINBA tuning parameters. 
+Now, run your zinba analysis. Here we start from our mapped sample reads and our prepared files, build the datasets needed for analysis, run the mixture regression model with the model selection specified, and then run a peak boundary refinement to capture exact peak boundaries. This function is our pipeline function, tying together the smaller functions that work on different parts of the analysis. The steps are detailed in the diagram at the top of this page, and details how to access and use the individual functions are given in the function reference section of this website. We choose to run the model selection function in this case because we do not know which parameters are best to model each component of signal in the data. We default to the default model selection method by not specifying "selecttype". Because input control was not available for this data, this function only considers the covariates GC content, mappability, and our estimate for local background to model the data. 
 
 {{{
 zinba(
-  align='align_athresh1_extension200/',
-  numProc=4,
-  seq='data/ctcfGM12878rep3chr22.taf',
-  basecountfile='data/ctcfGM12878rep3chr22.basecount',
-  filetype="tagAlign",
-  outfile="data/faire",
-  twoBit="hg18.2bit",
-  extension=200,	
-  printFullOut=1,
-  refinepeaks=1, 
-  broad=F,
-  input='data/inputGM12878rep3chr22.taf'
+	align='align_athresh4_extension134/',
+	numProc=4,
+	seq='data/faireGM12878rep1chr22.taf',
+	basecountfile='data/faireGM12878rep1chr22.basecount',
+	filetype="tagAlign",
+	outfile="data/faire",
+	twoBit="hg18.2bit",
+	extension=134,
+	printFullOut=1,
+	refinepeaks=1,
+	broad=F,
+	input="none"
 )
+
     
 }}}
 ==ChIP-seq example==
