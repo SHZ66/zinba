@@ -57,7 +57,7 @@ Usage for the ZINBA pipeline function
 zinba(
   refinepeaks=,   #refine peaks?  1 for yes, 0 for no
   seq=,           #path to mapped experimental reads
-  input=,         #path to mapped input reads, if available, else ignore
+  input=,         #path to mapped input reads if available (default is "none")
   filetype=,      #either 'bed', 'bowtie', or 'tagAlign'
   threshold=,     #FDR threshold, default is 0.05 
   align=,         #path to alignability directory
@@ -65,7 +65,11 @@ zinba(
   twoBit=,        #path to genome build in .2bit format
   outfile=,       #prefix for outputted files
   extension=,  #average fragment library length (size selected)
-  #OPTIONAL PARAMETERS
+  
+  ###################
+  OPTIONAL PARAMETERS
+  ###################
+
   basecountfile=, #path to basecount file, required if refinepeaks is 1
   broad=,         #broad setting, TRUE or FALSE (default)?
   printFullOut=,  #print original data with enrichment estimates, 1  for yes (more space required), 0 for no (default)
