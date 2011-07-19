@@ -6,28 +6,23 @@
 Here you will find instructions to install the Zinba software package into  <a href="http://cran.r-project.org/" >R</a>.  It is assumed that you already have R installed.  
 
 == Linux ==
-Open a terminal and copy and paste the block of commands below into a terminal to automate the installation process.
+Enter R from the terminal and copy and paste the block of commands below into R to automate the installation process.  If this is your first time installing packages into R, then you may be asked if you want to create a personal R library (select yes).
 
 {{{
-wget http://zinba.googlecode.com/files/zinba_2.0.tar.gz
-tar -xzvf zinba_2.0.tar.gz
-R CMD INSTALL zinba
-R
+system("wget http://zinba.googlecode.com/files/zinba_2.0.tar.gz")
 install.packages(c('multicore','doMC','foreach','qvalue','quantreg')) 
+install.packages("zinba_2.0.tar.gz", repos=NULL) 
 library(zinba)
 }}}
 
 
 
 == Mac ==
-
-Open a terminal and copy and paste the block of commands below into a terminal to automate the installation process.  Important: you must run R from the terminal, do not use the R.app GUI as you will experience problems with Zinba
+Enter R *from the terminal* and copy and paste the block of commands below into R to automate the installation process.  If this is your first time installing packages into R, then you may be asked if you want to create a personal R library (select yes).
 
 {{{
-curl -O http://zinba.googlecode.com/files/zinba_2.0.tar.gz
-tar -xzvf zinba_2.0.tar.gz
-R CMD INSTALL zinba
-R
+system("curl -O http://zinba.googlecode.com/files/zinba_2.0.tar.gz")
 install.packages(c('multicore','doMC','foreach','qvalue','quantreg')) 
+install.packages("zinba_2.0.tar.gz", repos=NULL) 
 library(zinba)
 }}}
