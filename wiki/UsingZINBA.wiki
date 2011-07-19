@@ -56,7 +56,7 @@ Usage for the ZINBA pipeline function
 {{{
 zinba(
   align=         #path to alignability directory
-  numProc=       #CPUs to use, must be less than max available
+  numProc=       #number of CPUs to use, must be less than max available
   seq=           #path to mapped experimental reads
   basecountfile= #path to basecount file, if refinepeaks is 1
   filetype=      #either 'bed', 'bowtie', or 'tagAlign'
