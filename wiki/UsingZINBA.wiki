@@ -31,21 +31,21 @@ tar -xzvf map##.tar.gz
   # Enter R and feed the unpacked mappability folder to the generateAlignability() function to generate your alignability directory. You do not need to compute this again unless you are running samples mapped with different alignability thresholds (athresh) or whose sequencing library has a different average fragment length (extension)
 {{{  
 generateAlignability(
-   mapdir=      #mappability directory from unpacked mappability files
-   outdir=      #directory for processed files, used later in analysis
-   athresh=     #number of hits per read allowed during mapping process
-   extension=   #average fragment library length
-   twoBitFile=  #path to downloaded genome build file in .2bit format
+   mapdir=,      #mappability directory from unpacked mappability files
+   outdir=,      #directory for processed files, used later in analysis
+   athresh=,     #number of hits per read allowed during mapping process
+   extension=,   #average fragment library length
+   twoBitFile=,  #path to downloaded genome build file in .2bit format
 )
 }}} 
   # Run the basealigncount function to generate the basecount file needed to obtain exact peak boundaries through peak refinement.  If peak refinement is not desired then this step can be skipped.  Otherwise, this should be generated for each set of sample reads you are analyzing.  In most cases the unrefined estimates should be sufficient.
 {{{
 basealigncount(
-   inputfile=  #mapped sample reads
-   outputfile= # output path
-   extension=  #average fragment library length 
-   filetype=   #either "bed", "bowtie", or "tagAlign"
-   twoBitFile= #path to downloaded genome build file in .2bit format
+   inputfile=,  #mapped sample reads
+   outputfile=, # output path
+   extension=,  #average fragment library length 
+   filetype=,   #either "bed", "bowtie", or "tagAlign"
+   twoBitFile=, #path to downloaded genome build file in .2bit format
 )
 }}}
 
@@ -55,23 +55,27 @@ basealigncount(
 Usage for the ZINBA pipeline function
 {{{
 zinba(
-  align=         #path to alignability directory
-  numProc=       #number of CPUs to use, must be less than max available
-  seq=           #path to mapped experimental reads
-  basecountfile= #path to basecount file, if refinepeaks is 1
-  filetype=      #either 'bed', 'bowtie', or 'tagAlign'
-  outfile=       #prefix for outputted files
-  twoBit=        #path to genome build in .2bit format
-  extension=  #average fragment library length (size selected)
-  printFullOut=  #print original data with enrichment estimates, 1 for yes, 0 for no (saves space)
-  refinepeaks=   #refine peaks?  1 for yes, 0 for no
-  broad=         #broad setting (TRUE or FALSE)?
-  input=         #Path to mapped input reads, if available
-  interaction=   #whether or not to considering interaction during model selection (TRUE or FALSE)
+  refinepeaks=,   #refine peaks?  1 for yes, 0 for no
+  seq=,           #path to mapped experimental reads
+  input=,         #path to mapped input reads, if available, else ignore
+  filetype=,      #either 'bed', 'bowtie', or 'tagAlign'
+  threshold=,     #FDR threshold, default is 0.05 
+  align=,         #path to alignability directory
+  numProc=,       #number of CPUs to use, must be less than max available
+  twoBit=,        #path to genome build in .2bit format
+  basecountfile=, #path to basecount file, if refinepeaks is 1, else ignore
+  outfile=,       #prefix for outputted files
+  extension=,  #average fragment library length (size selected)
+  printFullOut=,  #print original data with enrichment estimates, 1  for yes (more space required), 0 for no (default)
+  broad=,         #broad setting, TRUE or FALSE (default)?
+  interaction=,   #whether or not to considering interaction during model selection, TRUE (default) or FALSE
+  mode=,          #either "peaks" for peak calling (default) or "CNV" for calling likely amplified CNV regions for reads in "seq" (input reads are best)
 )
 }}}
 
 This function is optimized for speed and for ease of use and for speed, utilizing only input if available.  A more flexible function run.zinba is available where more parameters can be specified. 
+
+For ENCODE reporting purposes, the zinba() convenience function converts posterior probability to q-values for FDR thresholding (more liberal results than posterior probability-based results in ZINBA manuscript).    
     
 ==FAIRE-seq example==
 FAIRE data example: sequencing reads are 36 bp in length, and correspond to a fragment library length of 134 base pairs. The mappability file is unpacked, unloading the map36/ folder with the mappability files contained in it. We create the alignability directory at align_athresh4_extension134/, where our reads were mapped with an alignability threshold of matching up to 4 regions in the genome (otherwise they were filtered out). Download the necessary files, unpack your mappability directory, and create a directory to place your alignability files. Open a terminal and run the following, corresponding to the test dataset unpacked (a data/ directory will be created wherever you unpacked it). 
