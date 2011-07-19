@@ -2,7 +2,7 @@
 <wiki:toc max_depth="2" />
 
 = Using ZINBA =
-A <a href="test_data.tgz">test dataset</a> has been created that corresponds to the example code given in each function used below. 
+A <a href="http://www.unc.edu/~nur2/zinbaweb/test_data.tgz">test dataset</a> has been created that corresponds to the example code given in each function used below. 
 
 =Necessary file downloads=
 Before using Zinba, you need two files before you can start your analysis, given below.   
