@@ -3,7 +3,7 @@
 
 = ZINBA Installation =
 
-Here you will find instructions to install the Zinba software package into  <a href="http://cran.r-project.org/" >R</a>.  It is assumed that you already have R installed.  
+Here you will find instructions to install the ZINBA software package into  <a href="http://cran.r-project.org/" >R</a>.  It is assumed that you already have R installed.  
 
 == Linux ==
 Enter R from the terminal and copy and paste the block of commands below into R to automate the installation process.  If this is your first time installing packages into R, then you may be asked if you want to create a personal R library (select yes).
@@ -18,7 +18,7 @@ library(zinba)
 
 
 == Mac ==
-Enter R *from the terminal* and copy and paste the block of commands below into R to automate the installation process.  If this is your first time installing packages into R, then you may be asked if you want to create a personal R library (select yes).
+Enter R *from the terminal* and copy and paste the block of commands below into R to automate the installation process.  If this is your first time installing packages into R, then you may be asked if you want to create a personal R library (select yes).  Important: you must run R from the terminal, do not use the R.app GUI as you will experience problems with ZINBA.
 
 {{{
 system("curl -O http://zinba.googlecode.com/files/zinba_2.0.tar.gz")
@@ -26,3 +26,5 @@ install.packages(c('multicore','doMC','foreach','qvalue','quantreg'))
 install.packages("zinba_2.0.tar.gz", repos=NULL) 
 library(zinba)
 }}}
+
+If you recieve errors on step 3 above, most likely you need to install [http://r.research.att.com/tools/ Xcode Developer Tools version] (2.4.0 or higher) as your C compiler may be out of date.
