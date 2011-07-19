@@ -63,11 +63,12 @@ zinba(
   align=,         #path to alignability directory
   numProc=,       #number of CPUs to use, must be less than max available (default 1)
   twoBit=,        #path to genome build in .2bit format
-  basecountfile=, #path to basecount file, if refinepeaks is 1, else ignore
   outfile=,       #prefix for outputted files
   extension=,  #average fragment library length (size selected)
-  printFullOut=,  #print original data with enrichment estimates, 1  for yes (more space required), 0 for no (default)
+  #OPTIONAL PARAMETERS
+  basecountfile=, #path to basecount file, required if refinepeaks is 1
   broad=,         #broad setting, TRUE or FALSE (default)?
+  printFullOut=,  #print original data with enrichment estimates, 1  for yes (more space required), 0 for no (default)
   interaction=,   #whether or not to considering interaction during model selection, TRUE (default) or FALSE
   mode=,          #either "peaks" for peak calling (default) or "CNV" for calling likely amplified CNV regions for reads in "seq" (input reads are best)
 )
