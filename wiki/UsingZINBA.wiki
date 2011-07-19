@@ -61,7 +61,7 @@ zinba(
   filetype=,      #either 'bed', 'bowtie', or 'tagAlign'
   threshold=,     #FDR threshold, default is 0.05 
   align=,         #path to alignability directory
-  numProc=,       #number of CPUs to use, must be less than max available
+  numProc=,       #number of CPUs to use, must be less than max available (default 1)
   twoBit=,        #path to genome build in .2bit format
   basecountfile=, #path to basecount file, if refinepeaks is 1, else ignore
   outfile=,       #prefix for outputted files
@@ -163,7 +163,7 @@ generateAlignability(
    outdir='align_athresh1_extension200/', 
    athresh=1,  
    extension=200,  
-   twoBitFile='hg18.2bit		'
+   twoBitFile='hg18.2bit'
 )   
 
 basealigncount(
