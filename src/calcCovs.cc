@@ -1100,9 +1100,10 @@ int calcCovs::processCustomSignal(int zWinSize, int zOffsetSize,const char * two
 					inCount = log((inCount+1)); //need to check this
 					dataWinsCustom zwin(currchr,zWinStart,zWinStop,peakCount,inCount);
 					z = peak_wins3.insert_after(z,zwin);
-				}
-				zWinStart += zWinSize;
-				zWinStop += zWinSize;
+					zWinStart += zWinSize;
+					zWinStop += zWinSize;
+			}
+
 			}
 			
 			if(outputCustomData(outfileDATA.c_str(),currchr) != 0){
