@@ -1,4 +1,4 @@
-buildcustomwindowdata=function(seq,input="none",twoBit,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,filelist,filetype="bowtie",extension, outdir="default"){
+buildcustomwindowdata=function(seq,input="none",twoBit,winSize=500,offset=0,filelist,filetype="bowtie",extension, outdir="default"){
 
 	if(!file.exists(seq)){
 		stop(paste("Seq file not found,",seq,sep=" "))
