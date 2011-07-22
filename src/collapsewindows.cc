@@ -243,7 +243,7 @@ RlengthThresholds,double thresholds[], int *RwinGap, int *RFDR, const char ** Ro
 			sprintf( stop,"%lu", back->end);
 //			strcpy(winID,chromName.c_str());strcat(winID,":");strcat(winID,start);strcat(winID,"-");strcat(winID,stop);
 //			fprintf(fh,"%s\t%s\t%lu\t%lu\t%s\t%.14f\n",winID,chromName.c_str(),back->start,back->end,strand,back->sigVal);
-			fprintf(fh,"%s\t%lu\t%lu\t%s\t%.14f\t%.14f\n",chromName.c_str(),back->start,back->end,strand,back->sigVal,back->qVal);
+			fprintf(fh,"%s\t%lu\t%lu\t%.14f\t%.14f\%s\n",chromName.c_str(),back->start,back->end,back->sigVal,back->qVal,strand);
 			back++;
 		}
 		fclose (fh);
