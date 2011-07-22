@@ -7,6 +7,7 @@ If peak refinement was utilized (refinepeaks=1), then the following two files ar
 
 *outfile.peaks*: Information file for broad (unrefined) and short (refined) ZINBA regions
 
+
 || *PEAKID* || UCSC Genome Browser friendly coordinate of unrefined peak region ||
 || *Chrom* || Chromosome ||
 || *Start* || Start position of unrefined peak region minus 500 bp.  This is to account for possible termination of refined peak boundary just outside of merged regions ||
@@ -21,7 +22,9 @@ If peak refinement was utilized (refinepeaks=1), then the following two files ar
 || *qValue* || Minimum q-value of overlapping or adjacent windows within unrefined region||
 
 
+
 *outfile.peaks.bed*:  File for unrefined peak regions 
+
 || *Chrom* || Chromosome ||
 || *Start* || Start position of unrefined peak region ||
 || *Stop* || End position of unrefined peak region plus 500 bp.  This is to account for possible termination of refined peak boundary just outside of the merged region ||
@@ -33,9 +36,9 @@ If peak refinement was utilized (refinepeaks=1), then the following two files ar
 == Without Peak Refinement (refinepeaks=0) ==
 
 *outfile.peaks.broad.bed*:  Bed File for unrefined peak regions 
+
 || *Chrom* || Chromosome ||
 || *Start* || Start position of broader peak region minus 500 bp.  This is to account for possible termination of refined peak boundaary just outside of merged regions ||
 || *Stop* || End position of broader peak region plus 500 bp.  This is to account for possible termination of refined peak boundaary just outside of the merged region ||
 || *Sig* || Maximum posterior probability of enrichment of overlapping or adjacent windows within merged region ||
 || *Strand* || Strand orientation of peak region ||
-
