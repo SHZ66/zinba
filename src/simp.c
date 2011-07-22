@@ -298,7 +298,7 @@ if(fgets(str_buf, MAX_LEN, FI2) == NULL){
   }else{
     error("%s is not tab-delimated\n", input);
   }
-  sprintf(line, "%s\t%d\t%d\t%s\t%.14f\t%s\t%.14f\n", chr, pstart, pstop, ID,sig ,strand,qVal);
+  sprintf(line, "%s\t%d\t%d\t%s\t%.14f\t%s\n", chr, pstart, pstop, ID,sig ,strand);
   fputs(line, FO2);
 }
 
