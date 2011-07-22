@@ -197,5 +197,3 @@ zinba(
   input='data/inputGM12878rep3chr22.taf'
 )
 }}}
-
-=Output Files=
