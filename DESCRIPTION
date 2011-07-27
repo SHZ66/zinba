@@ -1,8 +1,8 @@
 Package: zinba
 Type: Package
 Title: ZINBA: Zero-Inflation Negative Binomial Algorithm
-Version: 1.11
-Date: 2011-4-26
+Version: 2.01
+Date: 2011-7-26
 Author: Naim Rashid, Paul Giresi
 Maintainer: Naim Rashid <nrashid@bios.unc.edu>, Naim Rashid <paulg@email.unc.edu>
 Description: Flexible peak calling algorithm for next generation sequencing data
