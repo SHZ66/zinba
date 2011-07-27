@@ -1,5 +1,5 @@
 zinba=function(outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,basecountfile=NULL,threshold=0.05,numProc=1,
-refinepeaks=1,printFullOut=0,filetype="bowtie",extension=NULL,broad=FALSE, mode="peaks", interaction=TRUE){
+refinepeaks=1,printFullOut=0,filetype="bowtie",extension=NULL,broad=FALSE, mode="peaks", interaction=TRUE, FDR=TRUE){
 	if(is.null(outfile)){stop("output prefix must be specified")}
 	if(is.null(seq)){stop("path to mapped experimental reads must be specified")}
 	if(!file.exists(seq)){stop("sequencing file does not exist at the specified path, check path for errors")}
@@ -24,7 +24,8 @@ refinepeaks=1,printFullOut=0,filetype="bowtie",extension=NULL,broad=FALSE, mode=
 	selectchr="chr22"
 	selecttype="dirty"
 	winGap=0
-	
+	peakconfidence=1-threshold	
+
 	if(broad==TRUE) winGap=5000
 	if(input=="none" & broad==FALSE){ 
 		selectcovs=c("gcPerc", "align_perc", "exp_cnvwin_log")
@@ -35,6 +36,7 @@ refinepeaks=1,printFullOut=0,filetype="bowtie",extension=NULL,broad=FALSE, mode=
 		selecttype="complete"
 	}
 
+	
 
 
 	if(mode=="peaks"){
@@ -66,8 +68,9 @@ refinepeaks=1,printFullOut=0,filetype="bowtie",extension=NULL,broad=FALSE, mode=
 			selectchr="chr22",
 			selecttype=selecttype,
 			selectcovs=selectcovs,
-			FDR=TRUE,
-			interaction=interaction
+			FDR=FDR,
+			interaction=interaction,
+			peakconfidence=peakconfidence
 		)
 	}else if(mode=="CNV"){
 		run.zinba(
