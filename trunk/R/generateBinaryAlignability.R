@@ -1,4 +1,4 @@
-generateAlignability=function(mapdir, outdir="", athresh=1, extension=0, twoBitFile){
+generateBinaryAlignability=function(mapdir, outdir="", athresh=1, extension=0, twoBitFile){
 	if(!file.exists(mapdir)){stop("Specified directory 'mapdir' doesnt exist or is not correct")
 	}else{
 		#if alignability path does not end in /, then put it in
