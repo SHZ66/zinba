@@ -5,7 +5,7 @@
 A <a href="http://www.unc.edu/~nur2/zinbaweb/test_data.tgz">test dataset</a> has been created that corresponds to the example code given in each function used below. 
 
 =Necessary file downloads=
-Before using Zinba, you need two files before you can start your analysis, given below.   
+Before using ZINBA, you need two files before you can start your analysis, given below.   
 
 ==1. Genome Build==
 The build of the genome you are using in .2bit format, downloadable below.  Also downloadable from the from the <a href=" http://hgdownload.cse.ucsc.edu/downloads.html">UCSC genome browser</a>. NOTE: YOUR DOWNLOADED BUILD MUST BE THE SAME BUILD THAT YOUR READS WERE MAPPED TO. 
