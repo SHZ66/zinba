@@ -75,12 +75,13 @@ zinba(
   printFullOut=,  #print original data with enrichment estimates, 1  for yes (more space required), 0 for no (default)
   interaction=,   #whether or not to considering interaction during model selection, TRUE (default) or FALSE
   mode=,          #either "peaks" for peak calling (default) or "CNV" for calling likely amplified CNV regions for reads in "seq" (input reads are best)
+  FDR=            #either TRUE (default) or FALSE.  If false, then uses posterior probability to threshold peaks using 1-threshold 
 )
 }}}
 
 This function is optimized for speed and for ease of use and for speed, utilizing only input if available.  A more flexible function run.zinba is available where more parameters can be specified. 
 
-For ENCODE reporting purposes, the zinba() convenience function converts posterior probability to q-values for FDR thresholding (more liberal results than posterior probability-based results in ZINBA manuscript).    
+For ENCODE reporting purposes, the zinba() convenience function can convert posterior probability to q-values for FDR thresholding (more liberal results than posterior probability-based results in ZINBA manuscript).    
     
 ==FAIRE-seq example==
 FAIRE data example: sequencing reads are 36 bp in length, and correspond to a fragment library length of 134 base pairs. The mappability file is unpacked, unloading the map36/ folder with the mappability files contained in it. We create the alignability directory at align_athresh4_extension134/, where our reads were mapped with an alignability threshold of matching up to 4 regions in the genome (otherwise they were filtered out). Download the necessary files, unpack your mappability directory, and create a directory to place your alignability files. Open a terminal and run the following, corresponding to the test dataset unpacked (a data/ directory will be created wherever you unpacked it). 
@@ -121,7 +122,7 @@ basealigncount(
 
 }}}
 
-Now, run your zinba analysis. Here we start from our mapped sample reads and our prepared files, build the datasets needed for analysis, run the mixture regression model with the model selection specified, and then run a peak boundary refinement to capture exact peak boundaries. This function is our pipeline function, tying together the smaller functions that work on different parts of the analysis. The steps are detailed in the diagram at the top of this page, and details how to access and use the individual functions are given in the function reference section of this website. We choose to run the model selection function in this case because we do not know which parameters are best to model each component of signal in the data. We default to the default model selection method by not specifying "selecttype". Because input control was not available for this data, this function only considers the covariates GC content, mappability, and our estimate for local background to model the data. 
+Now, run your zinba analysis. Here we start from our mapped sample reads and our prepared files, build the datasets needed for analysis, run the mixture regression model with the model selection specified, and then run a peak boundary refinement to capture exact peak boundaries. This function is our pipeline function, tying together the smaller functions that work on different parts of the analysis. Because input control was not available for this data, this function only considers the covariates GC content, mappability, and our estimate for local background to model the data, and utilizes the model selection procedure to select the best model for each component. 
 
 {{{
 zinba(
@@ -179,7 +180,7 @@ basealigncount(
    twoBitFile='hg18.2bit' )
 }}}
 
-Now, run your zinba analysis. Here we start from our mapped sample reads and our prepared files, build the datasets needed for analysis, run the mixture regression model considering only input control, and then run a peak boundary refinement to capture exact peak boundaries. This function is our pipeline function, tying together the smaller functions that work on different parts of the analysis. 
+Now, run your zinba analysis. Here we start from our mapped sample reads and our prepared files, build the datasets needed for analysis, run the mixture regression model considering only input control, and then run a peak boundary refinement to capture exact peak boundaries.  
 
 {{{
 zinba(
