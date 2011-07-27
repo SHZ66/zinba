@@ -34,6 +34,7 @@ The next step uses the locations in filelist to import this built data into the 
 			\item{mode}{Either "peaks" (default) fo peak calling or "CNV" for a quick estimation of amplified regions in "seq".  For this option is is suggested to have "seq" to be your input control for best results}
 			\item{interaction}{TRUE or FALSE, whether interaction terms between covariates are considered during model selection.  FALSE results in greater speedup during model selection} 	    
 			\item{broad}{TRUE or FALSE, whether to merge enriched windows within 5kb of each other}
+			}
 			\seealso{
             \code{\link{save}}.
           }
