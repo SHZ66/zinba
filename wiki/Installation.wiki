@@ -3,7 +3,7 @@
 
 = ZINBA Installation =
 
-Here you will find instructions to install the ZINBA software package into  <a href="http://cran.r-project.org/" >R</a>.  It is assumed that you already have R installed.  
+Here you will find instructions to install the ZINBA software package into  <a href="http://cran.r-project.org/" >R</a>.  It is assumed that you already have R (>2.10) installed.  
 
 == Linux ==
 Enter R from the terminal and copy and paste the block of commands below into R to automate the installation process.  If this is your first time installing packages into R, then you may be asked if you want to create a personal R library (select yes).
