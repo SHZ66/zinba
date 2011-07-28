@@ -79,7 +79,7 @@ zinba(
 )
 }}}
 
-This function is optimized for speed and for ease of use and for speed, utilizing only input if available.  A more flexible function run.zinba is available where more parameters can be specified. 
+This function is optimized for speed and for ease of use, utilizing only input if it is available.  A more flexible function run.zinba is available where more parameters can be specified. 
 
 For ENCODE reporting purposes, the zinba() convenience function can convert posterior probability to q-values for FDR thresholding (more liberal results than posterior probability-based results in ZINBA manuscript).    
     
