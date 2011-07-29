@@ -114,7 +114,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 		cat("Enrichment formula is:\n\t") 
 			print(formulaE)
 		cat("Zero-inflated formula is:\n\t") 
-			print(formulaE)
+			print(formulaZ)
 		cat(paste("--------MODEL SELECTION COMPLETE--------",as.character(Sys.time()),"\n\n")) 
 	}	
 	 

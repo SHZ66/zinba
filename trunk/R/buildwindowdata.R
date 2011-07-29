@@ -24,7 +24,7 @@ buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvW
 		stop(paste("filelist was not specified"))
 	}
 	if(!file.exists(outdir) && outdir!="default"){
-		stop(paste("buildwindowdata: pecified output directory to place built datafiles doesnt exist"))
+		stop(paste("buildwindowdata: specified output directory to place built datafiles doesnt exist"))
 	}
 	wigfiles <- file.access(dir(align,pattern="wig",full.names=T))
 	twigfiles <- table(wigfiles)
