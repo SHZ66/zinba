@@ -51,6 +51,27 @@ basealigncount(
 
 
 =Analyze your Data=
+==Input Formats==
+Three input formats are allowed for ZINBA:
+
+*BED*:  The first [http://genome.ucsc.edu/FAQ/FAQformat.html#format1 6 fields] of the BED format
+  * Chromosome
+  * Start
+  * Stop
+  * Name (can be any string/character)
+  * Score (can be set to 0 if N/A)
+  * Strand (can be set to + if unknown)
+
+*tagAlign*:  Similar to the above BED format, except "Seq" replaces "Name".  This format is sometimes found on the UCSC genome browser.
+  * Chromosome
+  * Start
+  * Stop
+  * Seq (sequence of mapped read)
+  * Score (can be set to 0)
+  * Strand (can be set to + if unknown)
+
+*bowtie*  The [http://bowtie-bio.sourceforge.net/manual.shtml#default-bowtie-output default output] from the Bowtie mapping software (.hits file)
+
 ==ZINBA pipeline function==
 Usage for the ZINBA pipeline function
 {{{
