@@ -1,6 +1,21 @@
+#define UBYTE unsigned char   /* Wants to be unsigned 8 bits. */
+#define BYTE signed char      /* Wants to be signed 8 bits. */
+#define UWORD unsigned short  /* Wants to be unsigned 16 bits. */
+#define WORD short	      /* Wants to be signed 16 bits. */
+#define bits64 unsigned long long  /* Wants to be unsigned 64 bits. */
+#define bits32 unsigned       /* Wants to be unsigned 32 bits. */
+#define bits16 unsigned short /* Wants to be unsigned 16 bits. */
+#define bits8 unsigned char   /* Wants to be unsigned 8 bits. */
+#define signed32 int	      /* Wants to be signed 32 bits. */
+#define boolean bool	      /* Wants to be signed 32 bits. */
+
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
+extern "C"{
+#include "twoBit.h"
+}
+
 #include "process_scores.h"
 #include <sstream>
 #include <string>
@@ -11,7 +26,7 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
-
+#include "string.h"
 using namespace std;
 
 process_scores::process_scores(){}
@@ -21,20 +36,25 @@ process_scores::~process_scores(){}
 int process_scores::adjustCoords(string alignFile,string outDir,const char* twoBitFile,int aThresh,int adjustSize){
 	
 	FILE * tempTB;
-	const char * tInfo = "tempInfo.txt"; 
-	const char * tChrSize = "tempChromSize.txt";
-	tempTB = fopen(tInfo,"w");
+	//const char * tInfo = "tempInfo.txt"; 
+	char * tChrSize = "tempChromSize.txt";
+	/*tempTB = fopen(tInfo,"w");
 	fprintf(tempTB,"library(zinba);\ntwobitinfo(infile=\"%s\",outfile=\"%s\");\n",twoBitFile,tChrSize);
 	fclose (tempTB);
 	
-	//	cout << "\nGetting chromosome lengths from .2bit file: " << twoBitFile << endl;
+	cout << "\nGetting chromosome lengths from .2bit file: " << twoBitFile << endl;
 	int s = system("R CMD BATCH tempInfo.txt /dev/null");
 	if(s != 0){
 		cout << "\nERROR: failed to generate info file using twoBitInfo, twoBit file is: " << twoBitFile << endl;
 		return 1;
 	}
 	remove(tInfo);	
-	
+	*/
+
+		char * twoBitFile2=(char*) malloc(strlen(twoBitFile)+1); strcpy(twoBitFile2,twoBitFile);
+		twoBitInfo2(twoBitFile2, tChrSize);
+		free(twoBitFile2);
+
 	tempTB = fopen(tChrSize,"r");
 	char tbChrom[128];
 	unsigned long int tbStart;

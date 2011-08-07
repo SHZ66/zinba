@@ -1,6 +1,20 @@
+#define UBYTE unsigned char   /* Wants to be unsigned 8 bits. */
+#define BYTE signed char      /* Wants to be signed 8 bits. */
+#define UWORD unsigned short  /* Wants to be unsigned 16 bits. */
+#define WORD short	      /* Wants to be signed 16 bits. */
+#define bits64 unsigned long long  /* Wants to be unsigned 64 bits. */
+#define bits32 unsigned       /* Wants to be unsigned 32 bits. */
+#define bits16 unsigned short /* Wants to be unsigned 16 bits. */
+#define bits8 unsigned char   /* Wants to be unsigned 8 bits. */
+#define signed32 int	      /* Wants to be signed 32 bits. */
+#define boolean bool	      /* Wants to be signed 32 bits. */
+
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
+extern "C"{
+#include "twoBit.h"
+}
 #include "bcanalysis.h"
 #include <sstream>
 #include <string>
@@ -133,10 +147,13 @@ int bcanalysis::importRawSignal(const char * signalFile,int extension,const char
 		char sysCall[256];
 		time(&rtime);
 		timeinfo=localtime(&rtime);
-		strftime(tInfo,128,"tempInfo_%H_%M_%S.txt",timeinfo);
+		//strftime(tInfo,128,"tempInfo_%H_%M_%S.txt",timeinfo);
 		strftime(tChrSize,128,"tempChromSize_%H_%M_%S.txt",timeinfo);
-		
-		tempTB = fopen(tInfo,"w");
+
+		char * twoBitFile2=(char*) malloc(strlen(twoBitFile)+1); strcpy(twoBitFile2,twoBitFile);
+		twoBitInfo2(twoBitFile2, tChrSize);
+		free(twoBitFile2);		
+		/*tempTB = fopen(tInfo,"w");
 		fprintf(tempTB,"library(zinba);\ntwobitinfo(infile=\"%s\",outfile=\"%s\");\n",twoBitFile,tChrSize);
 		fclose (tempTB);
 		
@@ -155,7 +172,8 @@ int bcanalysis::importRawSignal(const char * signalFile,int extension,const char
 			}
 		}
 		remove(tInfo);
-		
+		*/
+
 		tempTB = fopen(tChrSize,"r");
 		char cChrom[128];
 		unsigned long int cStart;

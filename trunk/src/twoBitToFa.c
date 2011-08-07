@@ -131,6 +131,52 @@ carefulClose(&outFile);
 twoBitClose(&tbf);
 }
 
+
+void twoBitToFa2(char *clSeq,int clStart,int clEnd,char *inName,char *outName)
+/* twoBitToFa - Convert all or part of twoBit file to fasta. */
+{
+
+	//char *clSeq = RinSeq[0];	/* Command line sequence. */
+	//int clStart = Rstart;	/* Start from command line. */
+	//int clEnd = Rstop;		/* End from command line. */
+	//char *clSeqList = Rtwobitfile[0]; /* file containing list of seq names */
+	noMask = TRUE;  /* convert seq to upper case */
+	char *clBpt = NULL;/* External index file. */
+	//char *inName = Rtwobitfile[0];	
+	//char *outName = RgcOut[0];
+	
+//char* inName=RinName[0];
+//char* outName=RoutName[0] ;
+struct twoBitFile *tbf;
+FILE *outFile = mustOpen(outName, "w");
+struct twoBitSpec *tbs;
+
+if (clSeq != NULL)
+    {
+    char seqSpec[2*PATH_LEN];
+    if (clEnd > clStart)
+        safef(seqSpec, sizeof(seqSpec), "%s:%s:%d-%d", inName, clSeq, clStart, clEnd);
+    else
+        safef(seqSpec, sizeof(seqSpec), "%s:%s", inName, clSeq);
+    tbs = twoBitSpecNew(seqSpec);
+    }
+else if (clSeqList != NULL)
+    tbs = twoBitSpecNewFile(inName, clSeqList);
+else
+    tbs = twoBitSpecNew(inName);
+if (tbs->seqs != NULL && clBpt != NULL)
+    tbf = twoBitOpenExternalBptIndex(tbs->fileName, clBpt);
+else
+    tbf = twoBitOpen(tbs->fileName);
+if (tbs->seqs == NULL)
+    processAllSeqs(tbf, outFile);
+else
+    processSeqSpecs(tbf, tbs->seqs, outFile);
+twoBitSpecFree(&tbs);
+carefulClose(&outFile);
+twoBitClose(&tbf);
+}
+
 /*
 int main(int argc, char *argv[])
 /* Process command line. 
