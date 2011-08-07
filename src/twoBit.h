@@ -3,7 +3,7 @@
  * masked regions. */
 
 #ifndef TWOBIT_H
-#define TWOBIT_H
+#define TWOBIT_H	
 
 struct twoBit
 /* Two bit representation of DNA. */
@@ -190,5 +190,9 @@ void twoBitOutNBeds(struct twoBitFile *tbf, char *seqName, FILE *outF);
 
 int twoBitSeqSizeNoNs(struct twoBitFile *tbf, char *seqName);
 /* return the length of the sequence, not counting N's */
+
+void twoBitToFa2(char *clSeq,int clStart,int clEnd,char *inName,char *outName);
+
+void twoBitInfo2(char *inName, char *outName);
 
 #endif /* TWOBIT_H */

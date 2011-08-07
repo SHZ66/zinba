@@ -79,6 +79,52 @@ twoBitClose(&tbf);
 carefulClose(&outFile); 
 }
 
+void twoBitInfo2(char *inName, char *outName)
+/* twoBitInfo - get information about sequences in a .2bit file. */
+{
+//char* inName=RinName[0];
+//char* outName=RoutName[0];
+struct twoBitFile *tbf;
+FILE *outFile;
+char *seqName = NULL;
+
+twoBitParseRange(inName, &inName, &seqName, NULL, NULL);
+tbf = twoBitOpen(inName);
+outFile = mustOpen(outName, "w");
+
+if (seqName != NULL)
+    {
+    char *seqArray[1023];
+    int i;
+    int seqCount = chopString(seqName, ",", seqArray, ArraySize(seqArray));
+    for (i = 0 ; i < seqCount ; i++)
+	{
+/*	if (optionExists("nBed"))
+	    twoBitOutNBeds(tbf, seqArray[i], outFile);
+	else if(optionExists("noNs"))
+	    fprintf(outFile, "%s\t%d\n", seqArray[i], twoBitSeqSizeNoNs(tbf, seqArray[i]));
+	else*/
+	    fprintf(outFile, "%s\t%d\n", seqArray[i], twoBitSeqSize(tbf, seqArray[i]));
+	}
+	
+    }
+else
+    {
+    struct twoBitIndex *index;
+    for (index = tbf->indexList; index != NULL; index = index->next)
+	{
+/*	if (optionExists("nBed"))
+	    twoBitOutNBeds(tbf, index->name, outFile);
+	else if(optionExists("noNs"))
+	    fprintf(outFile, "%s\t%d\n", index->name, twoBitSeqSizeNoNs(tbf, index->name));
+	else*/
+	    fprintf(outFile, "%s\t%d\n", index->name, twoBitSeqSize(tbf, index->name));
+	}
+    }
+twoBitClose(&tbf);
+carefulClose(&outFile); 
+}
+
 //int main(int argc, char *argv[])
 /* Process command line. */
 //{

@@ -1,6 +1,20 @@
+#define UBYTE unsigned char   /* Wants to be unsigned 8 bits. */
+#define BYTE signed char      /* Wants to be signed 8 bits. */
+#define UWORD unsigned short  /* Wants to be unsigned 16 bits. */
+#define WORD short	      /* Wants to be signed 16 bits. */
+#define bits64 unsigned long long  /* Wants to be unsigned 64 bits. */
+#define bits32 unsigned       /* Wants to be unsigned 32 bits. */
+#define bits16 unsigned short /* Wants to be unsigned 16 bits. */
+#define bits8 unsigned char   /* Wants to be unsigned 8 bits. */
+#define signed32 int	      /* Wants to be signed 32 bits. */
+#define boolean bool	      /* Wants to be signed 32 bits. */
+
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
+extern "C"{
+#include "twoBit.h"
+}
 #include "calcCovs.h"
 //#include <sstream>
 #include <string>
@@ -14,6 +28,7 @@
 #include <R.h>
 #include <algorithm>
 #include <time.h>
+#include "string.h"
 
 using namespace std;
 
@@ -52,6 +67,8 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		i = 0;
 		currchr = signal_slist[0].chrom;
 		const char * chromReport = getKey(currchr);
+		char * chromReport2=(char*) malloc(strlen(chromReport)+1) ; strcpy(chromReport2,chromReport);
+		char * twoBitFile2=(char*) malloc(strlen(twoBitFile)+1); strcpy(twoBitFile2,twoBitFile);
 		cout << "\nProcessing " << chromReport << endl;
 		cout << "\tInitializing to length " << chr_size[currchr] << endl;
 		basepair = new unsigned short int[chr_size[currchr]+1];
@@ -95,13 +112,22 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		char tSeq[128];
 		time(&rtime);
 		timeinfo=localtime(&rtime);
-		strftime(tInfo,128,"tempInfo_%H_%M_%S.txt",timeinfo);
-		strftime(tSeq,128,"tempSeq_%H_%M_%S.txt",timeinfo);
+		//strftime(tInfo,128,"tempInfo_%H_%M_%S.txt",timeinfo); 
+		strftime(tSeq,128,"tempSeq_%H_%M_%S.txt",timeinfo);  //need to add random number
 
-		tempTB = fopen(tInfo,"w");
-		fprintf(tempTB,"library(zinba);\ntwobittofa(chrm=\"%s\",start=1,end=%lu,twoBitFile=\"%s\",gcSeq=\"%s\");\n",chromReport,chr_size[currchr],twoBitFile,tSeq);
-		fclose (tempTB);
-		sprintf(sysCall,"R CMD BATCH %s /dev/null",tInfo);
+    string tSeq2= outfile+tSeq;
+		char *tSeq3 = new char[tSeq2.size() + 1];
+		strcpy(tSeq3, tSeq2.c_str());   
+		twoBitToFa2(chromReport2,1,chr_size[currchr],twoBitFile2,tSeq3);
+
+//		twoBitToFa2(chromReport2,1,chr_size[currchr],twoBitFile2,tSeq);
+		free(chromReport2);
+		free(twoBitFile2);
+		// opens R file tempTB = fopen(tInfo,"w");
+		// prints command to R file fprintf(tempTB,"library(zinba);\ntwobittofa(chrm=\"%s\",start=1,end=%lu,twoBitFile=\"%s\",gcSeq=\"%s\");\n",chromReport,chr_size[currchr],twoBitFile,tSeq);
+		// fclose (tempTB);
+		// command to run r file in batch sprintf(sysCall,"R CMD BATCH %s /dev/null",tInfo);
+		/* this part runs the system command and retries if failure
 		int s = 1;
 		int twobitCount = 0;
 		while(s != 0){
@@ -115,8 +141,9 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			}
 		}
 		remove(tInfo);
-		
-		ifstream seqfile(tSeq);
+		*/
+
+		ifstream seqfile(tSeq3);
 		string line;
 		pos = 1;
 		unsigned long int nStart = 0;
@@ -137,7 +164,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			}
 		}
 		seqfile.close();
-		remove(tSeq);
+		remove(tSeq3);
 
 		cout << "\tGetting counts for " << cWinSize << "bp windows.........." << endl;
 		int numOffsets = 1;
@@ -582,12 +609,15 @@ int calcCovs::importRawSignal(const char * signalFile,int extension,const char *
 		char tInfo[128];// = "tempInfo.txt";
 		char tChrSize[128];// = "tempChromSize.txt";
 		char sysCall[256];
+		char * twoBitFile2=(char*) malloc(strlen(twoBitFile)+1); strcpy(twoBitFile2,twoBitFile);
 		time(&rtime);
 		timeinfo=localtime(&rtime);
-		strftime(tInfo,128,"tempInfo_%H_%M_%S.txt",timeinfo);
+		//strftime(tInfo,128,"tempInfo_%H_%M_%S.txt",timeinfo);
 		strftime(tChrSize,128,"tempChromSize_%H_%M_%S.txt",timeinfo);
 
-		tempTB = fopen(tInfo,"w");
+		twoBitInfo2(twoBitFile2, tChrSize);
+		free(twoBitFile2);
+		/*tempTB = fopen(tInfo,"w");
 		fprintf(tempTB,"library(zinba);\ntwobitinfo(infile=\"%s\",outfile=\"%s\");\n",twoBitFile,tChrSize);
 		fclose (tempTB);
 
@@ -605,7 +635,7 @@ int calcCovs::importRawSignal(const char * signalFile,int extension,const char *
 				return 1;
 			}
 		}
-		remove(tInfo);
+		remove(tInfo);*/
 
 		tempTB = fopen(tChrSize,"r");
 		char cChrom[128];
@@ -844,6 +874,8 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 		i = 0;
 		currchr = signal_slist[0].chrom;
 		const char * chromReport = getKey(currchr);
+		char * chromReport2=(char*) malloc(strlen(chromReport)+1) ; strcpy(chromReport2,chromReport);
+		char * twoBitFile2=(char*) malloc(strlen(twoBitFile)+1); strcpy(twoBitFile2,twoBitFile);
 		cout << "\nProcessing " << chromReport << endl;
 		basepair = new unsigned int[chr_size[currchr]+1];
 		for(int ch = chr_size[currchr]; ch--;)
@@ -864,10 +896,13 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 		char tSeq[128];
 		time(&rtime);
 		timeinfo=localtime(&rtime);
-		strftime(tInfo,128,"tempInfo_%H_%M_%S.txt",timeinfo);
+		//strftime(tInfo,128,"tempInfo_%H_%M_%S.txt",timeinfo);
 		strftime(tSeq,128,"tempSeq_%H_%M_%S.txt",timeinfo);
 
-		tempTB = fopen(tInfo,"w");
+		twoBitToFa2(chromReport2,1,chr_size[currchr],twoBitFile2,tSeq);
+		free(chromReport2);
+		free(twoBitFile2);
+		/*tempTB = fopen(tInfo,"w");
 		fprintf(tempTB,"library(zinba);\ntwobittofa(chrm=\"%s\",start=1,end=%lu,twoBitFile=\"%s\",gcSeq=\"%s\");\n",chromReport,chr_size[currchr],twoBitFile,tSeq);
 		fclose (tempTB);
 		sprintf(sysCall,"R CMD BATCH %s /dev/null",tInfo);
@@ -883,7 +918,7 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 				return 1;
 			}
 		}
-		remove(tInfo);
+		remove(tInfo);*/
 		
 		ifstream seqfile(tSeq);
 		string line;
