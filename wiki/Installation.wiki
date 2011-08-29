@@ -36,4 +36,10 @@ library(zinba)
 }}}
 
 
-If you recieve errors on step 3 above, most likely you need to install [http://r.research.att.com/tools/ Xcode Developer Tools version] (2.4.0 or higher) as your C compiler may be out of date.
+Some users have reported problems loading the zinba package after installation.  If this is the case, try installing R from the command line (not within R), using
+
+{{{
+R CMD INSTALL zinba_2.01.tar.gz
+}}}
+
+If you receive errors during package installation, most likely you need to install [http://r.research.att.com/tools/ Xcode Developer Tools version] (2.4.0 or higher) as your C compiler may be out of date.
