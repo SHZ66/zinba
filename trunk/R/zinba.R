@@ -1,5 +1,7 @@
 zinba=function(outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,basecountfile=NULL,threshold=0.05,numProc=1,
-refinepeaks=1,printFullOut=0,filetype="bowtie",extension=NULL,broad=FALSE, mode="peaks", interaction=TRUE, FDR=TRUE){
+refinepeaks=1,printFullOut=0,filetype="bowtie",extension=NULL,broad=FALSE, mode="peaks", interaction=TRUE, FDR=TRUE,
+genome="hg"
+){
 	if(is.null(outfile)){stop("output prefix must be specified")}
 	if(is.null(seq)){stop("path to mapped experimental reads must be specified")}
 	if(!file.exists(seq)){stop("sequencing file does not exist at the specified path, check path for errors")}
@@ -9,6 +11,7 @@ refinepeaks=1,printFullOut=0,filetype="bowtie",extension=NULL,broad=FALSE, mode=
 	if(is.null(basecountfile) & refinepeaks==1){stop("basecount file needs to be specified for peak refinement")}
 	if(is.null(extension)){stop("sequencing read extension length (average length of fragment library) needs to be specified")}
 
+	#base parameters
 	buildwin=1
 	winSize=250	
 	offset=125
@@ -26,14 +29,34 @@ refinepeaks=1,printFullOut=0,filetype="bowtie",extension=NULL,broad=FALSE, mode=
 	winGap=0
 	peakconfidence=1-threshold	
 
-	if(broad==TRUE) winGap=5000
-	if(input=="none" & broad==FALSE){ 
-		selectcovs=c("gcPerc", "align_perc", "exp_cnvwin_log")
-	}else if(input=="none" & broad==TRUE){
-		selectcovs=c("gcPerc", "align_perc")
-	}else if(input!="none"){
-		selectcovs=c("input_count")
-		selecttype="complete"
+	#options	
+	if(genome=="hg" || genome=="mm"){
+		if(broad==TRUE) winGap=5000
+		if(input=="none" & broad==FALSE){ 
+			selectcovs=c("gcPerc", "align_perc", "exp_cnvwin_log")
+		}else if(input=="none" & broad==TRUE){
+			selectcovs=c("gcPerc", "align_perc")
+		}else if(input!="none"){
+			selectcovs=c("input_count")
+			selecttype="complete"
+		}
+
+	}else if(genome=="othersmall" || genome=="ce" ||genome=="dm"){
+		winSize=200	
+		offset=40
+		if(broad==TRUE) winGap=2000
+		if(input=="none" & broad==FALSE){ 
+			selectcovs=c("gcPerc", "exp_cnvwin_log", "align_perc")
+		}else if(input=="none" & broad==TRUE){
+			selectcovs=c("gcPerc","align_perc")
+		}else if(input!="none"){
+			selectcovs=c("input_count")
+			selecttype="complete"
+		}
+		if(genome=="dm")	selectchr="chr2L"
+		else if(genome=="ce")	selectchr="chrI"
+	}else{
+		stop("'genome' should be either 'hg', 'mm', 'dm', 'ce', 'othersmall'")
 	}
 
 	
@@ -47,25 +70,25 @@ refinepeaks=1,printFullOut=0,filetype="bowtie",extension=NULL,broad=FALSE, mode=
 			input=input,
 			basecountfile=basecountfile,
 			filetype=filetype,
-			offset=125,
+			offset=offset,
 			buildwin=1,
 			outfile=outfile,
 			threshold=threshold,
 			twoBit=twoBit,
-			cnvOffset=2500,
+			cnvOffset=cnvOffset,
 			pquant=1,
 			winGap=winGap,
-			cnvWinSize=100000,	
+			cnvWinSize=cnvWinSize,	
 			initmethod="count",
-			printFullOut=1,
-			winSize=250,
+			printFullOut=printFullOut,
+			winSize=winSize,
 			diff=0,
 			pWinSize=200,	
 			extension=extension,
 			method="mixture",
 			refinepeaks=refinepeaks,
 			selectmodel=TRUE,
-			selectchr="chr22",
+			selectchr=selectchr,
 			selecttype=selecttype,
 			selectcovs=selectcovs,
 			FDR=FDR,
