@@ -40,6 +40,7 @@ genome="hg"
 			selectcovs=c("input_count")
 			selecttype="complete"
 		}
+		if(genome="mm") selectchr="chr20"
 
 	}else if(genome=="othersmall" || genome=="ce" ||genome=="dm"){
 		winSize=200	
