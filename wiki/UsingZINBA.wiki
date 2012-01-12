@@ -18,8 +18,8 @@ The build of the genome you are using in .2bit format, downloadable below.  Also
 ==2. Mappability File==
 A mappability folder corresponding to your <u>sequencing read length</u> and <u>genome</u> (links to compressed files are below).  These files were generated using code from <a href="www.gersteinlab.org/proj/PeakSeq">Peakseq </a>, developed by the Gerstein Lab. This file is used to derive final mappability score in ZINBA.
 
-||*Human*||*Mouse*||*Drosophila*||*C. Elegans*||
-||<a href="http://www.bios.unc.edu/~nrashid/map36.tgz"  >hg18 36bp</a><br><a href="http://www.bios.unc.edu/~nrashid/map50.tgz"  >hg18 50bp</a> || ||<a href="http://www.bios.unc.edu/~nrashid/map36_dm3.tgz"  >dm3 36bp</a><br><a href="http://www.unc.edu/~nur2/map50_dm3.tgz"  >dm3 50bp</a>||<a href="http://www.bios.unc.edu/~nrashid/map36_ce4.tgz"  >ce4 36bp</a> ||
+||*Human*||*Mouse*||*Drosophila*||*C. Elegans*||*Yeast*||
+||<a href="http://www.bios.unc.edu/~nrashid/map36.tgz"  >hg18 36bp</a><br><a href="http://www.bios.unc.edu/~nrashid/map50.tgz"  >hg18 50bp</a> || ||<a href="http://www.bios.unc.edu/~nrashid/map36_dm3.tgz"  >dm3 36bp</a><br><a href="http://www.unc.edu/~nur2/map50_dm3.tgz"  >dm3 50bp</a>||<a href="http://www.bios.unc.edu/~nrashid/map36_ce4.tgz"  >ce4 36bp</a> || ||
 ||<a href="http://www.bios.unc.edu/~nrashid/map36_hg19.tgz"  >hg19  36bp</a><br><a href="http://www.bios.unc.edu/~nrashid/map50_hg19.tgz"  >hg19 50bp</a> ||<a href="http://www.bios.unc.edu/~nrashid/map36_mm9.tgz"  >mm9 36bp</a><br><a href="http://www.bios.unc.edu/~nrashid/map50_mm9.tgz"  >mm9 50bp</a> ||  ||<a href="http://www.bios.unc.edu/~nrashid/map36_ce6.tgz"  >ce6 36bp</a>|| <a href="http://zinba.googlecode.com/files/map36_sacCer3.tgz"  >sacCer3 36bp</a><br><a href="http://zinba.googlecode.com/files/map50_sacCer3.tgz"  >sacCer3 50bp</a>|| 
 
 
