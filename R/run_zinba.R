@@ -1,6 +1,6 @@
 run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfile=NULL,seq=NULL,align=NULL,input="none",twoBit=NULL,
 		winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,
-		numProc=1,buildwin=1, winGap=0,pWinSize=200,pquant=1,refinepeaks=1,printFullOut=0,method='pscl',initmethod='count',
+		numProc=1,buildwin=1, winGap=0,pWinSize=200,pquant=1,refinepeaks=1,printFullOut=0,method='mixture',initmethod='count',
 		diff=0,filetype="bowtie",extension, cleanup=FALSE, selectmodel=FALSE, selectchr=NULL, selecttype="dirty", selectcovs=NULL, FDR=FALSE, interaction=TRUE){
 
 	#since peakconfidence is now deprecated, set as 1-threshold	
