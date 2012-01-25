@@ -226,9 +226,9 @@ zinba(
 Please note that this section and below uses ZINBA version 2.02 or later.  For versions < 2.02, you must manually set the peakconfidence level when FDR = F, for example peakfconfidence=0.95.  While the zinba() function offers ease of use, it doesn't offer much flexibility.  With the run.zinba() function, one can specify options that will allow for
 
   * Faster processing by selecting larger window sizes
-	* The ability to bypass model selection if model formulas are previously known
+  * The ability to bypass model selection if model formulas are previously known
   * Specify the distance threshold for merging windows
-	* Rerun an analysis using an already built set of windows
+  * Rerun an analysis using an already built set of windows
   * Call multiple peaks within a broad region
 
 We describe some of the optional parameters in more detail later on.
