@@ -211,7 +211,7 @@ zinba(
   seq='data/ctcfGM12878rep3chr22.taf',
   basecountfile='data/ctcfGM12878rep3chr22.basecount',
   filetype="tagAlign",
-  outfile="data/faire",
+  outfile="data/ctcf",
   twoBit="hg18.2bit",
   extension=200,
   printFullOut=1,
