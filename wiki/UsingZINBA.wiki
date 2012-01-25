@@ -309,28 +309,26 @@ This example mirrors that of what is used in the zinba() example and will produr
 
 {{{
 run.zinba(
-				seq='data/faireGM12878rep1chr22.taf',        
-        input="none"
-        filetype="tagAlign",
-        twoBit="hg18.2bit",
-				winSize=250,
-				offset=125,
-        extension=134,
-        basecountfile='data/faireGM12878rep1chr22.basecount',
-				align='align_athresh4_extension134/',
-				selectmodel=T, 
-				selectchr = "chr22",
-				selecttype = "dirty"
-				selectcovs = c("gcPerc", "align_perc", "exp_cnvwin_log"), 
-				interaction= T, 
-				threshold=0.05,
-        refinepeaks=1, 
-        numProc=4,
-				winGap=0,         
-				FDR=TRUE
-        outfile="data/faire",
-        printFullOut=1,
+  seq='data/faireGM12878rep1chr22.taf',  
+  input="none"
+  filetype="tagAlign",
+  twoBit="hg18.2bit",
+  winSize=250,
+  offset=125,
+  extension=134,
+  basecountfile='data/faireGM12878rep1chr22.basecount',
+  align='align_athresh4_extension134/',
+  selectmodel=T, 
+  selectchr = "chr22",
+  selecttype = "dirty"
+  selectcovs = c("gcPerc", "align_perc", "exp_cnvwin_log"), 
+  interaction= T, 
+  threshold=0.05,
+  refinepeaks=1, 
+  numProc=4,
+  winGap=0,   
+  FDR=TRUE
+  outfile="data/faire",
+  printFullOut=1,
 )
 }}}
-
-
