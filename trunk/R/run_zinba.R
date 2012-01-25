@@ -2,7 +2,10 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 		winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,
 		numProc=1,buildwin=1, winGap=0,pWinSize=200,pquant=1,refinepeaks=1,printFullOut=0,method='pscl',initmethod='count',
 		diff=0,filetype="bowtie",extension, cleanup=FALSE, selectmodel=FALSE, selectchr=NULL, selecttype="dirty", selectcovs=NULL, FDR=FALSE, interaction=TRUE){
-	
+
+	#since peakconfidence is now deprecated, set as 1-threshold	
+	peakconfidence=1-threshold	
+
 	parameters=list(filelist=filelist,formula=formula,formulaE=formulaE,formulaZ=formulaZ,outfile=outfile,seq=seq,align=align,input=input,twoBit=twoBit,
                 winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset,basecountfile=basecountfile,threshold=threshold,peakconfidence=peakconfidence,tol=tol,
                 numProc=numProc,buildwin=buildwin, winGap=winGap,pWinSize=pWinSize,pquant=pquant,refinepeaks=refinepeaks,printFullOut=printFullOut,method=method,initmethod=initmethod,
