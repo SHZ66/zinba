@@ -27,7 +27,7 @@ genome="hg"
 	selectchr="chr22"
 	selecttype="dirty"
 	winGap=0
-	peakconfidence=1-threshold	
+	#peakconfidence=1-threshold	  this is now done in run.zinba
 
 	#options	
 	if(genome=="hg" || genome=="mm"){
@@ -93,8 +93,8 @@ genome="hg"
 			selecttype=selecttype,
 			selectcovs=selectcovs,
 			FDR=FDR,
-			interaction=interaction,
-			peakconfidence=peakconfidence
+			interaction=interaction #,
+			#peakconfidence=peakconfidence  this is now deprecated
 		)
 	}else if(mode=="CNV"){
 		run.zinba(
@@ -107,7 +107,7 @@ genome="hg"
 			offset=2500,
 			buildwin=1,
 			outfile=outfile,
-			threshold=threshold,
+			threshold=0.05,
 			twoBit=twoBit,
 			cnvOffset=2500,
 			pquant=1,
@@ -126,7 +126,7 @@ genome="hg"
 			formulaE=exp_count~1,
 			formulaZ=exp_count~1,
 			FDR=FALSE,
-			peakconfidence=0.95,
+			#peakconfidence=0.95,
 			interaction=interaction
 		)
 	}
