@@ -221,6 +221,7 @@ zinba(
 )
 }}}
 
+
 =Custom Analysis=
 While the zinba() function offers ease of use, it doesn't offer much stability.  With the run.zinba function, one can specify options that will allow for
 
@@ -234,48 +235,48 @@ We describe some of the optional parameters in more detail later on.
 
 {{{
 run.zinba(
-##Main parameters        
+##Main parameters  
   seq= # path to mapped experimental reads       
   input= # path to mapped input reads if available (default is "none")       
-  filetype= # either 'bed', 'bowtie', or 'tagAlign'        
+  filetype= # either 'bed', 'bowtie', or 'tagAlign'  
   align= # path to alignability directory       
   twoBit= # path to genome build in .2bit format       
   winSize= # window size, default 500 bp       
   offset=  # offset distance, default 0 bp     
-  extension= # average fragment library length (size selected)        
+  extension= # average fragment library length (size selected)  
   basecountfile= # path to basecount file if refinepeaks is 1       
   selectmodel= # Either TRUE for model selection of FALSE (default, need to specify formulas)       
-  threshold= # FDR threshhold, default is 0.05          
-  FDR= #either TRUE (default) or FALSE.         
+  threshold= # FDR threshhold, default is 0.05    
+  FDR= #either TRUE (default) or FALSE.   
   numProc= # number of CPUs to use, must be less than max available (default 1)       
   winGap= # distance threshold for significant window merging (detault 0bp)
-  outfile= # path prefix for outputted files                        
-          
-##Optional, can ignore/not specify        
-  #window building        
-  buildwin= # 1 to build windows (default), 0 to skip        
-  filelist= # if buildwin=0, path to .list file for existing set of built windows (usuall in same folder)         
+  outfile= # path prefix for outputted files      
+    
+##Optional, can ignore/not specify  
+  #window building  
+  buildwin= # 1 to build windows (default), 0 to skip  
+  filelist= # if buildwin=0, path to .list file for existing set of built windows (usuall in same folder)   
   cnvWinSize= # CNV window size, default 100000 bp.
   cnvOffset=  # CNV window offset distance, default 2500 bp      
-          
-  #If Model selection  is FALSE        
-  formula= # background formula                           
-  formulaE= # enrichment formula               
-  formulaZ= # zero-inflation formula         
-          
-  #If Model selection is TRUE        
+    
+  #If Model selection  is FALSE  
+  formula= # background formula         
+  formulaE= # enrichment formula         
+  formulaZ= # zero-inflation formula   
+    
+  #If Model selection is TRUE  
   selectchr= # chromosome name to use for model selection, default "chr22"
   selecttype= # either the abridged version "dirty" (default) or complete version "complete"     
   selectcovs= # vector of covariate names (characters) to consider in model selection       
   interaction= # consider two or three-way covariate interactions?  Default TRUE, otherwise FALSE.  
-          
-  #peak refinement        
-  refinepeaks= # 1 for refinement (default), 0 otherwise        
-  pWinSize= # sliding window size for local maximum detection (default 200 bp)               
+    
+  #peak refinement  
+  refinepeaks= # 1 for refinement (default), 0 otherwise  
+  pWinSize= # sliding window size for local maximum detection (default 200 bp)         
   pquant= # read overlap quantile threshold for local maximum selection (0.0-1.0 (default)     
-          
-  #miscellaneous options        
-  printFullOut= # 1 for printing full form of intermediate output, 0 otherwuse        
+    
+  #miscellaneous options  
+  printFullOut= # 1 for printing full form of intermediate output, 0 otherwuse  
   cleanup= # TRUE to delete all intermediate files, FALSE otherwise       
   tol= # mixture regression EM algorithm convergence threshold, default 10^-5      
   initmethod= # initialization method, default is "count", otherwise "quantile" or "pscl"       
@@ -329,6 +330,117 @@ run.zinba(
   winGap=0,   
   FDR=TRUE
   outfile="data/faire",
-  printFullOut=1,
+  printFullOut=1
+)
+}}}
+
+==ChIP-seq Example==
+This example mirrors that of what is used in the zinba() example and will produre the same exact output. 
+
+{{{
+run.zinba(
+  seq='data/ctcfGM12878rep3chr22.taf',  
+  input="data/inputGM12878rep3chr22.taf"
+  filetype="tagAlign",
+  twoBit="hg18.2bit",
+  winSize=250,
+  offset=125,
+  extension=200,
+  basecountfile='data/ctcfGM12878rep3chr22.basecount',
+  align='align_athresh1_extension200/',
+  selectmodel=T,
+  selectchr = "chr22",
+  selecttype = "complete"
+  selectcovs = c("input_count"), 
+  interaction= T, 
+  threshold=0.05,
+  refinepeaks=1, 
+  numProc=4,
+  winGap=0,   
+  FDR=TRUE
+  outfile="data/ctcf",
+  printFullOut=1
+)
+}}}
+
+==Decreasing ZINBA Run Time on Individual Desktops==
+ZINBA was designed in with high performance computing clusters in mind.  That is, the ability to utilize multiple computing cores for parallel processing.  On individual desktops however, the regular ZINBA parameters may pose a burden on the user in terms of computational time and resources.  This is worsened for desktops with limited memory (less than 3 GB) and a limited number of processors (less than quad-core CPUs).  The examples below show how to run zinba on the above data quickly.  However, for the greatest peak sensitivity and model stability it is recommended to use the original parameters or the zinba() function and at least running the model selectionprocess. Increasing the window size to 1 KB and offset to 500 bp will result may be appropriate for broader data and will result in even faster processing. 
+
+FAIRE, using model selection but ignoring interaction (fast) 
+{{{
+run.zinba(
+  seq='data/faireGM12878rep1chr22.taf',  
+  input="none"
+  filetype="tagAlign",
+  twoBit="hg18.2bit",
+  winSize=500,
+  offset=250,
+  extension=134,
+  basecountfile='data/faireGM12878rep1chr22.basecount',
+  align='align_athresh4_extension134/',
+  selectmodel=T, 
+  selectchr = "chr22",
+  selecttype = "dirty"
+  selectcovs = c("gcPerc", "align_perc", "exp_cnvwin_log"), 
+  interaction= F, 
+  threshold=0.05,
+  refinepeaks=1, 
+  numProc=4,
+  winGap=0,   
+  FDR=TRUE
+  outfile="data/faire",
+  printFullOut=1
+)
+}}}
+
+FAIRE, skipping model selection (fastest): 
+{{{
+run.zinba(
+  seq='data/faireGM12878rep1chr22.taf',  
+  input="none"
+  filetype="tagAlign",
+  twoBit="hg18.2bit",
+  winSize=500,
+  offset=250,
+  extension=134,
+  basecountfile='data/faireGM12878rep1chr22.basecount',
+  align='align_athresh4_extension134/',
+  selectmodel=F, 
+  formula= exp_count ~ gcPerc + align_perc + exp_cnvwin_log,
+  formulaE= exp_count ~ gcPerc + align_perc + exp_cnvwin_log,
+  formulaZ= exp_count ~ gcPerc + align_perc + exp_cnvwin_log,
+  threshold=0.05,
+  refinepeaks=1, 
+  numProc=4,
+  winGap=0,   
+  FDR=TRUE
+  outfile="data/faire",
+  printFullOut=1
+)
+}}}
+
+ChIP-seq, ignoring model selection (fastest) 
+{{{
+run.zinba(
+  seq='data/ctcfGM12878rep3chr22.taf',  
+  input="data/inputGM12878rep3chr22.taf"
+  filetype="tagAlign",
+  twoBit="hg18.2bit",
+  winSize=500,
+  offset=250,
+  extension=200,
+  basecountfile='data/ctcfGM12878rep3chr22.basecount',
+  align='align_athresh1_extension200/',
+  selectmodel=F,
+  formula= exp_count ~ input_count,
+  formulaE= exp_count ~ input_count,
+  formulaZ= exp_count ~ input_count, 
+  threshold=0.05,
+  refinepeaks=1, 
+  numProc=4,
+  winGap=0,   
+  FDR=TRUE
+  outfile="data/ctcf",
+  printFullOut=1
 )
 }}}
