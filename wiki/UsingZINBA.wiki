@@ -221,7 +221,6 @@ zinba(
 )
 }}}
 
-
 =Custom Analysis=
 While the zinba() function offers ease of use, it doesn't offer much stability.  With the run.zinba function, one can specify options that will allow for
 
@@ -241,24 +240,23 @@ run.zinba(
   filetype= # either 'bed', 'bowtie', or 'tagAlign'        
   align= # path to alignability directory       
   twoBit= # path to genome build in .2bit format       
-  winSize= # Default 500 bp       
-  offset=  # Default 0 bp     
+  winSize= # window size, default 500 bp       
+  offset=  # offset distance, default 0 bp     
   extension= # average fragment library length (size selected)        
   basecountfile= # path to basecount file if refinepeaks is 1       
   selectmodel= # Either TRUE for model selection of FALSE (default, need to specify formulas)       
-  threshold= # FDR threshhold, default is 0.05        
-  peakconfidence=        
+  threshold= # FDR threshhold, default is 0.05          
   FDR= #either TRUE (default) or FALSE.         
   numProc= # number of CPUs to use, must be less than max available (default 1)       
-  winGap= #Distance threshold for significant window merging (detault 0bp)
-  outfile= # prefix for outputted files                        
+  winGap= # distance threshold for significant window merging (detault 0bp)
+  outfile= # path prefix for outputted files                        
           
 ##Optional, can ignore/not specify        
   #window building        
   buildwin= # 1 to build windows (default), 0 to skip        
-  filelist= # if buildwin=0, path to .list file for existing set of built windows         
-  cnvWinSize= # CNV window size, default 100,000 bp
-  cnvOffset=  # CNV window offset distance, dafault 2500 bp      
+  filelist= # if buildwin=0, path to .list file for existing set of built windows (usuall in same folder)         
+  cnvWinSize= # CNV window size, default 100000 bp.
+  cnvOffset=  # CNV window offset distance, default 2500 bp      
           
   #If Model selection  is FALSE        
   formula= # background formula                           
@@ -266,10 +264,10 @@ run.zinba(
   formulaZ= # zero-inflation formula         
           
   #If Model selection is TRUE        
-  selectchr= # chromsome name to use for model selection, default "chr22"
+  selectchr= # chromosome name to use for model selection, default "chr22"
   selecttype= # either the abridged version "dirty" (default) or complete version "complete"     
   selectcovs= # vector of covariate names (characters) to consider in model selection       
-  interaction= # consider two or three-way interaction?  Default TRUE, otherwise FALSE.  
+  interaction= # consider two or three-way covariate interactions?  Default TRUE, otherwise FALSE.  
           
   #peak refinement        
   refinepeaks= # 1 for refinement (default), 0 otherwise        
@@ -279,13 +277,13 @@ run.zinba(
   #miscellaneous options        
   printFullOut= # 1 for printing full form of intermediate output, 0 otherwuse        
   cleanup= # TRUE to delete all intermediate files, FALSE otherwise       
-  tol= # Converge threshold, default 10^-5      
+  tol= # mixture regression EM algorithm convergence threshold, default 10^-5      
   initmethod= # initialization method, default is "count", otherwise "quantile" or "pscl"       
-  diff= # Experimental, 1 for two-sample comparison where input = path to second sample, othewise 0 (default)
+  diff= # experimental, 1 for two-sample comparison where input = path to second sample, othewise 0 (default)
 )
 }}}
 
-==Notes on usage==
+Notes on each parameter:
 || *Parameter* || Note ||
 || winSize || Selecting a larger window size increases speed of analysis but decreases resolution and sensitivity to detect enrichment.  Consider pairing with smaller offset distances to deal with potentially bisected peak regions.  The zinba() function uses 250bp  windows by default, but 500 - 1000 bp windows may be sufficient for one's analysis. ||
 || offset || Smaller non-zero offset distances increase sensitivity but also increase computational builden.  An offset distance of at least half the window size is usually recommended. If a window size of 500 bp is specified, an offset distance of 250 bp will result in 2 sets of windows to be built - one corresponding to 0bp offset (original windows) and another set correponding to windows shifted 250 downstream from the first set.  ||
@@ -300,12 +298,39 @@ run.zinba(
 || selectchr || If selectmodel=TRUE, then specify the chromsome that should be used for model selection.  Typeically this is a smaller chromsome to allow for more efficient model selection. The name of the chromsome should be exactly how it is represented in its genome build, for example chromsome 22 in hg18 is referred to as "chr22"||
 || selecttype || Option "dirty" fixes the formulaZ at the intercept (no covariates) and then performs model selection for the background and enrichment components.  When this process is finished, then model selection proceeds for the zero inflated component given the selected background and enriched formulas.  Used by default and is much faster than option "complete", which does model selection in all components simultaneously.||
 || selectcovs || Vector of covariate names to consider during model selection.  That is, all models that are tested will only consist of combinations of these covariates.  Potential covariates are "gcPerc", "align_perc", "exp_cnvwin_log", and "input_count" (see formula notes above).  If only GC content and input control are to be considered, usage would be selectcovs = c("gcPerc", "input_count"). It is not advised to mix input_count and the local background estimate covariate.  Model selection is much faster if only input control is considered (default in zinba() if input control exists).  ||
-|| interaction || If interaction=TRUE (default) then all two and three-way interaction terms between covariates specified in selectcovs are used.  If set to FALSE, then they are ignored and model selection is much faster buy may not result in the best model. 
+|| interaction || If interaction=TRUE (default) then all two and three-way interaction terms between covariates specified in selectcovs are used.  If set to FALSE, then they are ignored and model selection is much faster buy may not result in the best model. ||
 || pwinSize || Size of the sliding window to determine local maximums from read overlap data in the peak refinement steps.  Should be smaller than winSize, default is 200 bp.  Smaller sizes results in greater sensitivity to potential local maximums, but also may produce may spurious local maximums caused by small blips in enrichment.  Last window sizes smooth over smaller potential local maximums but may miss real peak regions.  ||
 || pquant || Read overlap quantile threshold for candidate local maximums.  For example, the .9 quantile corresponds to the 90th percentile of read overlap values within a peak region, and any local maximums discovered with a height below this value are ignored.  Default value is 1.0, selecting only the global maximum in the merged region (one peak per broad region unless there is a tie ||  
 || printFullOut || Controls printing options for files from the getsignwindows function where the enrichment posterior probability is calculated.  If 1, then the original data matrix is printing out (window coordinates, window read count, covariate values) are outputted along with the estimated enrichment.  This is helpful for basic exploratory analysis and plotting.  However, this also takes up much more disk space.  Setting this parameter to 0 only prints out the window coordinates and enrichment estimates. ||
 || cleanup ||  If cleanup=TRUE, then all intermediate files found in the folder outfile_files/ is deleted after the analysis is complete, where outfile is the path specified for the outfile parameter.  This saves diskspace, but one may not getrefined peaks to try different winGaps or thresholds without running the model selection and/or mixture regression analysis again. ||
 
-==Examples==
+==FAIRE-seq Example==
+This example mirrors that of what is used in the zinba() example and will produre the same exact output. 
+
+{{{
+run.zinba(
+				seq='data/faireGM12878rep1chr22.taf',        
+        input="none"
+        filetype="tagAlign",
+        twoBit="hg18.2bit",
+				winSize=250,
+				offset=125,
+        extension=134,
+        basecountfile='data/faireGM12878rep1chr22.basecount',
+				align='align_athresh4_extension134/',
+				selectmodel=T, 
+				selectchr = "chr22",
+				selecttype = "dirty"
+				selectcovs = c("gcPerc", "align_perc", "exp_cnvwin_log"), 
+				interaction= T, 
+				threshold=0.05,
+        refinepeaks=1, 
+        numProc=4,
+				winGap=0,         
+				FDR=TRUE
+        outfile="data/faire",
+        printFullOut=1,
+)
+}}}
 
 
