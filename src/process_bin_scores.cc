@@ -1,3 +1,14 @@
+#define UBYTE unsigned char   /* Wants to be unsigned 8 bits. */
+#define BYTE signed char      /* Wants to be signed 8 bits. */
+#define UWORD unsigned short  /* Wants to be unsigned 16 bits. */
+#define WORD short	      /* Wants to be signed 16 bits. */
+#define bits64 unsigned long long  /* Wants to be unsigned 64 bits. */
+#define bits32 unsigned       /* Wants to be unsigned 32 bits. */
+#define bits16 unsigned short /* Wants to be unsigned 16 bits. */
+#define bits8 unsigned char   /* Wants to be unsigned 8 bits. */
+#define signed32 int	      /* Wants to be signed 32 bits. */
+#define boolean bool	      /* Wants to be signed 32 bits. */
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -13,7 +24,9 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
-
+extern "C"{
+#include "twoBit.h"
+}
 using namespace std;
 
 process_bin_scores::process_bin_scores(){}
@@ -23,10 +36,11 @@ process_bin_scores::~process_bin_scores(){}
 int process_bin_scores::adjustCoords(const char * filelist,string outDir,const char* twoBitFile,int aThresh,int adjustSize){
 	
 	FILE * tempTB;
-	const char * tInfo = "tempInfo.txt"; 
-	const char * tChrSize = "tempChromSize.txt";
+	struct tm *timeinfo;
+	time_t rtime;
+	//const char * tChrSize = "tempChromSize.txt";
 	cout << "\nGetting chrm size from " << twoBitFile << endl;
-	tempTB = fopen(tInfo,"w");
+	/*tempTB = fopen(tInfo,"w");
 	fprintf(tempTB,"library(zinba);\ntwobitinfo(infile=\"%s\",outfile=\"%s\");\n",twoBitFile,tChrSize);
 	fclose (tempTB);
 	
@@ -37,7 +51,17 @@ int process_bin_scores::adjustCoords(const char * filelist,string outDir,const c
 		return 1;
 	}
 	remove(tInfo);	
+	*/
 	
+	char tChrSize[128];
+	char * twoBitFile2=(char*) malloc(strlen(twoBitFile)+1); strcpy(twoBitFile2,twoBitFile);
+	time(&rtime);
+	timeinfo=localtime(&rtime);
+	strftime(tChrSize,128,"tempChromSize_%H_%M_%S.txt",timeinfo);
+
+	twoBitInfo2(twoBitFile2, tChrSize);
+	free(twoBitFile2);
+
 	tempTB = fopen(tChrSize,"r");
 	char tbChrom[128];
 	unsigned long int tbStart;
@@ -75,6 +99,9 @@ int process_bin_scores::adjustCoords(const char * filelist,string outDir,const c
 		chrm = string(mapfile);
 		size_t bout = chrm.find("b.out");
 		chrm.erase(bout);
+	  size_t  last = chrm.find_last_of('/');
+    chrm = chrm.substr(last+1);
+
 		cout << "Chromosome is " << chrm << endl;
 		align_count = new unsigned short int[chr_size[chrm]+1];
 		for(int c = chr_size[chrm];c--;)
