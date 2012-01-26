@@ -231,7 +231,7 @@ Please note that this section and below uses ZINBA version 2.02 or later.  For v
   * Rerun an analysis using an already built set of windows
   * Call multiple peaks within a broad region
 
-We describe some of the optional parameters in more detail later on.
+In general, the user has much more control over how their data is processed and analyzed.  With the variety of data types available, this is the best option for users who are looking for a custom analysis for their genome and data type.  We describe some of the optional parameters in more detail later on.
 
 {{{
 run.zinba(
