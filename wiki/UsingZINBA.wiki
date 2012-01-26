@@ -363,7 +363,7 @@ run.zinba(
 )
 }}}
 
-==Decreasing ZINBA Run Time on Individual Desktops==
+=Decreasing ZINBA Run Time=
 ZINBA was designed in with high performance computing clusters in mind.  That is, the ability to utilize multiple computing cores for parallel processing.  On individual desktops however, the regular ZINBA parameters may pose a burden on the user in terms of computational time and resources.  This is worsened for desktops with limited memory (less than 3 GB) and a limited number of processors (less than quad-core CPUs).  The examples below show how to run zinba on the above data quickly.  However, for the greatest peak sensitivity and model stability it is recommended to use the original parameters or the zinba() function and at least running the model selectionprocess. Increasing the window size to 1 KB and offset to 500 bp will result may be appropriate for broader data and will result in even faster processing. 
 
 FAIRE, using model selection but ignoring interaction ( 10x faster than default) 
