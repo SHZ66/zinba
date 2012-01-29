@@ -39,7 +39,7 @@ int process_bin_scores::adjustCoords(const char * filelist,string outDir,const c
 	struct tm *timeinfo;
 	time_t rtime;
 	//const char * tChrSize = "tempChromSize.txt";
-	cout << "\nGetting chrm size from " << twoBitFile << endl;
+	//cout << "\nGetting chrm size from " << twoBitFile << endl;
 	/*tempTB = fopen(tInfo,"w");
 	fprintf(tempTB,"library(zinba);\ntwobitinfo(infile=\"%s\",outfile=\"%s\");\n",twoBitFile,tChrSize);
 	fclose (tempTB);
@@ -68,7 +68,7 @@ int process_bin_scores::adjustCoords(const char * filelist,string outDir,const c
 	while(!feof(tempTB)){
 		int ret = fscanf(tempTB,"%s%lu",tbChrom,&tbStart);
 		if(ret == 2){
-			cout << "\tFor " << tbChrom << " length is " << tbStart << endl;
+		//	cout << "\tFor " << tbChrom << " length is " << tbStart << endl;
 			string sChr(tbChrom);
 			chr_size[sChr] = tbStart;
 		}
