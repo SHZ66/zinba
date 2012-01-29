@@ -26,6 +26,8 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
+#include <sys/time.h>
+#include "R.h"
 extern "C"{
 #include "twoBit.h"
 }
@@ -61,13 +63,17 @@ int process_bin_scores::adjustCoords(const char * filelist,string outDir,const c
 	time(&rtime);
 	timeinfo=localtime(&rtime);
 	strftime(tChrSize,128,"tempChromSize_%H_%M_%S",timeinfo);
-		int random = rand() % 10;
-		char rand[128];
-		sprintf(rand,"%d\n", random);
+		struct timeval time;
+	     	gettimeofday(&time,NULL);
+	     	srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+		int random = rand();
+		char rand[1024];
+		sprintf(rand,"_%d.txt", random);
+	//Rprintf("%s %d %s", filelist, random, rand);
 	strcat(tChrSize2, tChrSize);
-  strcat(tChrSize2, rand);
-  strcat(tChrSize2, ".txt");
-
+	//Rprintf(" %s %s ", tChrSize, tChrSize2);
+	strcat(tChrSize2, rand);
+	//Rprintf(" %s\n", tChrSize2);
 
 	twoBitInfo2(twoBitFile2, tChrSize2);
 	free(twoBitFile2);
@@ -109,10 +115,10 @@ int process_bin_scores::adjustCoords(const char * filelist,string outDir,const c
 		chrm = string(mapfile);
 		size_t bout = chrm.find("b.out");
 		chrm.erase(bout);
-	  size_t  last = chrm.find_last_of('/');
+	        size_t  last = chrm.find_last_of('/');
 		if(chrm.npos != last)  chrm = chrm.substr(last+1);
 
-		//cout << "Chromosome is " << chrm << endl;
+		cout << "Chromosome is " << chrm << endl;
 		align_count = new unsigned short int[chr_size[chrm]+1];
 		for(int c = chr_size[chrm];c--;)
 			align_count[c] = 0;
