@@ -8,6 +8,8 @@
 #define bits8 unsigned char   /* Wants to be unsigned 8 bits. */
 #define signed32 int	      /* Wants to be signed 32 bits. */
 #define boolean bool	      /* Wants to be signed 32 bits. */
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <iostream>
 #include <fstream>
@@ -54,15 +56,23 @@ int process_bin_scores::adjustCoords(const char * filelist,string outDir,const c
 	*/
 	
 	char tChrSize[128];
+	char tChrSize2[512];
 	char * twoBitFile2=(char*) malloc(strlen(twoBitFile)+1); strcpy(twoBitFile2,twoBitFile);
 	time(&rtime);
 	timeinfo=localtime(&rtime);
-	strftime(tChrSize,128,"tempChromSize_%H_%M_%S.txt",timeinfo);
+	strftime(tChrSize,128,"tempChromSize_%H_%M_%S",timeinfo);
+		int random = rand() % 10;
+		char rand[128];
+		sprintf(rand,"%d\n", random);
+	strcat(tChrSize2, tChrSize);
+  strcat(tChrSize2, rand);
+  strcat(tChrSize2, ".txt");
 
-	twoBitInfo2(twoBitFile2, tChrSize);
+
+	twoBitInfo2(twoBitFile2, tChrSize2);
 	free(twoBitFile2);
 
-	tempTB = fopen(tChrSize,"r");
+	tempTB = fopen(tChrSize2,"r");
 	char tbChrom[128];
 	unsigned long int tbStart;
 	while(!feof(tempTB)){
@@ -74,9 +84,9 @@ int process_bin_scores::adjustCoords(const char * filelist,string outDir,const c
 		}
 	}
 	fclose(tempTB);
-	remove(tChrSize);
+	remove(tChrSize2);
 	
-	cout << "\nProcessing chromosome files......" << endl;
+	//cout << "\nProcessing chromosome files......" << endl;
 	FILE * flist;
 	flist = fopen(filelist,"r");
 	if(flist == NULL){
@@ -102,7 +112,7 @@ int process_bin_scores::adjustCoords(const char * filelist,string outDir,const c
 	  size_t  last = chrm.find_last_of('/');
 		if(chrm.npos != last)  chrm = chrm.substr(last+1);
 
-		cout << "Chromosome is " << chrm << endl;
+		//cout << "Chromosome is " << chrm << endl;
 		align_count = new unsigned short int[chr_size[chrm]+1];
 		for(int c = chr_size[chrm];c--;)
 			align_count[c] = 0;
