@@ -100,7 +100,7 @@ int process_bin_scores::adjustCoords(const char * filelist,string outDir,const c
 		size_t bout = chrm.find("b.out");
 		chrm.erase(bout);
 	  size_t  last = chrm.find_last_of('/');
-    chrm = chrm.substr(last+1);
+		if(chrm.npos != last)  chrm = chrm.substr(last+1);
 
 		cout << "Chromosome is " << chrm << endl;
 		align_count = new unsigned short int[chr_size[chrm]+1];
