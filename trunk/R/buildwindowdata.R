@@ -1,4 +1,4 @@
-buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,filelist,filetype="bowtie",extension, outdir="default"){
+buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,filelist,filetype="bowtie",extension, outdir="default", numProc=1){
 	if(!file.exists(align)){
 		stop(paste("Specified Alignability directory not found,",align,sep=" "))
 	}else{
@@ -26,13 +26,72 @@ buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvW
 	if(!file.exists(outdir) && outdir!="default"){
 		stop(paste("buildwindowdata: specified output directory to place built datafiles doesnt exist"))
 	}
-	wigfiles <- file.access(dir(align,pattern="wig",full.names=T))
-	twigfiles <- table(wigfiles)
-	for(i in 1:length(twigfiles)){
-		if(twigfiles[[i]] == -1){
-			print(paste("Unable to access some wig files in align directory:",align,sep=" "))
+	
+	require(R.utils)
+	require(multicore)
+	#check if gzipped binary wig files
+	bwiggzfiles = file.access(dir(align,pattern="\\.bwig.gz$",full.names=T))
+	bwigfiles = file.access(dir(align,pattern="\\.bwig$",full.names=T))
+	wigfiles = file.access(dir(align,pattern="\\.wig$",full.names=T))
+	allfiles = dir(align,pattern="\\.*wig*$",full.names=T)
+
+	if(length(allfiles) != sum(file.access(allfiles)==0)){
+			cat("The following alignability files could not be accessed\n")
+			print(allfiles[file.access(allfiles)!=0])
+			stop("It is likely you do not have permission to access these files\n")
+	} 
+
+	if( (length(bwiggzfiles) > 0 | length(bwigfiles) > 0) & length(wigfiles) == 0 ){
+		#all though either be bwig.gz or bwig, otherwise .wig
+		#here, unzip those that are .gz
+		if(length(bwiggzfiles) > 0) mc=mclapply(names(bwiggzfiles)[bwiggzfiles == 0], gunzip, mc.cores = numProc)
+
+		#check for disk space issues
+	  bwigfiles=file.access(dir(align,pattern="bwig",full.names=T))
+		bwig_sizes=file.info(names(bwigfiles))$size
+		if(any(bwig_sizes==0)){
+			cat("The following alignability files have a size of zero\n")
+			print(names(bwigfiles)[which(bwig_sizes==0)])
+			stop("It is likely you have run of out disk space\n")
+		}
+
+		#check for unzipping issues
+		if(length(bwigfiles) != length(allfiles)){
+			cat("Not all files could be unzipped, listed below:\n")
+			print(setdiff(allfiles, names(bwigfiles)))
+			stop("Check to see whether you are used all of your disk space")
+		}
+		
+		#set buildwindows binary flag
+		binary=1
+	}else{
+		#then all we have are the regular uncompressed wig files
+		#check for disk space issues
+		wig_sizes=file.info(names(wigfiles))$size
+		if(any(wig_sizes==0)){
+			cat("The following alignability files have a size of zero\n")
+			print(names(bwigfiles)[which(bwig_sizes==0)])
+			stop("It is likely you have run of out disk space\nPlease free some disk space and regenerate your alignability directory")
+		}
+
+		#set buildwindows binary flag
+		binary=0
+	}	
+	cReturn <- .C("buildWindows",as.character(seq),as.character(input),as.character(align),as.character(twoBit),as.integer(winSize),as.integer(offset),as.integer(cnvWinSize),as.integer(cnvOffset),as.character(filetype),as.character(filelist),as.integer(extension), as.character(outdir), as.integer(binary),PACKAGE="zinba")
+
+	#gzip all bwig files if they exist, anod no wigfiles exist
+	if( length(bwigfiles) > 0 & length(wigfiles) == 0 ){
+		#If there are any bwig files and no wig files, then all bwig files should be gzipped back
+		mc=mclapply(names(bwigfiles)[bwigfiles == 0], gzip, mc.cores = numProc)
+		bwiggzfiles = file.access(dir(align,pattern="\\.bwig.gz$",full.names=T))
+
+		if( length(bwiggzfiles) != length(bwigfiles)){
+			cat("Not all .bwig files could be gzipped.  Files gzipped and remaining are listed:\n")
+			print(names(bwiggzfiles))
+			bwigfiles = file.access(dir(align,pattern="\\.bwig$",full.names=T))
+			print(names(bwigfiles))
 		}
 	}
-	cReturn <- .C("buildWindows",as.character(seq),as.character(input),as.character(align),as.character(twoBit),as.integer(winSize),as.integer(offset),as.integer(cnvWinSize),as.integer(cnvOffset),as.character(filetype),as.character(filelist),as.integer(extension), as.character(outdir),PACKAGE="zinba")
+
 	gc()
 }

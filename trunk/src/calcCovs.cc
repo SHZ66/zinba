@@ -44,8 +44,7 @@ calcCovs::~calcCovs(){
 	}
 }
 
-int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir,const char * twoBitFile,const char * inputFile,string outfile,const char * flist,int extension,const char * filetype){
-
+int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir,const char * twoBitFile,const char * inputFile,string outfile,const char * flist,int extension,const char * filetype, int binary){
 	FILE * tempTB;
 	time_t rtime;
 	struct tm *timeinfo;
@@ -62,7 +61,8 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 
 	int readInput = 0;
 	const char* noneVal = "none";
-	
+	char mapChar[1];
+
 	while(!signal_slist.empty()){
 		i = 0;
 		currchr = signal_slist[0].chrom;
@@ -85,24 +85,54 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		alignability = new unsigned char[chr_size[currchr] + 1];
 		for(int ch = chr_size[currchr]; ch--;)
 			alignability[ch] = (unsigned char) 0;
+			unsigned long int pos = 1;
+		if(binary == 0){
 
-		string alignFileS = alignDir + chromReport + ".wig";
-		char * alignFile = new char[alignFileS.size() + 1];
-		strcpy(alignFile, alignFileS.c_str());
-		cout << "\tGetting alignability info from:\n\t\t" << alignFile << endl;
-		tempTB = fopen(alignFile,"r");
-		if(tempTB == NULL){
-			cout << "Unable to open alignability file " << alignFile << endl;
-			return 1;
+			string alignFileS = alignDir + chromReport + ".wig";
+			char * alignFile = new char[alignFileS.size() + 1];
+			strcpy(alignFile, alignFileS.c_str());
+			cout << "\tGetting alignability info from:\n\t\t" << alignFile << endl;
+
+			tempTB = fopen(alignFile,"r");
+			if(tempTB == NULL){
+				cout << "Unable to open alignability file " << alignFile << endl;
+				return 1;
+			}
+			unsigned short int aScore;
+			while(!feof(tempTB)){
+				int ret = fscanf(tempTB,"%hu",&aScore);
+				alignability[pos] = (unsigned char) aScore;
+				pos++;
+			}
+			fclose(tempTB);
+
+		}else if(binary == 1){
+			string alignFileS = alignDir + chromReport + ".bwig";
+			char * alignFile = new char[alignFileS.size() + 1];
+			strcpy(alignFile, alignFileS.c_str());
+			cout << "\tGetting alignability info from:\n\t\t" << alignFile << endl;
+
+			ifstream mfile (alignFile,ios::in|ios::binary);
+			if(mfile.is_open()){
+				unsigned long int pos = 1;							
+				while(!mfile.eof()){
+					mfile.read(mapChar,1);
+					unsigned char mchr = mapChar[0];
+					alignability[pos] = mchr;
+					pos++;
+				}
+			}else{
+				cout << "ERROR: Unable to open chromosome file " << alignFile << endl;
+				return 1;
+			}
+			mfile.close();
+			
+		}else{
+			cout << "ERROR: BINARY FLAG MUST BE PASS AS EITHER 0 OR 1 IN BUILDWINDOWS.R" << endl;
+			exit(1);
 		}
-		unsigned short int aScore;
-		unsigned long int pos = 1;
-		while(!feof(tempTB)){
-			int ret = fscanf(tempTB,"%hu",&aScore);
-			alignability[pos] = (unsigned char) aScore;
-			pos++;
-		}
-		fclose(tempTB);
+
+		
 		
 		cout << "\tGetting sequence from .2bit file:\n\t\t" << twoBitFile << endl;
 		gcContent = new unsigned char[chr_size[currchr] + 1];

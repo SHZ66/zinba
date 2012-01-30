@@ -115,6 +115,7 @@ require(multicore)
 require(doMC)
 require(foreach)
 library(MASS)
+library(R.utils)
 
 supported=c("gcPerc", "align_perc", "input_count", "exp_cnvwin_log")
 if( sum(covs %in% supported)!=length(covs)){
@@ -189,9 +190,7 @@ if (!is.null(fixed)) {
 print(formulas)
 if(selection=="complete"){
 	index=start:(length(formulas)^3)
-	if(!append){
 		write.table(t(c("i","formula", "formulaE", "formulaZ","BIC","AIC","ICL","k","ll", "fail")),loc,quote=F, append=F,  row.names=F, 	col.names=F, sep="\t")
-	}
  		registerDoMC(numProc)
  		mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
  		getDoParWorkers()
@@ -208,14 +207,48 @@ if(selection=="complete"){
  	getDoParWorkers()
  	result <- foreach(i=index,.combine='rbind',.inorder=FALSE,.errorhandling="remove",.options.multicore = mcoptions) %dopar%
                      covanal(file=file,formula=formulas[[ceiling(i/length(formulas))]],formulaE=formulas[[i-(ceiling(i/length(formulas))-1)*length(formulas)]],formulaZ=formulaZ,i=i,loc=loc, size=length(formulas)^2)
+	
+	size=file.info(loc)$size
+	fields=count.fields(loc, sep="\t")
+	lines=countLines(loc)
+
+	#zero file size?
+	if(size == 0) cat("Intermediate (dirty) model file", loc, "has size 0.  Please check if you have run out of disk space")
+
+	#unequal number of columns?
+	if(length(table(fields)) != 1){
+		cat("Warning: intermediate (dirty) model file", loc, "has", length(skip), "lines with less than expected columns.  Removing problematic lines")
+		skip=which(fields != max(fields))
+	}
+
+	#no lines written to output?
+	if(lines == 0) cat("Intermediate (dirty) model file", loc, "has 0 lines written to it.  This suggests anomaly in model selection, please contact the package administrator")
+
 	#now pick best zero-inflated formula given bg and enrichd covariates
-	final=read.table(loc, header=T, sep="\t")
+	if(length(skip)==0){
+		final=read.table(loc, header=T, sep="\t")
+	}else{
+		final_lines=readLines(loc)[-skip]
+		final = read.table(textConntection(final_lines), header=T, sep="\t") 
+	}
+
+	#make sure that all models did not fail
+	if(all(final$fail==1))  stop("covselect.R:  all models failed after model selection intermediate step")
+
 	final=final[final$fail==0,]
 	bestBIC=which.min(final$BIC)
+	
+	a=try(as.formula(paste("exp_count~",final$formula[bestBIC])), silent=T)
+	b=try(as.formula(paste("exp_count~",final$formulaE[bestBIC])), silent=T)
+	c=try(as.formula(paste("exp_count~",final$formulaZ[bestBIC])), silent=T)
+
+	#check for proper form of each formula, errors would not result from .model file having 0 size or 0 lines
+	if(inherits(a, "try-error") ==T | inherits(b, "try-error") ==T | inherits(b, "try-error") ==T) stop("Intermediate (dirty) formulas not read properly from .model file, check .model file in _files/directory for errors")
+
 	formvector=c(
-	as.formula(paste("exp_count~",final$formula[bestBIC])),
-	as.formula(paste("exp_count~",final$formulaE[bestBIC])),
-	as.formula(paste("exp_count~",final$formulaZ[bestBIC]))
+		as.formula(paste("exp_count~",final$formula[bestBIC])),
+		as.formula(paste("exp_count~",final$formulaE[bestBIC])),
+		as.formula(paste("exp_count~",final$formulaZ[bestBIC]))
 	)
 	#write.table(t(c("i","formula", "formulaE", "formulaZ","BIC","AIC","ICL","k","ll")),loc,quote=F, append=F, row.names=F, 	col.names=F, sep="\t")
 	index=start:(length(formulas))	
@@ -227,14 +260,51 @@ if(selection=="complete"){
 	stop("selection parameter must be specified as either 'dirty' or 'complete'")
 } 
 
-final=read.table(loc, header=T, sep="\t")
+#check for errors in writing process
+#file size zero due to running out of disk space
+
+size=file.info(loc)$size
+fields=count.fields(loc, sep="\t")
+lines=countLines(loc)
+
+#zero file size?
+if(size == 0) cat("Final model file", loc, "has size 0.  Please check if you have run out of disk space")
+
+#unequal number of columns?
+if(length(table(fields)) != 1){
+	cat("Warnings: final model file", loc, "has", length(skip), "lines with less than expected columns.  Removing problematic lines")
+	skip=which(fields != max(fields))
+}
+
+#no lines written to output?
+if(lines == 0) cat("Final model file", loc, "has 0 lines written to it.  This suggests anomaly in model selection, please contact the package administrator")
+
+
+if(length(skip)==0){
+	final=read.table(loc, header=T, sep="\t")
+}else{
+	final_lines=readLines(loc)[-skip]
+	final = read.table(textConntection(final_lines), header=T, sep="\t") 
+}
+
+if(all(final$fail==1))  stop("covselect.R:  all models failed after model selection final step")
 final=final[final$fail==0,]
 bestBIC=which.min(final$BIC)
+
+a=try(as.formula(paste("exp_count~",final$formula[bestBIC])), silent=T)
+b=try(as.formula(paste("exp_count~",final$formulaE[bestBIC])), silent=T)
+c=try(as.formula(paste("exp_count~",final$formulaZ[bestBIC])), silent=T)
+
+
+#check for proper form of each formula, errors would not result from .model file having 0 size or 0 lines
+if(inherits(a, "try-error") ==T | inherits(b, "try-error") ==T | inherits(b, "try-error") ==T) stop("Final formulas not read properly from .model file, check .model file in _files/directory for errors")
+
 formvector=c(
-as.formula(paste("exp_count~",final$formula[bestBIC])),
-as.formula(paste("exp_count~",final$formulaE[bestBIC])),
-as.formula(paste("exp_count~",final$formulaZ[bestBIC]))
+	as.formula(paste("exp_count~",final$formula[bestBIC])),
+	as.formula(paste("exp_count~",final$formulaE[bestBIC])),
+	as.formula(paste("exp_count~",final$formulaZ[bestBIC]))
 )
+
 return(formvector)
 }
 

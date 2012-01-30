@@ -25,7 +25,7 @@ class calcCovs{
 		~calcCovs(); //Implemented
 		
 		int importRawSignal(const char *,int,const char *,int,const char *);//Implemented
-		int processSignals(int,int,int,int,string,const char *,const char *,string,const char *,int,const char *);//Implemented
+		int processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir,const char * twoBitFile,const char * inputFile,string outfile,const char * flist,int extension,const char * filetype, int binary);//Implemented
 		int outputData(const char *, unsigned short int);//Implemented
 		int outputDataWinCount(const char *, unsigned short int);
 		int importBowtie(const char *,int,int);
