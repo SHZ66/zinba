@@ -14,7 +14,7 @@ using namespace sgi;
 using namespace std;
 
 extern "C" {
-void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **RtwoBitFile,int *RzWinSize,int *RzOffsetSize,int *RcWinSize,int *RcOffsetSize,char **Rfiletype,char **Rfilelist,int *Rextension,char **Routdir){
+void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **RtwoBitFile,int *RzWinSize,int *RzOffsetSize,int *RcWinSize,int *RcOffsetSize,char **Rfiletype,char **Rfilelist,int *Rextension,char **Routdir, int *Rbinary){
 
 	string expSeqFile = RexpSeqFile[0];
 	const char * inSeqFile = RinSeqFile[0];
@@ -24,6 +24,7 @@ void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **R
 	int zOffsetSize = RzOffsetSize[0];
 	int cWinSize = RcWinSize[0];
 	int cOffsetSize = RcOffsetSize[0];
+	int binary = Rbinary[0];
 	const char * filetype = Rfiletype[0];
 	const char * filelist = Rfilelist[0];
 	const char * outdir = Routdir[0];
@@ -52,7 +53,7 @@ void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **R
 			found2 = expSeqFile.find_last_of("/");
 			outfile_prefix = outdir+expSeqFile.substr(found2+1,found-found2-1);
 		}		
-		ret = newAnalysis.processSignals(zWinSize,zOffsetSize,cWinSize,cOffsetSize,alignDir,twoBitFile,inSeqFile,outfile_prefix,filelist,extension,filetype);
+		ret = newAnalysis.processSignals(zWinSize,zOffsetSize,cWinSize,cOffsetSize,alignDir,twoBitFile,inSeqFile,outfile_prefix,filelist,extension,filetype, binary);
 		if(ret == 1){
 			Rprintf("ERROR: building windows was unsuccssful\n");
 		}

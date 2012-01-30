@@ -13,12 +13,14 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 	print("parameters in effect:")
 	print(parameters)
 
-        rmc <- require(multicore)
-        rdmc <- require(doMC)
-        rfor <- require(foreach)
-        if(rmc == FALSE){
-            stop(paste("multicore available"))
-        }
+  rmc <- require(multicore)
+  rdmc <- require(doMC)
+  rfor <- require(foreach)
+  if(rmc == FALSE){
+    stop(paste("multicore available"))
+  }
+	library(R.utils)
+	
 	time.start <- Sys.time()
 	
 	
@@ -57,21 +59,47 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 	if(buildwin==1){
 	    if(is.null(filelist)) filelist=paste(outfile_subpath,".list",sep="")	
 	    cat(paste("\n--------BEGIN BUILDING WINDOW DATA--------",as.character(Sys.time()),"\n"))
-            buildwindowdata(seq=seq,align=align,input=input,twoBit=twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset,filelist=filelist,filetype=filetype,extension=extension, outdir=outfile_subdir)
+            buildwindowdata(seq=seq,align=align,input=input,twoBit=twoBit,winSize=winSize,offset=offset,cnvWinSize=cnvWinSize,cnvOffset=cnvOffset,filelist=filelist,filetype=filetype,extension=extension, outdir=outfile_subdir, numProc=numProc)
 	}
 
 	if(refinepeaks==1 && is.null(basecountfile)){
 		stop(paste("Basecount file must be specified, currently",basecountfile,sep=" "))
 	}else if (is.null(filelist)){
 		stop(paste("Need list of files ",filelist,sep=" "))
+	}else if (!file.exists(filelist)){
+		stop(paste("File list ",filelist," does not exist, check whether your reads have been formatted properly" ,sep=" "))
+	}else if (file.info(filelist)$size == 0){
+		stop(paste("File list ",filelist," has 0 size, check whether you have run out of disk space" ,sep=" "))
+	}else if (countLines(filelist)==0 ){
+		stop(paste("File list ",filelist," has 0 lines, check whether you have run out of disk space or if your reads are formatted properly" ,sep=" "))
 	}else if(method != 'pscl' && method != 'mixture'){
 		stop(paste("Method should be either pscl or mixture, currently",method))
 	}else{
-	        #set prefixes of outputfiles
-                params=scan(filelist,what=character(0),quiet=T)
-	        winlist=paste(outfile_subpath,".winlist",sep="")
-                peakout=paste(outfile,".peaks",sep="")
-                broadpeakout=paste(outfile,".peaks.broad.bed",sep="")
+		#set prefixes of outputfiles
+		#Before reading file list, check if all built files exist		
+		checkfiles=as.character(unlist(read.table(filelist, sep=";")))
+		file.info2=function(x){ return(file.info(x)$size) }
+			
+		if(any(unlist(lapply(checkfiles, file.exists))==FALSE)){
+			cat("The following files from buildwindows do no exist\n")
+			print(checkfiles[which(unlist(lapply(checkfiles, file.exists))==FALSE)])
+			stop("Some files did not print, check the format of your reads, whether you have run out of disk space, or if you have permission to write to the _files/ directory")
+		}else if(any(unlist(lapply(checkfiles, file.info2))==0)){
+			#if all exist, check if all built files have non-zero size (no disk space issues)
+			cat("The following files from buildwindows have 0 size\n")
+			print(checkfiles[which(unlist(lapply(checkfiles, file.info2))==0)])
+			stop("Check whether you have run out of disk space, or if you have permission to write to the _files/ directory")
+		}else if(any(unlist(lapply(checkfiles, countLines))==0)){
+			#if all exist, check if all built files have non-zero size (no disk space issues)
+			cat("The following files from buildwindows have 0 lines\n")
+			print(checkfiles[which(unlist(lapply(checkfiles, countLines))==0)])
+			stop("Check whether you have run out of disk space, or if you have permission to write to the _files/ directory")
+		}
+
+		params=scan(filelist,what=character(0),quiet=T)
+		winlist=paste(outfile_subpath,".winlist",sep="")
+		peakout=paste(outfile,".peaks",sep="")
+		broadpeakout=paste(outfile,".peaks.broad.bed",sep="")
 		bpout=paste(outfile_subpath,".bpcount",sep="")
 
 	if(selectmodel==FALSE){
@@ -85,8 +113,8 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,outfil
 			stop("No background formula specified, so must perform model selection procedure")
 		}
 		if(!inherits(formula, "formula")) cat("Check your background component formula, not entered as a formula object")
-	        if(!inherits(formulaE, "formula")) cat("Check your enrichment component formula, not entered as a formula object")
-	        if(!inherits(formulaZ, "formula")) cat("Check your zero-inflated component formula, not entered as a formula object")
+	  if(!inherits(formulaE, "formula")) cat("Check your enrichment component formula, not entered as a formula object")
+	  if(!inherits(formulaZ, "formula")) cat("Check your zero-inflated component formula, not entered as a formula object")
 	}else if(selectmodel==TRUE){
 		#start optional model selection
 		if(is.null(selectchr)) stop("need to specify which chromosome to apply model selection to")
