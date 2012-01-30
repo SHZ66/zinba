@@ -11,7 +11,7 @@ Enter R from the terminal and copy and paste the block of commands below into R 
 Download ZINBA and install R dependencies
 {{{
 system("wget http://zinba.googlecode.com/files/zinba_2.01.tar.gz")
-install.packages(c('multicore','doMC','foreach','qvalue','quantreg')) 
+install.packages(c('multicore','doMC','foreach','qvalue','quantreg','R.utils')) 
 }}}
 Install the ZINBA R package and load library into R
 {{{
@@ -27,7 +27,7 @@ Enter R *from the terminal* and copy and paste the block of commands below into 
 Download ZINBA and install R dependencies
 {{{
 system("curl -O http://zinba.googlecode.com/files/zinba_2.01.tar.gz")
-install.packages(c('multicore','doMC','foreach','qvalue','quantreg')) 
+install.packages(c('multicore','doMC','foreach','qvalue','quantreg','R.utils')) 
 }}}
 Install the ZINBA R package and load library into R
 {{{
