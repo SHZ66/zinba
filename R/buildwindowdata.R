@@ -50,7 +50,7 @@ buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvW
 		if(length(bwiggzfiles) > 0) mc=mclapply(names(bwiggzfiles)[bwiggzfiles == 0], function(x) gunzip(x, remove=F, overwrite=T), mc.cores = numProc)
 		cat("Uncompressiing complete\n")
 		#check for disk space issues
-	  bwigfiles=file.access(dir(align,pattern="bwig",full.names=T))
+	  bwigfiles=file.access(dir(align,pattern="\\.bwig$",full.names=T))
 		bwig_sizes=file.info(names(bwigfiles))$size
 		if(any(bwig_sizes==0)){
 			cat("The following alignability files have a size of zero\n")
