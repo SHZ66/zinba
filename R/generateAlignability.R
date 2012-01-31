@@ -70,9 +70,9 @@ generateAlignability=function(mapdir, outdir="", athresh=1, extension=0,
 				gzip(adjmapchr[i], overwrite=T, remove=TRUE)
 			}
 		}else{
-			rmc <- require(multicore)
-			rdmc <- require(doMC)
-			rfor <- require(foreach) 
+			suppressPackageStartupMessages(require(multicore))
+			suppressPackageStartupMessages(require(doMC))
+			suppressPackageStartupMessages(require(foreach)) 
 			registerDoMC(numProc)
 			getDoParWorkers()
 			if(file.exists(mapdir)) cat("Overwriting existing mappability directory",mapdir,"\n")
@@ -81,6 +81,7 @@ generateAlignability=function(mapdir, outdir="", athresh=1, extension=0,
 			mapfiles <- foreach(i=1:length(chr),.combine='rbind',.inorder=FALSE,.errorhandling="remove" ) %dopar%{
 				process(maptargz,mapdir, chr, outdir, twoBitFile, athresh, extension,maplist, i)
 			}
+			cat("Finished Processing files\n")
 		}
 
 		if(cleanup==T){ 

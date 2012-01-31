@@ -768,8 +768,9 @@ int calcCovs::importBowtie(const char * signalFile,int extension,int dataType){
 	if(formatflag ==1 ){
 		cout << "WARNING:  8 columns detected in bowtie file, ignoring last column pertaining to mismatch descriptiors (see Input Files in ZINBA tutorial on the ZINBA website)" << endl;
 	}
-	if(signal_slist.size()==0){
+	if((signal_slist.size()==0 & dataType==0) | (input_slist.size()==0 & dataType==1) ){
 			cout << "error:  0 reads imported, check formatting of reads on zinba website" << endl;
+			cout << "error: number of columns found is"<< rval << endl;
 			return(1);
 	}
 
@@ -824,8 +825,9 @@ int calcCovs::importTagAlign(const char * signalFile,int extension,int dataType)
 		}
 	}
 
-	if(signal_slist.size()==0){
+	if((signal_slist.size()==0 & dataType==0) | (input_slist.size()==0 & dataType==1) ){
 			cout << "error:  0 reads imported, check formatting of reads on zinba website" << endl;
+			cout << "error: number of columns found is"<< rval << endl;
 			return(1);
 	}
 
@@ -880,8 +882,9 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 		}
 	}
 
-	if(signal_slist.size()==0){
+	if((signal_slist.size()==0 & dataType==0) | (input_slist.size()==0 & dataType==1) ){
 			cout << "error:  0 reads imported, check formatting of reads on zinba website" << endl;
+			cout << "error: number of columns found is"<< rval << endl;
 			return(1);
 	}
 
