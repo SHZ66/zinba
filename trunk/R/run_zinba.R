@@ -39,6 +39,13 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 	
 	
         #####################################################################################################
+	if(is.null(outfile)) stop("output prefix must be specified")
+	if(is.null(align)) stop("alignability directory must be specified")
+	if(is.null(seq)) stop("path to experimental mapped reads 'seq' must be specified")
+	if(is.null(twoBit)) stop("path to .2bit file 'twoBit' must be specified")
+	if(is.null(basecountfile)) stop("path to read overlap file 'basecountfile' must be specified")
+
+
 	#create subdirectory to hold intermediate files to be used later
 	outfile_subdir=paste(outfile,"_files/", sep="")
 	if(!dir.create(outfile_subdir, showWarnings=FALSE )& buildwin==1){
@@ -145,7 +152,12 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 	
 		}else if(selectmodel==TRUE){
 			#start optional model selection
-			if(is.null(selectchr)) stop("need to specify which chromosome to apply model selection to")
+			if(is.null(selectchr)){
+				stop("need to specify which chromosome to apply model selection to")
+			}else if(length(selectchr)>1){
+				stop("only one chromsome can be specified for selectchr, typically a smaller chromsome in larger genomes")
+			}
+
 			if(is.null(selectcovs)) stop("need to specify which covariates to use in model selection")
 			supported=c("gcPerc", "align_perc", "input_count", "exp_cnvwin_log")
 			if( sum(selectcovs %in% supported)!=length(selectcovs)){
@@ -189,7 +201,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 				getsigwindows(file=params[i],formula=formula,formulaE=formulaE,
 					formulaZ=formulaZ,threshold=threshold,winout=outfile_subpath,
 					peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,
-					initmethod=initmethod, FDR=FDR
+					initmethod=initmethod, FDR=FDR,
 				)
 	    }
 	    write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)

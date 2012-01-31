@@ -1,6 +1,17 @@
 
 covariateselect=function(file=NULL, covs=NULL, selection="dirty",formulaZ=NULL,numProc=1,loc=NULL, start=1, append=FALSE, interaction=TRUE){
 
+if(!is.null(file)){
+	if(!file.exists(file)) cat("covselect.R: file at path", file, "does not exist")
+}
+
+if(!is.null(covs)){
+	cat("covselect.R: covariates must be specified for model selection, see zinba website for details")
+}
+
+
+
+
 ###################################local functions#####################################3
 #From MuMIn R Package
 `getAllTerms.default` <-
