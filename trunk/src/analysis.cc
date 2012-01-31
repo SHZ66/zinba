@@ -43,7 +43,7 @@ analysis::~analysis(){
 	}
 }
 
-int analysis::processCoords(const char* inputFile,const char* outputFile,const char* twoBitFile,const char* chrmSearch){
+int analysis::processCoords(const char* inputFile,const char* outputFile,const char* twoBitFile,const char* chrmSearch, int binary){
 
 	FILE * tempTB;
 	time_t rtime;
@@ -107,7 +107,13 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	unsigned long int countBases = 250000000;
 	unsigned long int startOffset = 0;
 	cout << "\nGetting basecount data from " << inputFile << endl;
-	ifstream seqfile(inputFile);
+	ifstream seqfile;
+	if(binary == 0){
+		seqfile.open (inputFile);
+	}else{
+  	seqfile.open (inputFile,ios::in|ios::binary);
+	}
+
 	if(!seqfile.is_open()){
 		cout << "ERROR opening input file" << inputFile << ", exiting" << endl;
 		return 1;

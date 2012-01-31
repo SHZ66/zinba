@@ -14,11 +14,12 @@ using namespace sgi;
 using namespace std;
 
 extern "C"{
-void baseAlignCounts(char **RinputFile,char **RoutputFile, char **Rtwobitfile,int *RextendLength,char **Rfiletype){
+void baseAlignCounts(char **RinputFile,char **RoutputFile, char **Rtwobitfile,int *RextendLength,char **Rfiletype, int *Rbinary){
 	const char * inputFile = RinputFile[0];
 	const char * outputFile = RoutputFile[0];
 	const char * twobitfile = Rtwobitfile[0];
 	int extendLength = RextendLength[0];
+	int binary = Rbinary[0];
 	const char * filetype = Rfiletype[0];
 	
 	bcanalysis newAnalysis;// = new analysis;
@@ -28,7 +29,7 @@ void baseAlignCounts(char **RinputFile,char **RoutputFile, char **Rtwobitfile,in
 	int ret=newAnalysis.importRawSignal(inputFile,extendLength,filetype,twobitfile);
 	if(ret == 0){
 		Rprintf("\nCalculating counts at each base\n");
-		ret = newAnalysis.processSignals(outputFile,extendLength);
+		ret = newAnalysis.processSignals(outputFile,extendLength, binary);
 		if(ret == 0)
 			Rprintf("-------- BASE ALIGN COUNTS COMPLETE SUCCESSFULLY --------\n");
 	}

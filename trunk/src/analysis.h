@@ -20,7 +20,7 @@ class analysis{
 		analysis(); //Implemented
 		~analysis(); //Implemented
 		int importCoords(const char *,double,const char *,int, int, int);//Implemented
-		int processCoords(const char *,const char *,const char *,const char *);//Implemented
+		int processCoords(const char *,const char *,const char *,const char *, int);//Implemented
 		int outputData(const char *,int,unsigned short int,unsigned long int,unsigned long int,double,double, int,unsigned int[]);//Implemented
 		int importPscl(const char *,double,int);
 		int importMixture(const char *,double,int,int);

@@ -40,7 +40,7 @@ bcanalysis::~bcanalysis(){
 	}
 }
 
-int bcanalysis::processSignals(const char* outputFile,int extend){
+int bcanalysis::processSignals(const char* outputFile,int extend, int binary){
 
 	unsigned short int currchr;
 	int i;
@@ -73,7 +73,7 @@ int bcanalysis::processSignals(const char* outputFile,int extend){
 		}
 		cout << "\t\t" << i << " reads mapped to " << chromReport << endl;
 
-		if(outputData(outputFile,currchr,printFLAG,basepair) != 0){
+		if(outputData(outputFile,currchr,printFLAG,basepair,binary) != 0){
 			return 1;
 		}else{
 			cout << "\t\tPrinted results to " << outputFile << endl;
@@ -87,26 +87,56 @@ int bcanalysis::processSignals(const char* outputFile,int extend){
 }
 
 //int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,unsigned short int pFLAG,unsigned short int basepair[]){
-int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,unsigned short int pFLAG,unsigned int basepair[]){
-	FILE * fh;
-	const char * chrom = getKey(currChr);
-	if(pFLAG == 0){
-		fh = fopen(outputFile,"w");
-		fprintf(fh,"track type=wiggle_0 name=\"%s\" desc=\"%s\" visibility=full\n",outputFile,outputFile);
-	}else{
-		fh = fopen(outputFile,"a");
-	}
-	if(fh == NULL){
-		cout << "\nERROR: Can't open output file: " << outputFile << endl;
-		return 1;
-	}
-	fprintf(fh,"fixedStep chrom=%s start=1 step=1\n",chrom);
+int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,unsigned short int pFLAG,unsigned int basepair[], int binary){
+	
+	if(binary ==0){
+		FILE * fh;
+		const char * chrom = getKey(currChr);
+		if(pFLAG == 0){
+			fh = fopen(outputFile,"w");
+			fprintf(fh,"track type=wiggle_0 name=\"%s\" desc=\"%s\" visibility=full\n", 	
+							outputFile,outputFile);
+		}else{
+			fh = fopen(outputFile,"a");
+		}
+		if(fh == NULL){
+			cout << "\nERROR: Can't open output file: " << outputFile << endl;
+			return 1;
+		}
+		fprintf(fh,"fixedStep chrom=%s start=1 step=1\n",chrom);
+	
+		for(int posP = 1; posP <= chr_size[currChr];posP++)
+			fprintf(fh,"%u\n",basepair[posP]);
+			//fprintf(fh,"%hu\n",basepair[posP]);
+		fclose(fh);
 
-	for(int posP = 1; posP <= chr_size[currChr];posP++)
-		fprintf(fh,"%u\n",basepair[posP]);
-//		fprintf(fh,"%hu\n",basepair[posP]);
-	fclose (fh);
-	return 0;
+	}else{
+		const char * chrom = getKey(currChr);
+		ofstream ofile;
+		if(pFLAG == 0){
+			ofile.open (outputFile,ios::out|ios::binary);
+			string outputFilestring = string(outputFile);
+			string firstline = "track type=wiggle_0 name=" + outputFilestring + " desc=" + outputFile + " visibility=full";
+			int size = firstline.size() + 1;
+			ofile.write(firstline.c_str() , size);
+		}else{
+			ofile.open (outputFile,ios::out|ios::binary|ios::app );
+		}
+
+		if(!ofile.is_open()){
+			cout << "ERROR: Can't open output file: " << outputFile << endl;
+			return 1;
+		}
+		
+		string chromstring = string(chrom);
+		string trackline = "fixedStep chrom=" + chromstring +  "start=1 step=1\n";
+		int size = trackline.size() + 1;
+		ofile.write(trackline.c_str() , size);
+		for(int posP = 1; posP <= chr_size[currChr];posP++)
+			ofile.write((const char*) &basepair[posP], 1);
+		ofile.close();
+	}
+		return 0;
 }
 
 unsigned short int bcanalysis::getHashValue(char *currChrom){
