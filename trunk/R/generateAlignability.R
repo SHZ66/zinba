@@ -7,6 +7,7 @@ process=function(maptargz,mapdir, chr, outdir, twoBitFile, athresh, extension,ma
 	unlink(getAbsolutePath(chr[i]))
 	adjmapchri=paste(outdir,gsub("b.out",".bwig",basename(chr[i])), sep="")
 	gzip(adjmapchri, overwrite=T, remove=TRUE)
+	cat("processed", getAbsolutePath(adjmapchri), "\n")
 	return(getAbsolutePath(adjmapchri))
 }
 
@@ -80,8 +81,8 @@ generateAlignability=function(mapdir, outdir="", athresh=1, extension=0,
 			mapfiles <- foreach(i=1:length(chr),.combine='rbind',.inorder=FALSE,.errorhandling="remove" ) %dopar%{
 				process(maptargz,mapdir, chr, outdir, twoBitFile, athresh, extension,maplist, i)
 			}
-			cat("Finished Processing files\n")
-			print(mapfiles)
+			cat("Finished Processing and compressing files files\n")
+			print(dir(outdir))
 		}
 
 		if(cleanup==T){ 

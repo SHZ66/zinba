@@ -35,7 +35,7 @@ buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvW
 	bwiggzfiles = file.access(dir(align,pattern="\\.bwig.gz$",full.names=T))
 	bwigfiles = file.access(dir(align,pattern="\\.bwig$",full.names=T))
 	wigfiles = file.access(dir(align,pattern="\\.wig$",full.names=T))
-	allfiles = dir(align,pattern="\\.*wig*$",full.names=T)
+	allfiles = dir(align,pattern="\\.*wig*",full.names=T)
 
 	if(length(allfiles) != sum(file.access(allfiles)==0)){
 			cat("The following alignability files could not be accessed\n")
