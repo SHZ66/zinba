@@ -4,6 +4,7 @@ buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvW
 	}else{
 		#if alignability path does not end in /, then put it in
 		if( strsplit(align,"")[[1]][length(strsplit(align,"")[[1]])]!='/') align=paste(align, '/', sep='')
+		if(!isDirectory(align)) stop("specified alignability directory path is not a directory")
 	}	
 	if(!file.exists(seq)){
 		stop(paste("Seq file not found,",seq,sep=" "))
@@ -25,6 +26,7 @@ buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvW
 	}
 	if(!file.exists(outdir) && outdir!="default"){
 		stop(paste("buildwindowdata: specified output directory to place built datafiles doesnt exist"))
+		if(!isDirectory(outdir)) stop("specified output directory path is not a directory")
 	}
 	
 	require(R.utils)
