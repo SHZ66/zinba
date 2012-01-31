@@ -205,8 +205,11 @@ if(selection=="complete"){
  	registerDoMC(numProc)
  	mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
  	getDoParWorkers()
- 	result <- foreach(i=index,.combine='rbind',.inorder=FALSE,.errorhandling="remove",.options.multicore = mcoptions) %dopar%
-                     covanal(file=file,formula=formulas[[ceiling(i/length(formulas))]],formulaE=formulas[[i-(ceiling(i/length(formulas))-1)*length(formulas)]],formulaZ=formulaZ,i=i,loc=loc, size=length(formulas)^2)
+ 	result <- foreach(i=index,.combine='rbind',.inorder=FALSE,.errorhandling="remove",.options.multicore = mcoptions) %dopar%{
+                     covanal(file=file,formula=formulas[[ceiling(i/length(formulas))]],
+											formulaE=formulas[[i-(ceiling(i/length(formulas))-1)*length(formulas)]],
+											formulaZ=formulaZ,i=i,loc=loc, size=length(formulas)^2)
+			}
 	
 	size=file.info(loc)$size
 	fields=count.fields(loc, sep="\t")

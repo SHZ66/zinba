@@ -17,6 +17,7 @@ loglikfun=function(parms){
 	prop2=parms$prop2
 	theta1=parms$start$theta1
 	theta2=parms$start$theta2
+	Y=parms$Y
 	loglik0=log(prob0+(1-prob0)*prop1*dnbinom(0, size = theta1, mu = mu1)+(1-prob0)*prop2*dnbinom(0, size = theta2, mu = mu2))
 	loglik1=log((1-prob0)*prop1*dnbinom(Y, size = theta1, mu = mu1)+(1-prob0)*prop2*dnbinom(Y, size = theta2, mu = mu2))
 	NAs=which(loglik1==-Inf)
@@ -224,7 +225,7 @@ getsigwindows=function(file,formula,formulaE,formulaZ,winout,
 					probi1[NAs]=0
 					probi2[NAs]=1
 			}	
-			ll_new <- loglikfun(list(start=start, prop1=prop1, prop2=prop2))
+			ll_new <- loglikfun(list(start=start, prop1=prop1, prop2=prop2, Y=Y))
 			ll_old <- 2 * ll_new	  
 	
 			if(!require("MASS")) {
@@ -306,7 +307,7 @@ getsigwindows=function(file,formula,formulaE,formulaZ,winout,
 				probi1[probi1<10^-10]=10^-10
 				probi2[probi2<10^-10]=10^-10
 
-				ll_new <- loglikfun(list(start=start, prop1=prop1, prop2=prop2))
+				ll_new <- loglikfun(list(start=start, prop1=prop1, prop2=prop2, Y=Y))
 				ll[i]=ll_new
 				i=i+1 
 				if(i>300){break}
