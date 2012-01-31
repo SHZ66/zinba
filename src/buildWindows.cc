@@ -39,8 +39,8 @@ void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **R
 	ret=newAnalysis.importRawSignal(expSeqFile.c_str(),extension,filetype,0,twoBitFile);
 
 	if(ret == 1){
-		Rprintf("\nEXITING due to error\n");
-	}else{
+		error("\nEXITING due to error in importing mapped reads\n");
+	}else{ 
 		size_t found;
 		size_t found2;
 		string outfile_prefix;
@@ -55,7 +55,7 @@ void buildWindows(char **RexpSeqFile,char **RinSeqFile,char **RalignDir,char **R
 		}		
 		ret = newAnalysis.processSignals(zWinSize,zOffsetSize,cWinSize,cOffsetSize,alignDir,twoBitFile,inSeqFile,outfile_prefix,filelist,extension,filetype, binary);
 		if(ret == 1){
-			Rprintf("ERROR: building windows was unsuccssful\n");
+			error("ERROR: building windows was unsuccssful\n");
 		}
 	}
 	Rprintf("\n\n--------BUILD WINDOWS COMPLETE-------\n\n");

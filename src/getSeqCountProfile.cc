@@ -54,7 +54,7 @@ void getSeqCountProfile(char **Rinputfile,char **Rwinlist,double *Rthreshold,cha
 	}
 	
 	if(ret != 0)
-		Rprintf("\ngetSeqCountProfile exiting with ERRORS\n");
+		error("\ngetSeqCountProfile exiting with ERRORS\n");
 	else if (ret == 0)
 		Rprintf("\ngetSeqCountProfile COMPLETED SUCCESSFULLY\n");
 
