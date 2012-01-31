@@ -271,10 +271,11 @@ lines=countLines(loc)
 if(size == 0) cat("Final model file", loc, "has size 0.  Please check if you have run out of disk space")
 
 #unequal number of columns?
+
 if(length(table(fields)) != 1){
 	cat("Warnings: final model file", loc, "has", length(skip), "lines with less than expected columns.  Removing problematic lines")
-	skip=which(fields != max(fields))
 }
+skip=which(fields != max(fields))
 
 #no lines written to output?
 if(lines == 0) cat("Final model file", loc, "has 0 lines written to it.  This suggests anomaly in model selection, please contact the package administrator")
