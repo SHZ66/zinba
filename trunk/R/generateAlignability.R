@@ -1,5 +1,5 @@
 process=function(maptargz,mapdir, chr, outdir, twoBitFile, athresh, extension,maplist,i){
-	untar(maptargz,compressed=T, file=chr[i], outdir=getParent(mapdir))
+	untar(maptargz,compressed=T, file=chr[i], exdir=getParent(mapdir))
 	maplist2=paste(maplist,"_", i, sep="")
 	write.table(getAbsolutePath(chr[i]), maplist2, quote = F, row.names = F, col.names = F)
 	b=.C("binAlignAdjust", as.character(maplist2), as.character(outdir),as.character( twoBitFile) , as.integer(athresh), as.integer(extension),package="zinba")
