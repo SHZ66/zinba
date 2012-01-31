@@ -78,7 +78,7 @@ generateAlignability=function(mapdir, outdir="", athresh=1, extension=0,
 			if(file.exists(mapdir)) cat("Overwriting existing mappability directory",mapdir,"\n")
 			unlink(mapdir, recursive=T)
 			dir.create(mapdir)
-			mapfiles <- foreach(i=1:length(chr),.combine='rbind',.inorder=FALSE,.errorhandling="remove" ) %	dopar%{
+			mapfiles <- foreach(i=1:length(chr),.combine='rbind',.inorder=FALSE,.errorhandling="remove" ) %dopar%{
 				process(maptargz,mapdir, chr, outdir, twoBitFile, athresh, extension,maplist, i)
 			}
 		}

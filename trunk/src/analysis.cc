@@ -505,6 +505,7 @@ int analysis::importMixture(const char *winlist,double threshold,int wformat, in
 			cout << "\tSkipping line, " << sigFile << endl;
 		}
 	}
+	if(coordIN_slist.size() <= 1 ) error("No regions imported, as non met the specified threshold level");
 	fclose(wlist);
 	return 0;
 }

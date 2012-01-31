@@ -672,7 +672,7 @@ int calcCovs::importRawSignal(const char * signalFile,int extension,const char *
 		unsigned long int cStart;
 		while(!feof(tempTB)){
 			int ret = fscanf(tempTB,"%s%lu",cChrom,&cStart);
-			cout << "\t\tFor " << cChrom << " length is " << cStart << endl;
+			//cout << "\t\tFor " << cChrom << " length is " << cStart << endl;
 			unsigned short int chromInt = getHashValue(cChrom);
 			chr_size[chromInt] = cStart;
 		}
@@ -734,11 +734,14 @@ int calcCovs::importBowtie(const char * signalFile,int extension,int dataType){
 	int extend = (int)(extension/2);
 	int rval;
 	int num_skip = -1;
-
+  int formatflag = 0 ;
 	while(!feof(fh)){
 		rval = fscanf(fh,"%s%s%s%lu%s%s%i",name,strand,cChrom,&pos,seq,sscore,&ival);
+		if(rval == 8){
+			formatflag = 1;
+		}
 		fgets(line,512,fh);
-		if(rval == 7){
+		if(rval == 7 | 8){
 			if(strcmp(strand,minus) == 0){
 				if((pos + strlen(seq)) >= extend)
 					pos = (pos + strlen(seq)) - extend + 1;
@@ -761,6 +764,15 @@ int calcCovs::importBowtie(const char * signalFile,int extension,int dataType){
 			num_skip++;
 		}
 	}
+
+	if(formatflag ==1 ){
+		cout << "WARNING:  8 columns detected in bowtie file, ignoring last column pertaining to mismatch descriptiors (see Input Files in ZINBA tutorial on the ZINBA website)" << endl;
+	}
+	if(signal_slist.size()==0){
+			cout << "error:  0 reads imported, check formatting of reads on zinba website" << endl;
+			return(1);
+	}
+
 	fclose(fh);
 	cout << "\tSkipped " << num_skip << " reads" << endl;
 	return 0;
@@ -811,6 +823,12 @@ int calcCovs::importTagAlign(const char * signalFile,int extension,int dataType)
 			num_skip++;
 		}
 	}
+
+	if(signal_slist.size()==0){
+			cout << "error:  0 reads imported, check formatting of reads on zinba website" << endl;
+			return(1);
+	}
+
 	fclose(fh);
 	cout << "\tSkipped " << num_skip << " reads" << endl;
 	return 0;
@@ -861,6 +879,12 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 			num_skip++;
 		}
 	}
+
+	if(signal_slist.size()==0){
+			cout << "error:  0 reads imported, check formatting of reads on zinba website" << endl;
+			return(1);
+	}
+
 	fclose(fh);
 	cout << "\tSkipped " << num_skip << " reads" << endl;
 	return 0;
