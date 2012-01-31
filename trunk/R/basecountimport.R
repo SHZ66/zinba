@@ -16,6 +16,10 @@ basecountimport=function(inputfile,winlist,threshold=.01,method='pscl',printFull
     }
 
 		if(length(grep(".bin.gz", inputfile))>0){
+			cat("Using compressed binary version of basecount file\n")
+			cat("Uncompressing file", inputfile,"\n")
+			library(R.utils)
+			gunzip(inputfile, remove=F, overwrite=T)
 			binary=1
 		}else{
 			binary=0
@@ -25,4 +29,6 @@ basecountimport=function(inputfile,winlist,threshold=.01,method='pscl',printFull
 				as.double(threshold),as.character(method),as.integer(printFullOut),
 				as.character(outputfile),as.character(twobitfile),as.character(chromosome), 
 				as.integer(winGap), as.integer(FDR^2),as.integer(binary),PACKAGE="zinba")
+	
+		if(binary==1) unlink(gsub("\\.gz$", "", inputfile))
 }
