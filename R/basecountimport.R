@@ -2,6 +2,9 @@ basecountimport=function(inputfile,winlist,threshold=.01,method='pscl',printFull
     if(!file.exists(inputfile)){
     	stop(paste("Input file not found,",inputfile,sep=" "))
     }
+    if(file.info(inputfile)$size==0){
+    	stop(paste("Input file ",inputfile, "has size 0, check for disk space issues",sep=" "))
+    }
     if(!file.exists(twobitfile)){
         stop(paste("twoBit file not found,",twobitfile,sep=" "))
     }
@@ -12,6 +15,14 @@ basecountimport=function(inputfile,winlist,threshold=.01,method='pscl',printFull
     	stop(paste("Need to specify an outputfile,",outputfile,sep=" "))
     }
 
-    cReturn <- .C("getSeqCountProfile",as.character(inputfile),as.character(winlist),as.double(threshold),as.character(method),as.integer(printFullOut),as.character(outputfile),as.character(twobitfile),as.character(chromosome), 
-as.integer(winGap), as.integer(FDR^2),PACKAGE="zinba")
+		if(length(grep(".bin.gz", inputfile))>0){
+			binary=1
+		}else{
+			binary=0
+		}
+
+    cReturn <- .C("getSeqCountProfile",as.character(inputfile),as.character(winlist),
+				as.double(threshold),as.character(method),as.integer(printFullOut),
+				as.character(outputfile),as.character(twobitfile),as.character(chromosome), 
+				as.integer(winGap), as.integer(FDR^2),as.integer(binary),PACKAGE="zinba")
 }

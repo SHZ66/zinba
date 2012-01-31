@@ -3,10 +3,13 @@ getrefinedpeaks=function(winlist,basecountfile,bpout,peakout,twoBit,winSize,pWin
     if(!file.exists(basecountfile)){stop("Specified basecountfile doesnt exist or is not correct")}
     if(!file.exists(twoBit)){stop("Specified twoBit file doesnt exist or is not correct")}
     if(method=='mixture' & FDR==FALSE){
-        threshold = peakconfidence
+        threshold = peakconfidence  #need to reconcile this with latest change
     }
     cat(paste("\nThreshold is ",threshold,"\n",sep=""))
-    basecountimport(inputfile=basecountfile,winlist=winlist,threshold=threshold,method=method,printFullOut=printFullOut,outputfile=bpout,twobitfile=twoBit, winGap=winGap, FDR=FDR)
-    peakbound(bpprofile=bpout,output=peakout,pwinSize=pWinSize,winSize=winSize,quantile=pquant,minscore=minscore, extension=extension)
+    basecountimport(inputfile=basecountfile,winlist=winlist,threshold=threshold,
+				method=method,printFullOut=printFullOut,outputfile=bpout,
+				twobitfile=twoBit, winGap=winGap, FDR=FDR)
+    peakbound(bpprofile=bpout,output=peakout,pwinSize=pWinSize,winSize=winSize,
+				quantile=pquant,minscore=minscore, extension=extension)
     unlink(bpout)
 }

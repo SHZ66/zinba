@@ -21,9 +21,9 @@ class bcanalysis{
 		~bcanalysis(); //Implemented
 		
 		int importRawSignal(const char *,int,const char *,const char *);//Implemented
-		int processSignals(const char *,int);//Implemented
+		int processSignals(const char *,int, int);//Implemented
 //		int outputData(const char *, unsigned short int,unsigned short int,unsigned short int[]);//Implemented
-		int outputData(const char *, unsigned short int,unsigned short int,unsigned int[]);//Implemented
+		int outputData(const char *, unsigned short int,unsigned short int,unsigned int[], int binary);//
 		int importTagAlign(const char *,int);
 		int importBowtie(const char *,int);
 		int importBed(const char *,int);
