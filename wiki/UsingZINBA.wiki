@@ -70,7 +70,8 @@ Three input formats are allowed for ZINBA:
   * Score (can be set to 0)
   * Strand (can be set to + if unknown)
 
-*bowtie* The [http://bowtie-bio.sourceforge.net/manual.shtml#default-bowtie-output default output] from the Bowtie mapping software (.hits file).  ZINBA ignores the last column (comma-separated list of mismatch descriptors if mismatches are detected), so in total one should have 7 columns.  
+*bowtie* The [http://bowtie-bio.sourceforge.net/manual.shtml#default-bowtie-output default output] from the Bowtie mapping software (.hits file).  ZINBA ignores the last column (comma-separated list of mismatch descriptors if mismatches are detected), so in total one should have 7 columns.  Also, if there are spaces in the first column of your bowtie output file (corresponding to read name) this will lead to importation errors in ZINBA version <= 2.01
+
 
 ==ZINBA pipeline function==
 Usage for the ZINBA pipeline function
