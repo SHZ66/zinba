@@ -21,11 +21,13 @@ basecountimport=function(inputfile,winlist,threshold=.01,method='pscl',printFull
 			library(R.utils)
 			gunzip(inputfile, remove=F, overwrite=T)
 			binary=1
+			inputfile2=gsub("\\.gz$", "", inputfile)
 		}else{
 			binary=0
+			inputfile2=inputfile
 		}
 
-    cReturn <- .C("getSeqCountProfile",as.character(inputfile),as.character(winlist),
+    cReturn <- .C("getSeqCountProfile",as.character(inputfile2),as.character(winlist),
 				as.double(threshold),as.character(method),as.integer(printFullOut),
 				as.character(outputfile),as.character(twobitfile),as.character(chromosome), 
 				as.integer(winGap), as.integer(FDR^2),as.integer(binary),PACKAGE="zinba")
