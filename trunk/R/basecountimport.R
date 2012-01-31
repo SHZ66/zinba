@@ -3,7 +3,7 @@ basecountimport=function(inputfile,winlist,threshold=.01,method='pscl',printFull
     	stop(paste("Input file not found,",inputfile,sep=" "))
     }
     if(file.info(inputfile)$size==0){
-    	stop(paste("Input file ",inputfile, "has size 0, check for disk space issues",sep=" "))
+    	stop(paste("Input file ",inputfile, "has size 0, chegeck for disk space issues",sep=" "))
     }
     if(!file.exists(twobitfile)){
         stop(paste("twoBit file not found,",twobitfile,sep=" "))
