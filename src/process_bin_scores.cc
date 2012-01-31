@@ -111,14 +111,14 @@ int process_bin_scores::adjustCoords(const char * filelist,string outDir,const c
 	
 	while(!feof(flist)){
 		fscanf(flist,"%s",mapfile);
-		cout << "\tProcessing " << mapfile << endl;
+		//cout << "\tProcessing " << mapfile << endl;
 		chrm = string(mapfile);
 		size_t bout = chrm.find("b.out");
 		chrm.erase(bout);
 	        size_t  last = chrm.find_last_of('/');
 		if(chrm.npos != last)  chrm = chrm.substr(last+1);
 
-		cout << "Chromosome is " << chrm << endl;
+		//cout << "Chromosome is " << chrm << endl;
 		align_count = new unsigned short int[chr_size[chrm]+1];
 		for(int c = chr_size[chrm];c--;)
 			align_count[c] = 0;
