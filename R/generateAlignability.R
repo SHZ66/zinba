@@ -2,12 +2,11 @@ process=function(maptargz,mapdir, chr, outdir, twoBitFile, athresh, extension,ma
 	untar(maptargz,compressed=T, file=chr[i], outdir=getParent(mapdir))
 	maplist2=paste(maplist,"_", i, sep="")
 	write.table(getAbsolutePath(chr[i]), maplist2, quote = F, row.names = F, col.names = F)
-	b=.C("binAlignextension", as.character(maplist2), as.character(outdir),as.character( twoBitFile) , as.integer(athresh), as.integer(extension),package="zinba")
+	b=.C("binAlignAdjust", as.character(maplist2), as.character(outdir),as.character( twoBitFile) , as.integer(athresh), as.integer(extension),package="zinba")
 	unlink(maplist2)
 	unlink(getAbsolutePath(chr[i]))
 	adjmapchri=paste(outdir,gsub("b.out",".bwig",basename(chr[i])), sep="")
 	gzip(adjmapchri, overwrite=T, remove=TRUE)
-	print(getAbsolutePath(adjmapchri))
 	return(getAbsolutePath(adjmapchri))
 }
 
@@ -61,11 +60,11 @@ generateAlignability=function(mapdir, outdir="", athresh=1, extension=0,
 			cat("Unpacking compressed mappability file",maptargz,"\n")
 			untar(maptargz,compressed=T)
 			write.table(dir(mapdir, full.names=T, pattern = "\\.out"), maplist, quote = F, row.names = F, 				col.names = F)
-			cat("Creating extensioned mappability files\n")
-			b=.C("binAlignextension", as.character(maplist), as.character(outdir),as.character
+			cat("Creating adjusted mappability files\n")
+			b=.C("binAlignAdjust", as.character(maplist), as.character(outdir),as.character
 			( twoBitFile) , as.integer(athresh), as.integer(extension),package="zinba")
 			adjmapchr=paste(outdir,dir(outdir, pattern = "\\.bwig"), sep="")
-			cat("Compressing extensioned mappability files\n")
+			cat("Compressing adjusted mappability files\n")
 			for(i in 1:length(adjmapchr)){
 				gzip(adjmapchr[i], overwrite=T, remove=TRUE)
 			}
@@ -82,6 +81,7 @@ generateAlignability=function(mapdir, outdir="", athresh=1, extension=0,
 				process(maptargz,mapdir, chr, outdir, twoBitFile, athresh, extension,maplist, i)
 			}
 			cat("Finished Processing files\n")
+			print(mapfiles)
 		}
 
 		if(cleanup==T){ 
