@@ -5,6 +5,7 @@ buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvW
 		#if alignability path does not end in /, then put it in
 		if( strsplit(align,"")[[1]][length(strsplit(align,"")[[1]])]!='/') align=paste(align, '/', sep='')
 		if(!isDirectory(align)) stop("specified alignability directory path is not a directory")
+		if(length(dir(align))==0) stop("There is nothing in your specified alignability directory, run generateAlignability again")
 	}	
 	if(!file.exists(seq)){
 		stop(paste("Seq file not found,",seq,sep=" "))
@@ -46,7 +47,7 @@ buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvW
 	if( (length(bwiggzfiles) > 0 | length(bwigfiles) > 0) & length(wigfiles) == 0 ){
 		#all though either be bwig.gz or bwig, otherwise .wig
 		#here, unzip those that are .gz
-		cat("Found compressed binary alignability files in", align, ", uncompressiing\n")
+		cat("Found compressed binary alignability files in", align, ", uncompressing\n")
 		if(length(bwiggzfiles) > 0) mc=mclapply(names(bwiggzfiles)[bwiggzfiles == 0], function(x) gunzip(x, remove=F, overwrite=T), mc.cores = numProc)
 		cat("Uncompressiing complete\n")
 		#check for disk space issues
@@ -88,6 +89,7 @@ buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvW
 		cat("Build window complete, removing uncompressed binary alignability files in", align, "\n")
 		mc=mclapply(names(bwigfiles)[bwigfiles == 0], unlink, mc.cores = numProc)
 		bwiggzfiles = file.access(dir(align,pattern="\\.bwig.gz$",full.names=T))
+		
 	}
 
 	gc()
