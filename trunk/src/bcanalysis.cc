@@ -133,7 +133,7 @@ int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,u
 		int size = trackline.size() + 1;
 		ofile.write(trackline.c_str() , size);
 		for(int posP = 1; posP <= chr_size[currChr];posP++)
-			ofile.write((const char*) &basepair[posP], 1);
+			ofile.write((const char*) &basepair[posP], sizeof(unsigned int));
 		ofile.close();
 	}
 		return 0;

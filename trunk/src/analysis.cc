@@ -92,7 +92,8 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	remove(tChrSize);
 	
 	unsigned short int chromInt;
-	string line;
+	//string line;
+	char line[5000];
 	string field;
 //////////////////////////////
 	int profile_extend = 500;
@@ -106,7 +107,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	unsigned int * profile = NULL;
 	unsigned long int countBases = 250000000;
 	unsigned long int startOffset = 0;
-	cout << "\nGetting basecount data from " << inputFile << endl;
+
 	ifstream seqfile;
 	if(binary == 0){
 		seqfile.open (inputFile);
@@ -117,9 +118,13 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	if(!seqfile.is_open()){
 		cout << "ERROR opening input file" << inputFile << ", exiting" << endl;
 		return 1;
+	}else{
+			cout << "\nGetting basecount data from " << inputFile << endl;
 	}
 
-	while (getline(seqfile, line)){
+	//while (getline(seqfile, line)){
+	while (!seqfile.eof()){
+		seqfile.getline(line, 5000);
 		if (line[0] == 'f'){
 			if(collectData == 1 && getChrmData == 1){
 				i = coordOUT_slist.begin();
@@ -158,7 +163,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 				}
 			}
 			
-			cout << "\tProcessing: " << line << endl;
+			cout << "\tProcessing: " << string(line) << endl;
 			istringstream iss(line);
 			while(iss >> field){
 				if (field[0] == 'c'){
@@ -202,7 +207,8 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 					cout << "\nERROR: Current position is " << countBases << " and chromosome length is " << chr_size[chromInt] << endl;
 					return 1;
 				}
-				basepair[countBases] = atoi(line.c_str());
+				//basepair[countBases] = atoi(line.c_str());
+					basepair[countBases] = atoi(line);
 		}
 	}
 
