@@ -13,7 +13,7 @@ basealigncount=function(inputfile,outputfile,twoBitFile,extension=NULL,filetype=
     if(is.null(extension)){
         stop(paste("Need to specify an extension length",,sep=" "))
     }
-		if(!file.exists(getparent(outputfile))){
+		if(!file.exists(getParent(outputfile))){
 			stop("Directory where output is being sent doesn't exist")
 		}else{
 			outputfile=getAbsolutePath(outputfile)

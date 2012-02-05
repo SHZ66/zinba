@@ -60,7 +60,7 @@ int import::importBowtie(const char * signalFile,int extension,int dataType){
 	char cChrom[128];
 	unsigned long int pos;
 	char strand[1];
-	char minus[] = "-";
+	//char minus[] = "-";
 	char line[512];char seq[128];
 	char name[128];char sscore[128];int ival;	
 	//int extend = (int)(extension/2); implement this above
@@ -100,7 +100,7 @@ int import::importBowtie(const char * signalFile,int extension,int dataType){
     error("%s is not tab-delimated\n", signalFile);
   }
 	if(i==7 | i==8){
-			if(strcmp(strand,minus) == 0){
+			if(strcmp(strand,"-") == 0 | strcmp(strand,"-\n") == 0){
 				if((pos + strlen(seq)) >= extension)
 					pos = (pos + strlen(seq)) - extension + 1;
 				else
@@ -262,7 +262,7 @@ int import::importBed(const char * signalFile,int extension,int dataType){
 	char cChrom[128];
 	unsigned long int pos;
 	char strand[1];
-	char minus[] = "-";
+	//char minus[] = "-";
 	unsigned long int start;unsigned long int stop;
 	char name[128];int bscore;
 	//int extend = (int)(extension/2);
@@ -299,7 +299,7 @@ int import::importBed(const char * signalFile,int extension,int dataType){
     error("%s is not tab-delimated\n", signalFile);
   }
 	if(i==6){
-			if(strcmp(strand,minus) == 0){
+			if(strcmp(strand,"-") == 0 | strcmp(strand,"-\n") == 0){
 				if(stop >= extension)
 					pos = stop - extension + 1;
 				else
