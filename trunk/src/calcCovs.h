@@ -6,6 +6,7 @@
 //#include "bwRead.h"
 //#include "bwRead2.h"
 #include "dataWins.h"
+#include "import.h"
 #include "cnvWins.h"
 #include <cstring>
 //#include "base.h"
@@ -24,17 +25,17 @@ class calcCovs{
 		//calcCovs(); //Implemented
 		//~calcCovs(); //Implemented
 		
-		int importRawSignal(const char *,int,const char *,int,const char *);//Implemented
-		int processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir,const char * twoBitFile,const char * inputFile,string outfile,const char * flist,int extension,const char * filetype, int binary);//Implemented
-		int outputData(const char *, unsigned short int);//Implemented
-		int outputDataWinCount(const char *, unsigned short int);
+		int importRawSignal(const char *,int,const char *,int,const char *, import);//Implemented
+		int processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir,const char * twoBitFile,const char * inputFile,string outfile,const char * flist,int extension,const char * filetype, int binary, import b);//Implemented
+		int outputData(const char *, unsigned short int, import);//Implemented
+		int outputDataWinCount(const char *, unsigned short int, import);
 /*		int importBowtie(const char *,int,int);
 		int importTagAlign(const char *,int,int);
 		int importBed(const char *,int,int);*/
-		int processWinSignal(int , int ,const char * ,string outfile,int ,const char *, double);
-		int	processCustomSignal(int zWinSize, int zOffsetSize,const char * twoBitFile,const char * inputFile,string outfile, const char* flist, int extension);
+		int processWinSignal(int , int ,const char * ,string outfile,int ,const char *, double, import);
+		int	processCustomSignal(int zWinSize, int zOffsetSize,const char * twoBitFile,const char * inputFile,string outfile, const char* flist, int extension, import b);
 		//int importCustomBed(const char * signalFile,int extension);
-		int outputCustomData(const char * outputFile, unsigned short int currChr);
+		int outputCustomData(const char * outputFile, unsigned short int currChr, import b);
 		/*struct ltstr{
 			bool operator()(const char* s1, const char* s2) const
 			{

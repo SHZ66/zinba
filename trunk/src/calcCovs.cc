@@ -47,14 +47,13 @@ calcCovs::~calcCovs(){
 }
 */
 
-int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir,const char * twoBitFile,const char * inputFile,string outfile,const char * flist,int extension,const char * filetype, int binary){
-	import b;
+int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir,const char * twoBitFile,const char * inputFile,string outfile,const char * flist,int extension,const char * filetype, int binary, import b){
 	FILE * tempTB;
 	time_t rtime;
 	struct tm *timeinfo;
 	char tInfo[128];// = "tempInfo.txt";
 	char sysCall[256];
-	
+
 	unsigned short int currchr = 999;
 	unsigned short int * basepair = NULL;
 	unsigned short int * ibasepair = NULL;
@@ -66,6 +65,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 	int readInput = 0;
 	const char* noneVal = "none";
 	char mapChar[1];
+	import b2;
 
 	while(!b.signal_slist.empty()){
 		i = 0;
@@ -475,7 +475,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 		if(strcmp(inputFile,noneVal)!=0){
 			if(readInput == 0){
 				cout << "\tLoading reads from input file " << inputFile << "........." << endl;
-				int rVal = importRawSignal(inputFile,extension,filetype,1,twoBitFile);
+				int rVal = importRawSignal(inputFile,extension,filetype,1,twoBitFile, b2);
 				if(rVal == 1){
 					cout << "Unable to open file with input reads" << endl;
 					return 1;
@@ -484,15 +484,15 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			}
 			cout << "\tMapping input tags to the genome........." << endl;
 			i = 0;
-			ibasepair = new unsigned short int[b.chr_size[currchr]+1];
-			for(int ch = b.chr_size[currchr]; ch--;)
+			ibasepair = new unsigned short int[b2.chr_size[currchr]+1];
+			for(int ch = b2.chr_size[currchr]; ch--;)
 				ibasepair[ch] = 0;
 
-			while(b.input_slist[i].chrom==currchr && i < (int) b.input_slist.size()){
-				ibasepair[b.input_slist[i].pos]++;
+			while(b2.input_slist[i].chrom==currchr && i < (int) b2.input_slist.size()){
+				ibasepair[b2.input_slist[i].pos]++;
 				i++;
 			}
-			b.input_slist.erase(b.input_slist.begin(),b.input_slist.begin()+i);
+			b2.input_slist.erase(b2.input_slist.begin(),b2.input_slist.begin()+i);
 		}
 		
 		cout << "\tGetting counts for zinba windows.........." << endl;
@@ -568,7 +568,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 				zWinStop += zWinSize;
 			}
 			
-			if(outputData(outfileDATA.c_str(),currchr) != 0){
+			if(outputData(outfileDATA.c_str(),currchr, b) != 0){
 				cout << "Error printing output to file, exiting" << endl;
 				exit(1);
 			}else{
@@ -592,8 +592,7 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 	return 0;
 }
 
-int calcCovs::outputData(const char * outputFile, unsigned short int currChr){
-	import b;
+int calcCovs::outputData(const char * outputFile, unsigned short int currChr, import b){
 	FILE * fh;
 	fh = fopen(outputFile,"w");
 	fprintf(fh,"chromosome\tstart\tstop\texp_count\tinput_count\tgcPerc\talign_perc\texp_cnvwin_log\n");
@@ -612,8 +611,7 @@ int calcCovs::outputData(const char * outputFile, unsigned short int currChr){
 
 
 
-int calcCovs::importRawSignal(const char * signalFile,int extension,const char * filetype,int dataType,const char * twoBitFile){
-	import b;
+int calcCovs::importRawSignal(const char * signalFile,int extension,const char * filetype,int dataType,const char * twoBitFile, import b){
 	if(tbSizeFlag == 0){
 		FILE * tempTB;
 		time_t rtime;
@@ -742,7 +740,7 @@ int calcCovs::b.importBowtie(const char * signalFile,int extension,int dataType)
 			if(dataType == 0)
 				b.signal_slist.push_back(sig);
 			else if(dataType == 1)
-				b.input_slist.push_back(sig);
+				b2.input_slist.push_back(sig);
 		}else{
 			num_skip++;
 		}
@@ -751,7 +749,7 @@ int calcCovs::b.importBowtie(const char * signalFile,int extension,int dataType)
 	if(formatflag ==1 ){
 		cout << "WARNING:  8 columns detected in bowtie file, ignoring last column pertaining to mismatch descriptiors (see Input Files in ZINBA tutorial on the ZINBA website)" << endl;
 	}
-	if((b.signal_slist.size()==0 & dataType==0) | (b.input_slist.size()==0 & dataType==1) ){
+	if((b.signal_slist.size()==0 & dataType==0) | (b2.input_slist.size()==0 & dataType==1) ){
 			cout << "error:  0 reads imported, check formatting of reads on zinba website" << endl;
 			cout << "error: number of columns found is"<< rval << endl;
 			return(1);
@@ -802,13 +800,13 @@ int calcCovs::b.importTagAlign(const char * signalFile,int extension,int dataTyp
 			if(dataType == 0)
 				b.signal_slist.push_back(sig);
 			else if(dataType == 1)
-				b.input_slist.push_back(sig);
+				b2.input_slist.push_back(sig);
 		}else{
 			num_skip++;
 		}
 	}
 
-	if((b.signal_slist.size()==0 & dataType==0) | (b.input_slist.size()==0 & dataType==1) ){
+	if((b.signal_slist.size()==0 & dataType==0) | (b2.input_slist.size()==0 & dataType==1) ){
 			cout << "error:  0 reads imported, check formatting of reads on zinba website" << endl;
 			cout << "error: number of columns found is"<< rval << endl;
 			return(1);
@@ -859,13 +857,13 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 			if(dataType == 0)
 				b.signal_slist.push_back(sig);
 			else if(dataType == 1)
-				b.input_slist.push_back(sig);
+				b2.input_slist.push_back(sig);
 		}else{
 			num_skip++;
 		}
 	}
 
-	if((b.signal_slist.size()==0 & dataType==0) | (b.input_slist.size()==0 & dataType==1) ){
+	if((b.signal_slist.size()==0 & dataType==0) | (b2.input_slist.size()==0 & dataType==1) ){
 			cout << "error:  0 reads imported, check formatting of reads on zinba website" << endl;
 			cout << "error: number of columns found is"<< rval << endl;
 			return(1);
@@ -877,8 +875,7 @@ int calcCovs::importBed(const char * signalFile,int extension,int dataType){
 }
 */
 
-int calcCovs::outputDataWinCount(const char * outputFile, unsigned short int currChr){
-	import b;
+int calcCovs::outputDataWinCount(const char * outputFile, unsigned short int currChr, import b){
 	FILE * fh;
 	fh = fopen(outputFile,"w");
 	fprintf(fh,"chromosome\tstart\tstop\texp_count\n");
@@ -892,8 +889,7 @@ int calcCovs::outputDataWinCount(const char * outputFile, unsigned short int cur
 	return 0;
 }
 
-int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBitFile,string outfile,int extension,const char * filetype, double Nthresh){
-  import b;
+int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBitFile,string outfile,int extension,const char * filetype, double Nthresh, import b){
 	time_t rtime;
 	struct tm *timeinfo;
 	FILE * tempTB;
@@ -1022,7 +1018,7 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 				zWinStop += zWinSize;
 			}
 			
-			if(outputDataWinCount(outfileDATA.c_str(),currchr) != 0){
+			if(outputDataWinCount(outfileDATA.c_str(),currchr, b) != 0){
 				cout << "Error printing output to file, exiting" << endl;
 				exit(1);
 			}
@@ -1039,8 +1035,7 @@ int calcCovs::processWinSignal(int zWinSize, int zOffsetSize,const char * twoBit
 
 
 
-int calcCovs::processCustomSignal(int zWinSize, int zOffsetSize,const char * twoBitFile,const char * inputFile,string outfile, const char* flist, int extension){
-  import b;
+int calcCovs::processCustomSignal(int zWinSize, int zOffsetSize,const char * twoBitFile,const char * inputFile,string outfile, const char* flist, int extension, import b){
 	FILE * tempTB;
 	unsigned short int currchr = 999;
 	unsigned short int * basepair = NULL;
@@ -1137,7 +1132,7 @@ int calcCovs::processCustomSignal(int zWinSize, int zOffsetSize,const char * two
 
 			}
 			
-			if(outputCustomData(outfileDATA.c_str(),currchr) != 0){
+			if(outputCustomData(outfileDATA.c_str(),currchr, b) != 0){
 				cout << "Error printing output to file, exiting" << endl;
 				exit(1);
 			}else{
@@ -1158,8 +1153,7 @@ int calcCovs::processCustomSignal(int zWinSize, int zOffsetSize,const char * two
 	
 
 
-int calcCovs::outputCustomData(const char * outputFile, unsigned short int currChr){
-  import b;
+int calcCovs::outputCustomData(const char * outputFile, unsigned short int currChr, import b){
 	FILE * fh;
 	fh = fopen(outputFile,"w");
 	fprintf(fh,"chromosome\tstart\tstop\texp_count\tinput_count\n");

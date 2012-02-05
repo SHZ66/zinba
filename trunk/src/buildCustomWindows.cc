@@ -1,4 +1,4 @@
-#include <iostream>
+/*#include <iostream>
 #include <string>
 #include <fstream>
 #include <vector>
@@ -56,4 +56,4 @@ void buildCustomWindows(char **RexpSeqFile,char **RinSeqFile,char **RtwoBitFile,
 	}
 	Rprintf("\n\n--------BUILD WINDOWS COMPLETE-------\n\n");
 }
-}
+}*/
