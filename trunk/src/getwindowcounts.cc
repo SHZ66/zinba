@@ -34,13 +34,13 @@ void getWindowCounts(char **RexpSeqFile,char **RtwoBitFile,int *RzWinSize,int *R
 	calcCovs newAnalysis;// = new analysis;
 	Rprintf("\nImporting reads from file %s \n", expSeqFile.c_str());
 	import b;
-	ret=newAnalysis.importRawSignal(expSeqFile.c_str(),extension,filetype,0,twoBitFile, b);
+	ret=newAnalysis.importRawSignal(expSeqFile.c_str(),extension,filetype,0,twoBitFile);
 
 	if(ret == 0){
 		Rprintf("\nBuilding window data\n");
 		size_t found = expSeqFile.find_last_of(".");
 		string outfile_prefix = expSeqFile.substr(0,found);
-		ret = newAnalysis.processWinSignal(zWinSize,zOffsetSize,twoBitFile,outfile_prefix,extension,filetype, Nthresh, b);
+		ret = newAnalysis.processWinSignal(zWinSize,zOffsetSize,twoBitFile,outfile_prefix,extension,filetype, Nthresh);
 	}
 	
 	if(ret != 0){
