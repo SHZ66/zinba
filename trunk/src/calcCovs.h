@@ -51,11 +51,11 @@ class calcCovs{
 		};*/
 	private:
 		//commented out items have moved to import.h
-/*		vector<bwRead> signal_slist;//Implemented
+/*	vector<bwRead> signal_slist;//Implemented
 		vector<bwRead> input_slist;
 		vector<bwRead2> custom_slist;
-//		slist<bwRead> signal_slist;//Implemented
-//		slist<bwRead> input_slist;*/
+//	list<bwRead> signal_slist;//Implemented
+//	slist<bwRead> input_slist;*/
 		list<cnvWins> cnv_wins;
 		slist<dataWins> peak_wins;
 		slist<dataWinsCount> peak_wins2;
