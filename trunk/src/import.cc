@@ -163,7 +163,7 @@ int import::importTagAlign(const char * signalFile,int extension,int dataType){
 	char cChrom[128];
 	unsigned long int pos;
 	char strand[1];
-	char minus[] = "-";
+	//char minus[] = "-";
 	unsigned long int start;unsigned long int stop;
 	char seq[128];int score;
 	//int extend = (int)(extension/2);
@@ -200,8 +200,9 @@ int import::importTagAlign(const char * signalFile,int extension,int dataType){
   }else{
     error("%s is not tab-delimated\n", signalFile);
   }
+
 	if(i==6){
-			if(strcmp(strand,minus) == 0){
+			if(strcmp(strand,"-") == 0 | strcmp(strand,"-\n") == 0){
 				if(stop >= extension)
 					pos = stop - extension + 1;
 				else
@@ -223,6 +224,7 @@ int import::importTagAlign(const char * signalFile,int extension,int dataType){
 			formatFlag=1;
 			num_skip++;
 		}
+		m++;
 	}
 
 	if(i<6){
