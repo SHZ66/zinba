@@ -24,7 +24,7 @@ class calcCovs{
 	
 		//calcCovs(); //Implemented
 		//~calcCovs(); //Implemented
-		
+		import b;
 		int importRawSignal(const char *,int,const char *,int,const char *);//Implemented
 		int processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cOffsetSize, string alignDir,const char * twoBitFile,const char * inputFile,string outfile,const char * flist,int extension,const char * filetype, int binary);//Implemented
 		int outputData(const char *, unsigned short int);//Implemented
@@ -49,7 +49,6 @@ class calcCovs{
 				return i1<i2;
 		 	}
 		};*/
-
 	private:
 		//commented out items have moved to import.h
 /*		vector<bwRead> signal_slist;//Implemented
@@ -61,11 +60,10 @@ class calcCovs{
 		slist<dataWins> peak_wins;
 		slist<dataWinsCount> peak_wins2;
 		slist<dataWinsCustom> peak_wins3;
-		import b;
-		unsigned short int tbSizeFlag;
+		//unsigned short int tbSizeFlag;
 	
-		unsigned short int chromCounter;//Implemented
-		unsigned short int getHashValue(char *);//Implemented
+		//unsigned short int chromCounter;//Implemented
+		//unsigned short int getHashValue(char *);//Implemented
 		//const char * getKey(unsigned short int);//Implemented
 		//map<const char*, int, ltstr> chroms;//Implemented
 		//map<int, const char*> intsToChrom;//Implemented

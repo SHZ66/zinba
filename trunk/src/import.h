@@ -42,7 +42,6 @@ class import{
 		int importTagAlign(const char *,int,int);
 		int importBed(const char *,int,int);
 		int importCustomBed(const char * signalFile,int extension);
-		
 		vector<bwRead> signal_slist;//Implemented
 		vector<bwRead> input_slist;
 		vector<bwRead2> custom_slist;

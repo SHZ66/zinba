@@ -611,7 +611,7 @@ int calcCovs::outputData(const char * outputFile, unsigned short int currChr){
 
 
 int calcCovs::importRawSignal(const char * signalFile,int extension,const char * filetype,int dataType,const char * twoBitFile){
-	if(tbSizeFlag == 0){
+	if(b.tbSizeFlag == 0){
 		FILE * tempTB;
 		time_t rtime;
 		struct tm *timeinfo;
@@ -658,7 +658,7 @@ int calcCovs::importRawSignal(const char * signalFile,int extension,const char *
 		}
 		fclose(tempTB);
 		remove(tChrSize);
-		tbSizeFlag = 1;
+		b.tbSizeFlag = 1;
 	}
 
 	const char * bowtie = "bowtie";
