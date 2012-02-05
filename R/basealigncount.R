@@ -1,7 +1,9 @@
 basealigncount=function(inputfile,outputfile,twoBitFile,extension=NULL,filetype="bowtie", binary=0){
     if(!file.exists(inputfile)){
     	stop(paste("Input file not found,",inputfile,sep=" "))
-    }
+    }else{
+			inputfile=getAbsolutePath(inputfile)
+		}
     if(!file.exists(twoBitFile)){
         stop(paste("twoBit file not found,",twoBitFile,sep=" "))
     }
@@ -11,12 +13,19 @@ basealigncount=function(inputfile,outputfile,twoBitFile,extension=NULL,filetype=
     if(is.null(extension)){
         stop(paste("Need to specify an extension length",,sep=" "))
     }
+		if(!file.exists(getparent(outputfile))){
+			stop("Directory where output is being sent doesn't exist")
+		}else{
+			outputfile=getAbsolutePath(outputfile)
+		}
+
+
     cReturn <- .C("baseAlignCounts",as.character(inputfile), as.character(outputfile), as.character(twoBitFile),as.integer(extension),as.character(filetype),as.integer(binary), PACKAGE="zinba")
 		if(binary==1){
 			library(R.utils)
 			cat("Because binary option is selected, appending '.bin.gz' to output path.\n")
 			newpath=paste(outputfile, ".bin.gz", sep="")
-			gzip(outputfile, destname=newpath, overwrite=T, remove=TRUE)
+			tar(tarfile=newpath, files=dir(path=getParent(outputfile), pattern=paste(outputfile,"_", sep="")), compression="gzip")
 			cat("Compressed binary basecount file can be found at", newpath, "\n")
 		}
 }

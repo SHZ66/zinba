@@ -92,8 +92,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	remove(tChrSize);
 	
 	unsigned short int chromInt;
-	//string line;
-	char line[5000];
+	string line;
 	string field;
 //////////////////////////////
 	int profile_extend = 500;
@@ -107,24 +106,14 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 	unsigned int * profile = NULL;
 	unsigned long int countBases = 250000000;
 	unsigned long int startOffset = 0;
-
-	ifstream seqfile;
-	if(binary == 0){
-		seqfile.open (inputFile);
-	}else{
-  	seqfile.open (inputFile,ios::in|ios::binary);
-	}
-
+	cout << "\nGetting basecount data from " << inputFile << endl;
+	ifstream seqfile(inputFile);
 	if(!seqfile.is_open()){
 		cout << "ERROR opening input file" << inputFile << ", exiting" << endl;
 		return 1;
-	}else{
-			cout << "\nGetting basecount data from " << inputFile << endl;
 	}
 
-	//while (getline(seqfile, line)){
-	while (!seqfile.eof()){
-		seqfile.getline(line, 5000);
+	while (getline(seqfile, line)){
 		if (line[0] == 'f'){
 			if(collectData == 1 && getChrmData == 1){
 				i = coordOUT_slist.begin();
@@ -163,7 +152,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 				}
 			}
 			
-			cout << "\tProcessing: " << string(line) << endl;
+			cout << "\tProcessing: " << line << endl;
 			istringstream iss(line);
 			while(iss >> field){
 				if (field[0] == 'c'){
@@ -207,8 +196,7 @@ int analysis::processCoords(const char* inputFile,const char* outputFile,const c
 					cout << "\nERROR: Current position is " << countBases << " and chromosome length is " << chr_size[chromInt] << endl;
 					return 1;
 				}
-				//basepair[countBases] = atoi(line.c_str());
-					basepair[countBases] = atoi(line);
+				basepair[countBases] = atoi(line.c_str());
 		}
 	}
 
@@ -511,7 +499,6 @@ int analysis::importMixture(const char *winlist,double threshold,int wformat, in
 			cout << "\tSkipping line, " << sigFile << endl;
 		}
 	}
-	if(coordIN_slist.size() <= 1 ) error("No regions imported, as non met the specified threshold level");
 	fclose(wlist);
 	return 0;
 }

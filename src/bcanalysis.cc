@@ -26,8 +26,11 @@ extern "C"{
 #include <cstdlib>
 #include <ctime>
 #include <R.h>
+#include "import.h"
+
 using namespace std;
 
+/*
 bcanalysis::bcanalysis(){
 	chromCounter = 0;
 	tbSizeFlag = 0;
@@ -39,9 +42,10 @@ bcanalysis::~bcanalysis(){
 		delete [] i->first;	
 	}
 }
+*/
 
 int bcanalysis::processSignals(const char* outputFile,int extend, int binary){
-
+	import b;
 	unsigned short int currchr;
 	int i;
 	const char * chromReport;
@@ -49,23 +53,23 @@ int bcanalysis::processSignals(const char* outputFile,int extend, int binary){
 	unsigned int * basepair = NULL;
 	unsigned short int printFLAG = 0;
 	unsigned long int aStart,aStop;
-	cout << "Processing " << signal_slist.size() << " reads" << endl;
+	cout << "Processing " << b.signal_slist.size() << " reads" << endl;
 	
-	while(!signal_slist.empty()){
+	while(!b.signal_slist.empty()){
 		i = 0;
-		currchr = signal_slist[0].chrom;
-		chromReport = getKey(currchr);
+		currchr = b.signal_slist[0].chrom;
+		chromReport = b.getKey(currchr);
 		cout << "\tProcessing " << chromReport << ".........." << endl;
-		cout << "\t\tInitializing length to " << chr_size[currchr] << endl;
-//		basepair = new unsigned short int[chr_size[currchr]+1];
-		basepair = new unsigned int[chr_size[currchr]+1];
-		for(int in = chr_size[currchr]; in--;)
+		cout << "\t\tInitializing length to " << b.chr_size[currchr] << endl;
+//		basepair = new unsigned short int[b.chr_size[currchr]+1];
+		basepair = new unsigned int[b.chr_size[currchr]+1];
+		for(int in = b.chr_size[currchr]; in--;)
 			basepair[in] = 0;
 
-		while(signal_slist[i].chrom==currchr && i < (int) signal_slist.size()){
-			aStart = signal_slist[i].pos;
-			aStop = chr_size[currchr];
-			if((aStart+extend-1) <= chr_size[currchr])
+		while(b.signal_slist[i].chrom==currchr && i < (int) b.signal_slist.size()){
+			aStart = b.signal_slist[i].pos;
+			aStop = b.chr_size[currchr];
+			if((aStart+extend-1) <= b.chr_size[currchr])
 				aStop = aStart + extend - 1;
 			for(unsigned int rpos = aStart; rpos <= aStop;rpos++)
 				basepair[rpos]++;
@@ -81,17 +85,17 @@ int bcanalysis::processSignals(const char* outputFile,int extend, int binary){
 		printFLAG = 1;
 		delete [] basepair;
 		basepair = NULL;
-		signal_slist.erase(signal_slist.begin(),signal_slist.begin()+i);
+		b.signal_slist.erase(b.signal_slist.begin(),b.signal_slist.begin()+i);
 	}
 	return 0;
 }
 
 //int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,unsigned short int pFLAG,unsigned short int basepair[]){
 int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,unsigned short int pFLAG,unsigned int basepair[], int binary){
-	
+	import b;
 	if(binary ==0){
 		FILE * fh;
-		const char * chrom = getKey(currChr);
+		const char * chrom = b.getKey(currChr);
 		if(pFLAG == 0){
 			fh = fopen(outputFile,"w");
 			fprintf(fh,"track type=wiggle_0 name=\"%s\" desc=\"%s\" visibility=full\n", 	
@@ -105,40 +109,28 @@ int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,u
 		}
 		fprintf(fh,"fixedStep chrom=%s start=1 step=1\n",chrom);
 	
-		for(int posP = 1; posP <= chr_size[currChr];posP++)
+		for(int posP = 1; posP <= b.chr_size[currChr];posP++)
 			fprintf(fh,"%u\n",basepair[posP]);
 			//fprintf(fh,"%hu\n",basepair[posP]);
 		fclose(fh);
 
 	}else{
-		const char * chrom = getKey(currChr);
+		const char * chrom = b.getKey(currChr);
 		ofstream ofile;
-		if(pFLAG == 0){
-			ofile.open (outputFile,ios::out|ios::binary);
-			string outputFilestring = string(outputFile);
-			string firstline = "track type=wiggle_0 name=" + outputFilestring + " desc=" + outputFile + " visibility=full";
-			int size = firstline.size() + 1;
-			ofile.write(firstline.c_str() , size);
-		}else{
-			ofile.open (outputFile,ios::out|ios::binary|ios::app );
-		}
-
+		string outputFilestring = string(outputFile)+"_"+ string(chrom);		
+		ofile.open (outputFile,ios::out|ios::binary);
 		if(!ofile.is_open()){
 			cout << "ERROR: Can't open output file: " << outputFile << endl;
 			return 1;
 		}
-		
-		string chromstring = string(chrom);
-		string trackline = "fixedStep chrom=" + chromstring +  "start=1 step=1\n";
-		int size = trackline.size() + 1;
-		ofile.write(trackline.c_str() , size);
-		for(int posP = 1; posP <= chr_size[currChr];posP++)
+		for(int posP = 1; posP <= b.chr_size[currChr];posP++)
 			ofile.write((const char*) &basepair[posP], sizeof(unsigned int));
 		ofile.close();
 	}
 		return 0;
 }
 
+/*
 unsigned short int bcanalysis::getHashValue(char *currChrom){
 	map<const char*, int>::iterator i;
 	i = chroms.find(currChrom);
@@ -153,7 +145,7 @@ unsigned short int bcanalysis::getHashValue(char *currChrom){
 	}
 }
 
-const char * bcanalysis::getKey(unsigned short int chrom){
+const char * bcanalysis::b.getKeyunsigned short int chrom){
 	map<int, const char*>::iterator i;
 	i = intsToChrom.find(chrom);
 	if(i == intsToChrom.end()){
@@ -164,10 +156,10 @@ const char * bcanalysis::getKey(unsigned short int chrom){
 		return i->second;	
 	}
 }
-
+*/
 int bcanalysis::importRawSignal(const char * signalFile,int extension,const char * filetype,const char * twoBitFile){
-
-	if(tbSizeFlag == 0){
+	import b;
+	if(b.tbSizeFlag == 0){
 		FILE * tempTB;
 		time_t rtime;
 		struct tm *timeinfo;
@@ -210,12 +202,12 @@ int bcanalysis::importRawSignal(const char * signalFile,int extension,const char
 		while(!feof(tempTB)){
 			int ret = fscanf(tempTB,"%s%lu",cChrom,&cStart);
 			cout << "\t\tFor " << cChrom << " length is " << cStart << endl;
-			unsigned short int chromInt = getHashValue(cChrom);
-			chr_size[chromInt] = cStart;
+			unsigned short int chromInt = b.getHashValue(cChrom);
+			b.chr_size[chromInt] = cStart;
 		}
 		fclose(tempTB);
 		remove(tChrSize);
-		tbSizeFlag = 1;
+		b.tbSizeFlag = 1;
 	}
 	
 	const char * bowtie = "bowtie";
@@ -224,20 +216,20 @@ int bcanalysis::importRawSignal(const char * signalFile,int extension,const char
 	int rval = 0;
 	
 	if(strcmp(filetype,bed) == 0){
-		rval = importBed(signalFile,extension);
+		rval = b.importBed(signalFile,extension, 0);
 	}else if (strcmp(filetype,bowtie) == 0){
-		rval = importBowtie(signalFile,extension);
+		rval = b.importBowtie(signalFile,extension, 0);
 	}else if(strcmp(filetype,tagAlign) == 0){
-		rval = importTagAlign(signalFile,extension);
+		rval = b.importTagAlign(signalFile,extension, 0);
 	}else{
 		cout << "Unrecognized type of file " << filetype << ", must be either bowtie, bed, or tagAlign" << endl;
 		return 1;
 	}
 	
 	if(rval == 0){
-		cout << "\tLoaded " << signal_slist.size() << " reads" << endl;
+		cout << "\tLoaded " << b.signal_slist.size() << " reads" << endl;
 		cout << "\tSorting reads ...";
-		sort (signal_slist.begin(), signal_slist.end());
+		sort (b.signal_slist.begin(), b.signal_slist.end());
 		cout << "COMPLETE" << endl;
 	}else{
 		cout << "Stopping basealigncounts" << endl;
@@ -246,6 +238,7 @@ int bcanalysis::importRawSignal(const char * signalFile,int extension,const char
 	return 0;
 }
 
+/*
 int bcanalysis::importBowtie(const char * signalFile,int extension){
 	
 	cout << "\nLoading bowtie formatted reads" << endl;
@@ -278,7 +271,7 @@ int bcanalysis::importBowtie(const char * signalFile,int extension){
 			unsigned short int chromInt = getHashValue(cChrom);
 //			bwRead sig(chromInt,pos,sval);
 			bwRead sig(chromInt,pos);
-			signal_slist.push_back(sig);
+			b.signal_slist.push_back(sig);
 		}else{
 			num_skip++;
 		}
@@ -321,7 +314,7 @@ int bcanalysis::importTagAlign(const char * signalFile,int extension){
 			unsigned short int chromInt = getHashValue(cChrom);
 //			bwRead sig(chromInt,pos,sval);
 			bwRead sig(chromInt,pos);
-			signal_slist.push_back(sig);
+			b.signal_slist.push_back(sig);
 		}else{
 			num_skip++;
 		}
@@ -365,7 +358,7 @@ int bcanalysis::importBed(const char * signalFile,int extension){
 			unsigned short int chromInt = getHashValue(cChrom);
 //			bwRead sig(chromInt,pos,sval);
 			bwRead sig(chromInt,pos);
-			signal_slist.push_back(sig);
+			b.signal_slist.push_back(sig);
 		}else{
 			num_skip++;
 		}
@@ -374,4 +367,4 @@ int bcanalysis::importBed(const char * signalFile,int extension){
 	cout << "\tSkipped " << num_skip << " reads" << endl;
 	return 0;
 }
-
+*/

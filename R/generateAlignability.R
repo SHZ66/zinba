@@ -2,7 +2,7 @@ process=function(maptargz,mapdir, chr, outdir, twoBitFile, athresh, extension,ma
 	untar(maptargz,compressed=T, file=chr[i], exdir=getParent(mapdir))
 	maplist2=paste(maplist,"_", i, sep="")
 	write.table(getAbsolutePath(chr[i]), maplist2, quote = F, row.names = F, col.names = F)
-	b=.C("binAlignAdjust", as.character(maplist2), as.character(outdir),as.character( twoBitFile) , as.integer(athresh), as.integer(extension),package="zinba")
+	b=.C("binAlignAdjust", as.character(maplist2), as.character(outdir),as.character( twoBitFile) , as.integer(athresh), as.integer(extension/2),package="zinba")
 	unlink(maplist2)
 	unlink(getAbsolutePath(chr[i]))
 	adjmapchri=paste(outdir,gsub("b.out",".bwig",basename(chr[i])), sep="")
@@ -63,7 +63,7 @@ generateAlignability=function(mapdir, outdir="", athresh=1, extension=0,
 			write.table(dir(mapdir, full.names=T, pattern = "\\.out"), maplist, quote = F, row.names = F, 				col.names = F)
 			cat("Creating adjusted mappability files\n")
 			b=.C("binAlignAdjust", as.character(maplist), as.character(outdir),as.character
-			( twoBitFile) , as.integer(athresh), as.integer(extension),package="zinba")
+			( twoBitFile) , as.integer(athresh), as.integer(extension/2),package="zinba")
 			adjmapchr=paste(outdir,dir(outdir, pattern = "\\.bwig"), sep="")
 			cat("Compressing adjusted mappability files\n")
 			for(i in 1:length(adjmapchr)){
