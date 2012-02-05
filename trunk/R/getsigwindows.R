@@ -50,7 +50,7 @@ getsigwindows=function(file,formula,formulaE,formulaZ,winout,
 	printflag = 0
 	if(method=='pscl'){
 	#not actively maintained
-		suppressPackageStartupMessages(library(qvalue))
+		suppressPackageStartupMessages(require(qvalue))
 		files = unlist(strsplit(file,";"))
 			for(i in 1:length(files)){
 				data=read.table(files[i], header=TRUE)
