@@ -67,7 +67,7 @@ int import::importBowtie(const char * signalFile,int extension,int dataType){
 	char *delim = "\t";
 	char *ptr= NULL;  
   char str_buf[MAX_LEN];
-	int num_skip = -1;
+	int num_skip = 0;
   int formatFlag = 0 ;
 	int m=0; 
 	int i;
@@ -170,7 +170,7 @@ int import::importTagAlign(const char * signalFile,int extension,int dataType){
 	char *delim = "\t";
 	char *ptr= NULL;  
   char str_buf[MAX_LEN];
-	int num_skip = -1;
+	int num_skip = 0;
   int formatFlag = 0 ;
 	int m=0; 
 	int i;
@@ -267,7 +267,7 @@ int import::importBed(const char * signalFile,int extension,int dataType){
 	char *delim = "\t";
 	char *ptr= NULL;  
   char str_buf[MAX_LEN];
-	int num_skip = -1;
+	int num_skip = 0;
   int formatFlag = 0 ;
 	int m=0; 
 	int i;
@@ -363,7 +363,7 @@ int import::importCustomBed(const char * signalFile,int extension){
 	char name[128];int bscore;
 	//int extend = (int)(extension/2);
 	int rval;
-	int num_skip = -1;
+	int num_skip = 0;
 	int score=0;
 	while(!feof(fh)){
 		rval = fscanf(fh,"%s%lu%lu%d",cChrom,&start,&stop,&score);
