@@ -245,9 +245,11 @@ getsigwindows=function(file,formula,formulaE,formulaZ,winout,
 				}
 	
 				if(prop1<.5){
-					print(paste("The estimated proportion of enrichment for  ", 
-					files[fnum], 
-					" has exceeded 0.5, suggesting difficulty in estimating enrichment.  Switching to more conservative model"))
+					if(modelselect==F){
+						print(paste("The estimated proportion of enrichment for  ", 
+							files[fnum], 
+							" has exceeded 0.5, suggesting difficulty in estimating enrichment.  Switching to more conservative model"))
+					}
 					break
 				}
 				#updated values for parameters of component means
