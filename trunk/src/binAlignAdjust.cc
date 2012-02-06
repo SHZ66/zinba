@@ -27,7 +27,7 @@ void binAlignAdjust(char **Rfilelist, char **Routdir,char **Rtwobitfile,int *RaT
 	int ret = newProcess.adjustCoords(filelist,outDir,twoBit,aThresh,adjustSize);
 	if(ret != 0)
 		error("\n---------------- ALIGN ADJUST EXITING WITH ERRORS ----------------\n");
-	else
-		Rprintf("\n---------------- ALIGN ADJUST COMPLETED SUCCESSFULLY ----------------\n");
+	//else
+		//Rprintf("\n---------------- ALIGN ADJUST COMPLETED SUCCESSFULLY ----------------\n");
 }
 }

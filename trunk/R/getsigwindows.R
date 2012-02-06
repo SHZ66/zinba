@@ -30,7 +30,7 @@ loglikfun=function(parms){
 
 getsigwindows=function(file,formula,formulaE,formulaZ,winout,
 	threshold=.01,peakconfidence=.8, printFullOut=0,tol=10^-5,
-	method='mixture',initmethod="count", diff=0,modelselect=FALSE, trace=0, 
+	method="mixture",initmethod="count", diff=0,modelselect=FALSE, trace=0, 
 	FDR=FALSE)
 {
 

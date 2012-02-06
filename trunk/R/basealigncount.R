@@ -1,4 +1,5 @@
 basealigncount=function(inputfile,outputfile,twoBitFile,extension=NULL,filetype="bowtie", binary=0){
+		library(R.utils)
     if(!file.exists(inputfile)){
     	stop(paste("Input file not found,",inputfile,sep=" "))
     }else{
