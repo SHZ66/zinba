@@ -162,7 +162,7 @@ int import::importTagAlign(const char * signalFile,int extension,int dataType){
 	
 	char cChrom[128];
 	unsigned long int pos;
-	char strand[1];
+	char strand[8];
 	//char minus[] = "-";
 	unsigned long int start;unsigned long int stop;
 	char seq[128];int score;

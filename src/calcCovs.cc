@@ -114,12 +114,13 @@ int calcCovs::processSignals(int zWinSize, int zOffsetSize, int cWinSize, int cO
 			char * alignFile = new char[alignFileS.size() + 1];
 			strcpy(alignFile, alignFileS.c_str());
 			cout << "\tGetting alignability info from:\n\t\t" << alignFile << endl;
-
+			int intmapchr;
 			ifstream mfile (alignFile,ios::in|ios::binary);
 			if(mfile.is_open()){
 				unsigned long int pos = 1;							
+				
 				while(!mfile.eof()){
-					mfile.read(mapChar,1);
+					mfile.read((char *)&intmapchr,1);
 					unsigned char mchr = mapChar[0];
 					alignability[pos] = mchr;
 					pos++;

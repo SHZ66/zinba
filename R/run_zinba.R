@@ -3,7 +3,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 		winSize=500,offset=0,cnvWinSize=100000,cnvOffset=0,
 		basecountfile=NULL,threshold=0.01,peakconfidence=.8,tol=10^-5,
 		numProc=1,buildwin=1, winGap=0,pWinSize=200,pquant=1,refinepeaks=1,
-		printFullOut=0,method='mixture',initmethod='count',diff=0,
+		printFullOut=0,method="mixture",initmethod="count",diff=0,
 		filetype="bowtie",extension, cleanup=FALSE, selectmodel=FALSE, 
 		selectchr=NULL, selecttype="dirty", selectcovs=NULL, FDR=FALSE, 
 		interaction=TRUE
@@ -201,7 +201,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 				getsigwindows(file=params[i],formula=formula,formulaE=formulaE,
 					formulaZ=formulaZ,threshold=threshold,winout=outfile_subpath,
 					peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,
-					initmethod=initmethod, FDR=FDR,
+					initmethod=initmethod, FDR=FDR
 				)
 	    }
 	    write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)

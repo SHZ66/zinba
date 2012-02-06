@@ -17,7 +17,7 @@ generateAlignability=function(mapdir, outdir="", athresh=1, extension=0,
 
 	if(file.exists(outdir)){
 		outdir=paste(getAbsolutePath(outdir),"/",sep="")
-		cat("Overwriting existing directory at", outdir,"\n")
+		cat("\n\nOverwriting existing directory at", outdir,"\n")
 		unlink(outdir, recursive=T) 
 		suppressWarnings(dir.create(outdir))
 	}else{
@@ -32,6 +32,7 @@ generateAlignability=function(mapdir, outdir="", athresh=1, extension=0,
 		twoBitFile=getAbsolutePath(twoBitFile)
 	} 
 	
+  cat("\nStarting generateAlignability\n")
 	if(binary==0){
 		if(!file.exists(mapdir))
 			{stop("Specified directory 'mapdir' doesnt exist or is not correct")
@@ -75,19 +76,21 @@ generateAlignability=function(mapdir, outdir="", athresh=1, extension=0,
 			suppressPackageStartupMessages(require(foreach)) 
 			registerDoMC(numProc)
 			getDoParWorkers()
-			if(file.exists(mapdir)) cat("Overwriting existing mappability directory",mapdir,"\n")
+			if(file.exists(mapdir)) cat("\n\nOverwriting existing mappability directory",mapdir,"\n")
 			unlink(mapdir, recursive=T)
 			dir.create(mapdir)
+			cat("Starting processing\n")
 			mapfiles <- foreach(i=1:length(chr),.combine='rbind',.inorder=FALSE,.errorhandling="remove" ) %dopar%{
 				process(maptargz,mapdir, chr, outdir, twoBitFile, athresh, extension,maplist, i)
 			}
-			cat("Finished Processing and compressing files files\n")
+			cat("\nFinished Processing and compressing files\n")
 			print(dir(outdir))
 		}
 
 		if(cleanup==T){ 
 			unlink(mapdir, recursive=T)
 		}
+	cat("\n---------BINARY  ALIGN ADJUST COMPLETED SUCCESSFULLY ----------------")
 	}
 
 }

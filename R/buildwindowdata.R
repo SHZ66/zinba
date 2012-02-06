@@ -60,9 +60,9 @@ buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvW
 		}
 
 		#check for unzipping issues
-		if(length(bwigfiles) != length(allfiles)){
+		if(length(bwigfiles) != length(bwiggzfiles)){
 			cat("Not all files could be unzipped, listed below:\n")
-			print(setdiff(allfiles, names(bwigfiles)))
+			#print(setdiff(allfiles, names(bwigfiles)))
 			stop("Check to see whether you are used all of your disk space")
 		}
 		
@@ -86,7 +86,7 @@ buildwindowdata=function(seq,input="none",align,twoBit,winSize=500,offset=0,cnvW
 	#remove all bwig files if they exist, and no wigfiles exist
 	if( length(bwigfiles) > 0 & length(wigfiles) == 0 ){
 		#If there are any bwig files and no wig files, then all bwig files should be gzipped back
-		cat("Build window complete, removing uncompressed binary alignability files in", align, "\n")
+		cat("Removing uncompressed binary alignability files in", align, "\n\n")
 		mc=mclapply(names(bwigfiles)[bwigfiles == 0], unlink, mc.cores = numProc)
 		bwiggzfiles = file.access(dir(align,pattern="\\.bwig.gz$",full.names=T))
 		
