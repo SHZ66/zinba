@@ -27,7 +27,7 @@ extern "C"{
 #include <ctime>
 #include <R.h>
 #include "import.h"
-
+#include "import.h"
 using namespace std;
 
 /*
@@ -45,7 +45,7 @@ bcanalysis::~bcanalysis(){
 */
 
 int bcanalysis::processSignals(const char* outputFile,int extend, int binary){
-	import b;
+	//import b;
 	unsigned short int currchr;
 	int i;
 	const char * chromReport;
@@ -92,7 +92,7 @@ int bcanalysis::processSignals(const char* outputFile,int extend, int binary){
 
 //int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,unsigned short int pFLAG,unsigned short int basepair[]){
 int bcanalysis::outputData(const char * outputFile, unsigned short int currChr,unsigned short int pFLAG,unsigned int basepair[], int binary){
-	import b;
+	//import b;
 	if(binary ==0){
 		FILE * fh;
 		const char * chrom = b.getKey(currChr);
@@ -158,7 +158,7 @@ const char * bcanalysis::b.getKeyunsigned short int chrom){
 }
 */
 int bcanalysis::importRawSignal(const char * signalFile,int extension,const char * filetype,const char * twoBitFile){
-	import b;
+	//import b;
 	if(b.tbSizeFlag == 0){
 		FILE * tempTB;
 		time_t rtime;

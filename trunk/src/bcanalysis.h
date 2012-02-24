@@ -19,7 +19,7 @@ class bcanalysis{
 	
 		//bcanalysis(); //Implemented
 		//~bcanalysis(); //Implemented
-		
+		import b;
 		int importRawSignal(const char *,int,const char *,const char *);//Implemented
 		int processSignals(const char *,int, int);//Implemented
 //		int outputData(const char *, unsigned short int,unsigned short int,unsigned short int[]);//Implemented
