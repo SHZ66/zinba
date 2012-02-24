@@ -1047,7 +1047,7 @@ int calcCovs::processCustomSignal(int zWinSize, int zOffsetSize,const char * two
 	const char* noneVal = "none";
 	
 	while(!b.signal_slist.empty()){
-		import b;
+		//import b;
 		i = 0;
 		currchr = b.signal_slist[0].chrom;
 		const char * chromReport = b.getKey(currchr);
