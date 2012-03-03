@@ -14,11 +14,13 @@ basealigncount=function(inputfile,outputfile,twoBitFile,extension=NULL,filetype=
     if(is.null(extension)){
         stop(paste("Need to specify an extension length",,sep=" "))
     }
-		if(!file.exists(getParent(outputfile))){
-			stop("Directory where output is being sent doesn't exist")
-		}else{
-			outputfile=getAbsolutePath(outputfile)
-		}
+		#if(is.null(getParent(outputfile))){
+			#
+		#}else if(!file.exists(getParent(outputfile))){
+		#	stop("Directory where output is being sent doesn't exist")
+		#}else{
+		#	outputfile=getAbsolutePath(outputfile)
+		#}
 
 
     cReturn <- .C("baseAlignCounts",as.character(inputfile), as.character(outputfile), as.character(twoBitFile),as.integer(extension),as.character(filetype),as.integer(binary), PACKAGE="zinba")
