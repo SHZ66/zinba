@@ -59,7 +59,7 @@ int import::importBowtie(const char * signalFile,int extension,int dataType){
 		
 	char cChrom[128];
 	unsigned long int pos;
-	char strand[1];
+	char strand[8];
 	//char minus[] = "-";
 	char line[512];char seq[128];
 	char name[128];char sscore[128];int ival;	
@@ -189,9 +189,9 @@ int import::importTagAlign(const char * signalFile,int extension,int dataType){
      }else if(i==3){
        stop = atol(ptr);
      }else if(i==4){
-       strcpy(seq, ptr);
+      //strcpy(seq, ptr);
      }else if(i==5){
-			score = atoi(ptr);
+			//score = atoi(ptr);
      }else if(i==6){
 			strcpy(strand, ptr);
      }
@@ -261,7 +261,7 @@ int import::importBed(const char * signalFile,int extension,int dataType){
 	}
 	char cChrom[128];
 	unsigned long int pos;
-	char strand[1];
+	char strand[8];
 	//char minus[] = "-";
 	unsigned long int start;unsigned long int stop;
 	char name[128];int bscore;
@@ -273,7 +273,6 @@ int import::importBed(const char * signalFile,int extension,int dataType){
   int formatFlag = 0 ;
 	int m=0; 
 	int i;
-	
 	
  	while(fgets(str_buf, MAX_LEN, fh) != NULL){
    i = 0;
@@ -287,9 +286,9 @@ int import::importBed(const char * signalFile,int extension,int dataType){
      }else if(i==3){
        stop = atol(ptr);
      }else if(i==4){
-       strcpy(name, ptr);
+       //strcpy(name, ptr);
      }else if(i==5){
-			bscore = atoi(ptr);
+			//bscore = atoi(ptr);
      }else if(i==6){
 			strcpy(strand, ptr);
      }

@@ -14,7 +14,7 @@ process=function(maptargz,mapdir, chr, outdir, twoBitFile, athresh, extension,ma
 
 generateAlignability=function(mapdir, outdir="", athresh=1, extension=0, 
 	twoBitFile, binary=0, cleanup=T,savespace=T,numProc=1,maptargz=""){
-
+	library(R.utils)
 	if(file.exists(outdir)){
 		outdir=paste(getAbsolutePath(outdir),"/",sep="")
 		cat("\n\nOverwriting existing directory at", outdir,"\n")
