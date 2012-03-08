@@ -5,7 +5,7 @@ if(!is.null(file)){
 	if(!file.exists(file)) cat("covselect.R: file at path", file, "does not exist")
 }
 
-if(!is.null(covs)){
+if(is.null(covs)){
 	cat("covselect.R: covariates must be specified for model selection, see zinba website for details")
 }
 
