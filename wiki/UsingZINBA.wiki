@@ -11,7 +11,7 @@ Before using ZINBA, you need two files before you can start your analysis, given
 The build of the genome you are using in .2bit format, downloadable below. Also downloadable from the from the <a href=" http://hgdownload.cse.ucsc.edu/downloads.html">UCSC genome browser</a>. NOTE: YOUR DOWNLOADED BUILD MUST BE THE SAME BUILD THAT YOUR READS WERE MAPPED TO.
 ||*Human*||*Mouse*||*Drosophila*||*C. Elegans*||*Yeast*||
 ||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/hg18/bigZips/hg18.2bit" >hg18</a>||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/mm8/bigZips/mm8.2bit" >mm8</a>||<a href="http://www.bios.unc.edu/~nrashid/dm3.2bit" >dm3</a>|| <a href="http://www.bios.unc.edu/~nrashid/ce6.2bit">ce6</a> || <a href="http://hgdownload.cse.ucsc.edu/goldenPath/sacCer2/bigZips/sacCer2.2bit" >sacCer2</a>||
-||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/hg18/bigZips/hg19.2bit" >hg19</a>||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/mm9/bigZips/mm9.2bit" >mm9</a>|| ||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/ce10/bigZips/ce10.2bit">ce10</a>|| <a href="http://hgdownload.cse.ucsc.edu/goldenPath/sacCer3/bigZips/sacCer3.2bit" >sacCer3</a>||
+||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit" >hg19</a>||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/mm9/bigZips/mm9.2bit" >mm9</a>|| ||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/ce10/bigZips/ce10.2bit">ce10</a>|| <a href="http://hgdownload.cse.ucsc.edu/goldenPath/sacCer3/bigZips/sacCer3.2bit" >sacCer3</a>||
 
 
 ==2. Mappability File==
