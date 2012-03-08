@@ -79,12 +79,11 @@ int import::importBowtie(const char * signalFile,int extension,int dataType){
    do {
      i++;
      if(i==1){
-       strcpy(cChrom, ptr);
        strcpy(name, ptr);
      }else if(i==2){
        strcpy(strand, ptr);
      }else if(i==3){
-
+       strcpy(cChrom, ptr);
      }else if(i==4){
        pos = atol(ptr);
      }else if(i==5){
