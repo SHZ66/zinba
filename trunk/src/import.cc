@@ -79,7 +79,7 @@ int import::importBowtie(const char * signalFile,int extension,int dataType){
    do {
      i++;
      if(i==1){
-       strcpy(name, ptr);
+       //strcpy(name, ptr);
      }else if(i==2){
        strcpy(strand, ptr);
      }else if(i==3){
@@ -89,9 +89,9 @@ int import::importBowtie(const char * signalFile,int extension,int dataType){
      }else if(i==5){
        strcpy(seq, ptr);
      }else if(i==6){
-			strcpy(sscore, ptr);
+			//strcpy(sscore, ptr);
      }else if(i==7){
-			ival = atoi(ptr);
+			//ival = atoi(ptr);
      }
 		//anything greater is ignored 
    } while ((ptr = strtok(NULL, delim)) != NULL);
