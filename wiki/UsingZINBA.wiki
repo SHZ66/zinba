@@ -55,7 +55,7 @@ basealigncount(
 Three input formats are allowed for ZINBA:
 
 *BED*: The first [http://genome.ucsc.edu/FAQ/FAQformat.html#format1 6 fields] of the BED format
-  * Chromosome
+  * Chromosome (has to match naming in genome build!)
   * Start
   * Stop
   * Name (can be any string/character)
@@ -63,14 +63,16 @@ Three input formats are allowed for ZINBA:
   * Strand (can be set to + if unknown)
 
 *tagAlign*: Similar to the above BED format, except "Seq" replaces "Name". This format is sometimes found on the UCSC genome browser.
-  * Chromosome
+  * Chromosome (has to match naming in genome build!)
   * Start
   * Stop
   * Seq (sequence of mapped read)
   * Score (can be set to 0)
   * Strand (can be set to + if unknown)
 
-*bowtie*: The [http://bowtie-bio.sourceforge.net/manual.shtml#default-bowtie-output default output] from the Bowtie mapping software (.hits file).  *ZINBA ignores the last column* (comma-separated list of mismatch descriptors if mismatches are detected), so in total one should have 7 columns.  Also, *if there are spaces in the first column of your bowtie output file* (corresponding to read name) this will lead to importation errors in ZINBA version <= 2.01
+*bowtie*: The [http://bowtie-bio.sourceforge.net/manual.shtml#default-bowtie-output default output] from the Bowtie mapping software (.hits file).  *ZINBA ignores the last column* (comma-separated list of mismatch descriptors if mismatches are detected), so in total one should have 7 columns.  Also, *if there are spaces in the first column of your bowtie output file* (corresponding to read name) this will lead to importation errors in ZINBA version <= 2.01 .  
+
+In general, the chromosome name started with the prefix *chr* and the names must match how they are used in the genome build file, including case.  
 
 
 ==ZINBA pipeline function==
