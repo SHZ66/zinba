@@ -10,7 +10,7 @@ Before using ZINBA, you need two files before you can start your analysis, given
 ==1. Genome Build==
 The build of the genome you are using in .2bit format, downloadable below. Also downloadable from the from the <a href=" http://hgdownload.cse.ucsc.edu/downloads.html">UCSC genome browser</a>. NOTE: YOUR DOWNLOADED BUILD MUST BE THE SAME BUILD THAT YOUR READS WERE MAPPED TO.
 ||*Human*||*Mouse*||*Drosophila*||*C. Elegans*||*Yeast*||
-||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/hg18/bigZips/hg18.2bit" >hg18</a>||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/mm8/bigZips/mm8.2bit" >mm8</a>||<a href="http://www.bios.unc.edu/~nrashid/dm3.2bit" >dm3</a>|| <a href="http://www.bios.unc.edu/~nrashid/ce6.2bit">ce6</a> || <a href="http://hgdownload.cse.ucsc.edu/goldenPath/sacCer2/bigZips/sacCer2.2bit" >sacCer2</a>||
+||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/hg18/bigZips/hg18.2bit" >hg18</a>||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/mm8/bigZips/mm8.2bit" >mm8</a>||<a href="http://www.bios.unc.edu/~nur2/dm3.2bit" >dm3</a>|| <a href="http://www.bios.unc.edu/~nur2/ce6.2bit">ce6</a> || <a href="http://hgdownload.cse.ucsc.edu/goldenPath/sacCer2/bigZips/sacCer2.2bit" >sacCer2</a>||
 ||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit" >hg19</a>||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/mm9/bigZips/mm9.2bit" >mm9</a>|| ||<a href="http://hgdownload.cse.ucsc.edu/goldenPath/ce10/bigZips/ce10.2bit">ce10</a>|| <a href="http://hgdownload.cse.ucsc.edu/goldenPath/sacCer3/bigZips/sacCer3.2bit" >sacCer3</a>||
 
 
@@ -18,14 +18,14 @@ The build of the genome you are using in .2bit format, downloadable below. Also 
 A mappability folder corresponding to your <u>sequencing read length</u> and <u>genome</u> (links to compressed files are below). These files were generated using code from <a href="www.gersteinlab.org/proj/PeakSeq">Peakseq </a>, developed by the Gerstein Lab. This file is used to derive final mappability score in ZINBA.
 
 ||*Human*||*Mouse*||*Drosophila*||*C. Elegans*||*Yeast*||
-||<a href="http://www.bios.unc.edu/~nrashid/map36.tgz" >hg18 36bp</a><br><a href="http://www.bios.unc.edu/~nrashid/map50.tgz" >hg18 50bp</a> || ||<a href="http://www.bios.unc.edu/~nrashid/map36_dm3.tgz" >dm3 36bp</a><br><a href="http://www.unc.edu/~nur2/map50_dm3.tgz" >dm3 50bp</a>||<a href="http://www.bios.unc.edu/~nrashid/map36_ce4.tgz" >ce4 36bp</a><br><a href="http://www.bios.unc.edu/~nrashid/map36_ce6.tgz" >ce6 36bp</a> ||<a href="http://zinba.googlecode.com/files/map36_sacCer2.tgz" >sacCer2 36bp</a><br><a href="http://zinba.googlecode.com/files/map50_sacCer2.tgz" >sacCer2 50bp</a> ||
-||<a href="http://www.bios.unc.edu/~nrashid/map36_hg19.tgz" >hg19 36bp</a><br><a href="http://www.bios.unc.edu/~nrashid/map50_hg19.tgz" >hg19 50bp</a> ||<a href="http://www.bios.unc.edu/~nrashid/map36_mm9.tgz" >mm9 36bp</a><br><a href="http://www.bios.unc.edu/~nrashid/map50_mm9.tgz" >mm9 50bp</a> || ||  <a href="http://zinba.googlecode.com/files/map36_ce10.tgz" >ce10 36bp</a><br><a href="http://zinba.googlecode.com/files/map50_ce10.tgz" >ce10 50bp</a> || <a href="http://zinba.googlecode.com/files/map36_sacCer3.tgz" >sacCer3 36bp</a><br><a href="http://zinba.googlecode.com/files/map50_sacCer3.tgz" >sacCer3 50bp</a>||
+||<a href="http://www.bios.unc.edu/~nur2/map36.tgz" >hg18 36bp</a><br><a href="http://www.bios.unc.edu/~nur2/map50.tgz" >hg18 50bp</a> || ||<a href="http://www.bios.unc.edu/~nur2/map36_dm3.tgz" >dm3 36bp</a><br><a href="http://www.unc.edu/~nur2/map50_dm3.tgz" >dm3 50bp</a>||<a href="http://www.bios.unc.edu/~nur2/map36_ce4.tgz" >ce4 36bp</a><br><a href="http://www.bios.unc.edu/~nur2/map36_ce6.tgz" >ce6 36bp</a> ||<a href="http://zinba.googlecode.com/files/map36_sacCer2.tgz" >sacCer2 36bp</a><br><a href="http://zinba.googlecode.com/files/map50_sacCer2.tgz" >sacCer2 50bp</a> ||
+||<a href="http://www.bios.unc.edu/~nur2/map36_hg19.tgz" >hg19 36bp</a><br><a href="http://www.bios.unc.edu/~nur2/map50_hg19.tgz" >hg19 50bp</a> ||<a href="http://www.bios.unc.edu/~nur2/map36_mm9.tgz" >mm9 36bp</a><br><a href="http://www.bios.unc.edu/~nur2/map50_mm9.tgz" >mm9 50bp</a> || ||  <a href="http://zinba.googlecode.com/files/map36_ce10.tgz" >ce10 36bp</a><br><a href="http://zinba.googlecode.com/files/map50_ce10.tgz" >ce10 50bp</a> || <a href="http://zinba.googlecode.com/files/map36_sacCer3.tgz" >sacCer3 36bp</a><br><a href="http://zinba.googlecode.com/files/map50_sacCer3.tgz" >sacCer3 50bp</a>||
 
 
 =Preparing your files=
 # Unpack your downloaded mappability folder by changing to the directory it is located in and running the command below, where ## is the specific name/number corresponding to the file
 {{{
-wget http://www.bios.unc.edu/~nrashid/map##.tgz
+wget http://www.bios.unc.edu/~nur2/map##.tgz
 tar -xzvf map##.tar.gz
 }}}
 # Enter R and feed the unpacked mappability folder to the generateAlignability() function to generate your alignability directory. You do not need to compute this again unless you are running samples mapped with different alignability thresholds (athresh) or whose sequencing library has a different average fragment length (extension)
@@ -114,7 +114,7 @@ FAIRE data example: sequencing reads are 36 bp in length, and correspond to a fr
 #open a terminal and download the necessary files and test dataset.
 #on the mac, use curl -O instead of wget
 wget http://hgdownload.cse.ucsc.edu/goldenPath/hg18/bigZips/hg18.2bit
-wget http://www.bios.unc.edu/~nrashid/map36.tgz
+wget http://www.bios.unc.edu/~nur2/map36.tgz
 wget http://www.unc.edu/~nur2/zinbaweb/test_data.tgz
 
 #unpack your mappability folder and test datasets
@@ -174,7 +174,7 @@ ChIP-seq data example: sequencing reads are 36 bp in length, and correspond to a
 #open a terminal and download the necessary files and test dataset.
 #on the mac, use curl -O instead of wget
 wget http://hgdownload.cse.ucsc.edu/goldenPath/hg18/bigZips/hg18.2bit
-wget http://www.bios.unc.edu/~nrashid/map36.tgz
+wget http://www.bios.unc.edu/~nur2/map36.tgz
 wget http://www.unc.edu/~nur2/zinbaweb/test_data.tgz
 
 #unpack your mappability folder and test datasets
