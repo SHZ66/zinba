@@ -92,7 +92,7 @@ getsigwindows_quickrun=function(file,formulaE,formulaZ,winout,
       write.table(data,winfile,quote=F,sep="\t",row.names=F)
       fnum=fnum+1
       }
-    }
+    
   
   time.end <- Sys.time()
   cat("\n")
