@@ -1319,13 +1319,13 @@ int calcCovs::processSignalsfast(int zWinSize, int zOffsetSize, int cWinSize, in
 					}
 				}
 				double cScore = 0.0;
-				/*if(alignCount > 0)
+				if(alignCount > 0)
 					cScore = (double) cnvCount/alignCount;
 				double percGap = (double) nCount/cWinSize;
 				cnvWins cnv(cWinStart,cWinStop,cScore,0,0,percGap);
 				cnv_wins.push_back(cnv);
 				cWinStart += cWinSize;
-				cWinStop += cWinSize; */
+				cWinStop += cWinSize; 
 			}
 		}
 			
