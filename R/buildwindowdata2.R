@@ -34,6 +34,9 @@ buildwindowdata2=function(
 		stop(paste("buildwindowdata: specified output directory to place built datafiles doesnt exist"))
 		if(!isDirectory(outdir)) stop("specified output directory path is not a directory")
 	}
+        if(substr(x=outdir, nchar(outdir), nchar(outdir)) !="/"){
+		outdir = paste(outdir, "/", sep="")
+        }
 	
   cReturn <- .C(
     "buildWindowsfast",
