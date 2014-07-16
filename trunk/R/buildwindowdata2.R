@@ -1,4 +1,4 @@
-buildwindowdata=function(
+buildwindowdata2=function(
   seq,
   input="none",
   twoBit,
