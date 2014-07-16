@@ -7,6 +7,8 @@ buildwindowdata2=function(
   filelist,
   filetype="bowtie",
   extension, 
+  cnvWinSize=100000,
+  cnvOffset=0,
   outdir="default"
 ){
 
