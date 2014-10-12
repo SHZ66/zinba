@@ -28,9 +28,20 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 	print(parameters)
 
   rmc <- require(doParallel)
+  rdmc <- require(doMC)
+  rfor <- require(foreach)
   if(rmc == FALSE){
-    stop(paste("parallel package not available, required for ZINBA"))
+    stop(paste("doParallel package not available, required for ZINBA"))
   }
+  
+	if(rdmc == FALSE){
+	  stop(paste("doMC package not available, required for ZINBA"))
+	}
+  
+	if(rfor == FALSE){
+	  stop(paste("foreach package not available, required for ZINBA"))
+	}
+  
 	library(R.utils)
 	
 	time.start <- Sys.time()
