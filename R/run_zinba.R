@@ -27,11 +27,9 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 	print("parameters in effect:")
 	print(parameters)
 
-  rmc <- require(multicore)
-  rdmc <- require(doMC)
-  rfor <- require(foreach)
+  rmc <- require(doParallel)
   if(rmc == FALSE){
-    stop(paste("multicore available"))
+    stop(paste("parallel package not available, required for ZINBA"))
   }
 	library(R.utils)
 	
@@ -90,7 +88,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 	}
 
 	if(refinepeaks==1 && is.null(basecountfile)){
-		stop(paste("Basecount file must be specified, currently",basecountfile,sep=" "))
+		stop(paste("Basecount file must be specified if refinepeaks = 1, currently",basecountfile,sep=" "))
 	}else if (is.null(filelist)){
 		stop(paste("Need list of files ",filelist,sep=" "))
 	}else if (!file.exists(filelist)){

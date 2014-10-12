@@ -35,7 +35,6 @@ getsigwindows=function(file,formula,formulaE,formulaZ,winout,
 {
 
 	time.start <- Sys.time()
-	suppressPackageStartupMessages(library(quantreg))
 	library(MASS)
 	options(scipen=999)
 
@@ -50,6 +49,7 @@ getsigwindows=function(file,formula,formulaE,formulaZ,winout,
 	printflag = 0
 	if(method=='pscl'){
 	#not actively maintained
+	  suppressPackageStartupMessages(library(quantreg))
 		suppressPackageStartupMessages(require(qvalue))
 		files = unlist(strsplit(file,";"))
 			for(i in 1:length(files)){
@@ -133,6 +133,7 @@ getsigwindows=function(file,formula,formulaE,formulaZ,winout,
 	
 			#INITIALIZATION OF THE MIXTURE MODEL
 			if(initmethod=='quantile'){
+			  require(quantreg)
 			 	if(fnum == 1){
 					startprop=startenrichment(c(.15, .001), data, formula, formulaE, formulaZ, initmethod)
 				}
@@ -156,6 +157,7 @@ getsigwindows=function(file,formula,formulaE,formulaZ,winout,
 				odY = order(Y)
 				priorCOUNTweight[odY[1:n1]]=10^-10
 			}else if(initmethod=='pscl'){
+			  require(quantreg)
 				mf2 <- model.frame(formula=formula, data=data)
 				X2 <- model.matrix(attr(mf2, "terms"), data=mf2)
 				if(fnum == 1){
