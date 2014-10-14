@@ -220,12 +220,11 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 		  #if parallelization fails due to lack of packages, resort to non-parallelized version
 		  cat(paste("--------GETTING ENRICHED WINDOWS--------",as.character(Sys.time()),"\n\n")) 	
 	    for(i in 1:length(params)){
-	       wfile <- 
-					getsigwindows(file=params[i],formula=formula,formulaE=formulaE,
-						formulaZ=formulaZ,threshold=threshold,winout=outfile_subpath,
-						peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,
-						initmethod=initmethod, FDR=FDR
-					)                    
+	       wfile <- getsigwindows2(file=params[i],formula=formula,formulaE=formulaE,
+	                               formulaZ=formulaZ,threshold=threshold,winout=outfile_subpath,
+	                               peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,
+	                               initmethod=initmethod, FDR=FDR
+	              ) 
 				winfiles <- rbind(wfile)
 	    }
 			write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)
