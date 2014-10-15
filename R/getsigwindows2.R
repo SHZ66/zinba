@@ -39,10 +39,10 @@ getsigwindows2=function(file,formula,formulaE,formulaZ,winout,
       
       #initalization
       if(fnum == 1){ 
-        props = c(.999, .99, .95, .9, .8, .7)
+        props = c(.999, .99, .95, .9, .8)
         ll0  = rep(-Inf, length(props))
         for(k in 1:length(props)){
-          ll0[k] = fmr(y=Y, X=as.matrix(X[,-1]), prop1=props[k], XE=as.matrix(XE[,-1]),maxitEM=5, glmtype="nb", zeroinfl = T, XZ = as.matrix(XZ[,-1]), trace = trace, thresh = 0)$ll
+          ll0[k] = fmr(y=Y, X=as.matrix(X[,-1]), prop1=props[k], XE=as.matrix(XE[,-1]),maxitEM=5, glmtype="nb", zeroinfl = T, XZ = as.matrix(XZ[,-1]), trace = trace)$ll
           if(trace==1) cat("Initialization prop ", k, "\n")
         }
         prop = props[which.max(ll0)]
