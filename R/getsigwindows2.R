@@ -7,7 +7,11 @@ getsigwindows2=function(file,formula,formulaE,formulaZ,winout,
   time.start <- Sys.time()
   library(MASS)
   rhmmcov = require(hmmcov)
+  ru = require(R.utils)
+  
   if(rhmmcov == F) stop("hmmcov package is needed")
+  if(ru == F) stop("R.utils package is needed")
+  
   options(scipen=999)
   
   if(!inherits(formula, "formula"))  
@@ -25,7 +29,10 @@ getsigwindows2=function(file,formula,formulaE,formulaZ,winout,
     while(fnum <= length(files)){
       fail=0 #failure flag for GLM, reset to zero for each offset
       #print(files[fnum])
-      data=read.table(files[fnum], header=TRUE)
+      n =  countLines(files[fnum])
+      tab5rows <- read.table(files[fnum], header = TRUE, nrows = 5)
+      classes <- sapply(tab5rows, class)
+      data=read.table(files[fnum], header=TRUE, nrows =n, colClasses = classes)
       chrm = data$chromosome[1]
       q25=quantile(data$exp_count, 0) #not used, set to 0
       mf <- model.frame(formula=formula, data=data)
