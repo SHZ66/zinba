@@ -49,14 +49,14 @@ getsigwindows2=function(file,formula,formulaE,formulaZ,winout,
         props = c(.99, .95, .9, .8)
         ll0  = rep(-Inf, length(props))
         for(k in 1:length(props)){
-          ll0[k] = fmr(y=Y, X=as.matrix(X[,-1]), prop1=props[k], XE=as.matrix(XE[,-1]),maxitEM=3, glmtype="nb", zeroinfl = T, XZ = as.matrix(XZ[,-1]), trace = trace, thresh = 0.5, maxitIAL= 1)$ll
+          ll0[k] = fmr(y=Y, X=as.matrix(X[,-1]), prop1=props[k], XE=as.matrix(XE[,-1]),maxitEM=3, glmtype="nb", zeroinfl = T, XZ = as.matrix(XZ[,-1]), trace = trace, thresh = 0.9, maxitIAL= 100)$ll
           if(trace==1) cat("Initialization prop ", k, "\n")
         }
         prop = props[which.max(ll0)]
       }
       if(trace==1) cat("File ", files[fnum], "\n")
       
-      result = fmr(y=Y, X=as.matrix(X[,-1]), prop1=prop, XE=as.matrix(XE[,-1]),maxitEM=100, glmtype="nb", zeroinfl = T, XZ = as.matrix(XZ[,-1]), trace = trace, thresh = 0.9, maxitIAL=1)
+      result = fmr(y=Y, X=as.matrix(X[,-1]), prop1=prop, XE=as.matrix(XE[,-1]),maxitEM=100, glmtype="nb", zeroinfl = T, XZ = as.matrix(XZ[,-1]), trace = trace, thresh = 0.9, maxitIAL=100)
 
         probi2 = result$forwardbackward[,2]
         p=1-probi2
