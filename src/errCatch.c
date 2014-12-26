@@ -90,7 +90,8 @@ if (errCatch != NULL)
     if (errCatch->gotError)
 	{
 	ok = FALSE;
-	warn(errCatch->message->string);
+	//warn(errCatch->message->string);
+  warn("%s", errCatch->message->string);
 	}
     errCatchFree(pErrCatch);
     }
