@@ -945,7 +945,8 @@ if (errCatchStart(errCatch))
     page = htmlPageForwarded(url, cookies);
 errCatchEnd(errCatch);
 if (errCatch->gotError)
-    warn(errCatch->message->string);
+    //warn(errCatch->message->string);
+    warn("%s", errCatch->message->string);
 errCatchFree(&errCatch);
 return page;
 }
