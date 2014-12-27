@@ -210,7 +210,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 	    winfiles <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,
 				.errorhandling="remove") %dopar%
 			{
-				getsigwindows2(file=params[i],formula=formula,formulaE=formulaE,
+				zinba::getsigwindows2(file=params[i],formula=formula,formulaE=formulaE,
 					formulaZ=formulaZ,threshold=threshold,winout=outfile_subpath,
 					peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,
 					initmethod=initmethod, FDR=FDR,  model = model
@@ -225,7 +225,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 	       wfile <- getsigwindows2(file=params[i],formula=formula,formulaE=formulaE,
 	                               formulaZ=formulaZ,threshold=threshold,winout=outfile_subpath,
 	                               peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,
-	                               initmethod=initmethod, FDR=FDR
+	                               initmethod=initmethod, FDR=FDR, model = model
 	              ) 
 				winfiles <- rbind(wfile)
 	    }
