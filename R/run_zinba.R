@@ -6,7 +6,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 		printFullOut=0,method="mixture",initmethod="count",diff=0,
 		filetype="bowtie",extension, cleanup=FALSE, selectmodel=FALSE, 
 		selectchr=NULL, selecttype="dirty", selectcovs=NULL, FDR=FALSE, 
-		interaction=TRUE
+		interaction=TRUE, model = "FMR"
 		){
 
 	#since peakconfidence is now deprecated, set as 1-threshold	
@@ -202,16 +202,18 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 		#begin mixture regression (parallelized)
 	  if(rmc == TRUE && rdmc == TRUE && rfor == TRUE){
 			cat(paste("--------GETTING ENRICHED WINDOWS--------",as.character(Sys.time()),"\n\n")) 		
-	    registerDoMC(numProc)
-	  	mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
-	    getDoParWorkers()
+	    #registerDoMC(numProc)
+	  	#mcoptions <- list(preschedule = FALSE, set.seed = FALSE)
+	    #getDoParWorkers()
+			cl <- makeCluster(numProc)
+			registerDoParallel(cl)
 	    winfiles <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,
-				.errorhandling="remove",.options.multicore = mcoptions) %dopar%
+				.errorhandling="remove") %dopar%
 			{
 				getsigwindows2(file=params[i],formula=formula,formulaE=formulaE,
 					formulaZ=formulaZ,threshold=threshold,winout=outfile_subpath,
 					peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,
-					initmethod=initmethod, FDR=FDR
+					initmethod=initmethod, FDR=FDR,  model = model
 				)
 	    }
 	    write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)
