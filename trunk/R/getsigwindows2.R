@@ -21,16 +21,6 @@ getsigwindows2=function(file,formula,formulaE,formulaZ,winout,
   if(!inherits(formulaZ, "formula")) 
     stop("Check your zero-inflated component formula, not entered as a formula object")
   
-  if(model == "FMR"){
-    run = fmr
-  }else if(model == "HMM"){
-    run = hmm
-  }else if(model == "ARHMM"){
-    run = arhmm
-  }else{
-    stop(sprintf("Model must be either FMR, HMM, or ARHMM: %s given",model))
-  }
-  
   winfile=NULL
   printflag = 0
   files = unlist(strsplit(file,";"))
@@ -59,15 +49,32 @@ getsigwindows2=function(file,formula,formulaE,formulaZ,winout,
         props = c(.99, .95, .9, .8)
         ll0  = rep(-Inf, length(props))
         for(k in 1:length(props)){
-          ll0[k] = run(y=Y, X=as.matrix(X[,-1]), prop1=props[k], XE=as.matrix(XE[,-1]),maxitEM=2, glmtype="nb", zeroinfl = T, XZ = as.matrix(XZ[,-1]), trace = trace, thresh = 0.9, maxitIAL= 100)$ll
+          
+          if(model == "FMR"){
+            ll0[k] = fmr(y=Y, X=as.matrix(X[,-1]), prop1=props[k], XE=as.matrix(XE[,-1]),maxitEM=2, glmtype="nb", zeroinfl = T, XZ = as.matrix(XZ[,-1]), trace = trace, thresh = 0.9, maxitIAL= 100)$ll
+          }else if(model == "HMM"){
+            ll0[k] = hmm(y=Y, X=as.matrix(X[,-1]), prop1=props[k], XE=as.matrix(XE[,-1]),maxitEM=2, glmtype="nb", thresh = 0.05, maxitIAL= 100)$ll      
+          }else if(model == "ARHMM"){
+            ll0[k] = arhmm(y=Y, X=as.matrix(X[,-1]), prop1=props[k], XE=as.matrix(XE[,-1]),maxitEM=2, glmtype="nb", thresh = 0.05, maxitIAL= 100)$ll      
+          }else{
+            stop(sprintf("Model must be either FMR, HMM, or ARHMM: %s given",model))
+          }
+          
           if(trace==1) cat("Initialization prop ", k, "\n")
         }
         prop = props[which.max(ll0)]
       }
       if(trace==1) cat("File ", files[fnum], "\n")
       
-      result = run(y=Y, X=as.matrix(X[,-1]), prop1=prop, XE=as.matrix(XE[,-1]),maxitEM=100, glmtype="nb", zeroinfl = T, XZ = as.matrix(XZ[,-1]), trace = trace, thresh = 0.9, maxitIAL=100)
-
+      if(model == "FMR"){
+        result = fmr(y=Y, X=as.matrix(X[,-1]), prop1=prop, XE=as.matrix(XE[,-1]),maxitEM=100, glmtype="nb", zeroinfl = T, XZ = as.matrix(XZ[,-1]), trace = trace, thresh = 0.9, maxitIAL= 100)
+      }else if(model == "HMM"){
+        result = hmm(y=Y, X=as.matrix(X[,-1]), prop1=prop, XE=as.matrix(XE[,-1]),maxitEM=100, glmtype="nb", thresh = 0.05, maxitIAL= 100)     
+      }else if(model == "ARHMM"){
+        result = arhmm(y=Y, X=as.matrix(X[,-1]), prop1=prop, XE=as.matrix(XE[,-1]),maxitEM=100, glmtype="nb", thresh = 0.05, maxitIAL= 100)      
+      }else{
+        stop(sprintf("Model must be either FMR, HMM, or ARHMM: %s given",model))
+      }
         probi2 = result$forwardbackward[,2]
         p=1-probi2
         p2=rep(0,length(p))
