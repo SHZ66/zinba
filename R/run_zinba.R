@@ -53,7 +53,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 	if(is.null(align)) stop("alignability directory must be specified")
 	if(is.null(seq)) stop("path to experimental mapped reads 'seq' must be specified")
 	if(is.null(twoBit)) stop("path to .2bit file 'twoBit' must be specified")
-	if(is.null(basecountfile)) stop("path to read overlap file 'basecountfile' must be specified")
+	if(is.null(basecountfile & refinepeaks == 1)) stop("path to read overlap file 'basecountfile' must be specified")
 
 
 	#create subdirectory to hold intermediate files to be used later
