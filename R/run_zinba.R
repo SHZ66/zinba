@@ -53,7 +53,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 	if(is.null(align)) stop("alignability directory must be specified")
 	if(is.null(seq)) stop("path to experimental mapped reads 'seq' must be specified")
 	if(is.null(twoBit)) stop("path to .2bit file 'twoBit' must be specified")
-	if(is.null(basecountfile & refinepeaks == 1)) stop("path to read overlap file 'basecountfile' must be specified")
+	if(is.null(basecountfile) & refinepeaks == 1) stop("path to read overlap file 'basecountfile' must be specified")
 
 
 	#create subdirectory to hold intermediate files to be used later
@@ -210,7 +210,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 	    winfiles <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,
 				.errorhandling="remove") %dopar%
 			{
-				zinba::getsigwindows2(file=params[i],formula=formula,formulaE=formulaE,
+				zinba::getsigwindows(file=params[i],formula=formula,formulaE=formulaE,
 					formulaZ=formulaZ,threshold=threshold,winout=outfile_subpath,
 					peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,
 					initmethod=initmethod, FDR=FDR,  model = model
