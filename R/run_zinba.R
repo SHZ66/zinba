@@ -210,7 +210,7 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 	    winfiles <- foreach(i=1:length(params),.combine='rbind',.inorder=FALSE,
 				.errorhandling="remove") %dopar%
 			{
-				zinba::getsigwindows(file=params[i],formula=formula,formulaE=formulaE,
+				zinba::getsigwindows2(file=params[i],formula=formula,formulaE=formulaE,
 					formulaZ=formulaZ,threshold=threshold,winout=outfile_subpath,
 					peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,
 					initmethod=initmethod, FDR=FDR,  model = model
@@ -221,13 +221,14 @@ run.zinba=function(filelist=NULL,formula=NULL,formulaE=NULL,formulaZ=NULL,
 	  }else{
 		  #if parallelization fails due to lack of packages, resort to non-parallelized version
 		  cat(paste("--------GETTING ENRICHED WINDOWS--------",as.character(Sys.time()),"\n\n")) 	
+	    winfiles = rep("", length(params))
 	    for(i in 1:length(params)){
-	       wfile <- getsigwindows2(file=params[i],formula=formula,formulaE=formulaE,
+	       winfiles[i] <- zinba::getsigwindows2(file=params[i],formula=formula,formulaE=formulaE,
 	                               formulaZ=formulaZ,threshold=threshold,winout=outfile_subpath,
 	                               peakconfidence=peakconfidence,tol=tol,method=method,printFullOut=printFullOut,
 	                               initmethod=initmethod, FDR=FDR, model = model
 	              ) 
-				winfiles <- rbind(wfile)
+				
 	    }
 			write.table(winfiles,winlist,quote=F,row.names=F,col.names=F)
 		  cat(paste("--------WINDOW ANALYSIS COMPLETE--------",as.character(Sys.time()),"\n\n"))		
