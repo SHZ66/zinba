@@ -1,0 +1,44 @@
+
+
+# ZINBA Installation #
+
+Here you will find instructions to install the ZINBA software package into  <a href='http://cran.r-project.org/'>R</a>.  It is assumed that you already have R (>2.10) installed.  Note:  the 'qvalue' package is no longer needed, and the 'R.utils' package is required instead.
+
+## Linux ##
+Enter R from the terminal and copy and paste the block of commands below into R to automate the installation process.  If this is your first time installing packages into R, then you may be asked if you want to create a personal R library (select yes).
+
+Download ZINBA and install R dependencies
+```
+system("wget http://zinba.googlecode.com/files/zinba_2.01.tar.gz")
+install.packages(c('multicore','doMC','foreach','quantreg','R.utils')) 
+```
+Install the ZINBA R package and load library into R
+```
+install.packages("zinba_2.01.tar.gz", repos=NULL) 
+library(zinba)
+```
+
+
+
+## Mac ##
+Enter R **from the terminal** and copy and paste the block of commands below into R to automate the installation process.  If this is your first time installing packages into R, then you may be asked if you want to create a personal R library (select yes).  Important: you must run R from the terminal, do not use the R.app GUI as you will experience problems with ZINBA.
+
+Download ZINBA and install R dependencies
+```
+system("curl -O http://zinba.googlecode.com/files/zinba_2.01.tar.gz")
+install.packages(c('multicore','doMC','foreach','quantreg','R.utils')) 
+```
+Install the ZINBA R package and load library into R
+```
+install.packages("zinba_2.01.tar.gz", repos=NULL) 
+library(zinba)
+```
+
+
+Some users have reported problems loading the zinba package after installation.  If this is the case, try installing R from the command line (not within R), using
+
+```
+R CMD INSTALL zinba_2.01.tar.gz
+```
+
+If you receive errors during package installation, most likely you need to install [Xcode Developer Tools version](http://r.research.att.com/tools/) (2.4.0 or higher) as your C compiler may be out of date.
